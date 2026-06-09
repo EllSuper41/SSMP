@@ -15,8 +15,10 @@ using UnityEngine.SceneManagement;
 using Logger = SSMP.Logging.Logger;
 using MapZone = GlobalEnums.MapZone;
 using Object = UnityEngine.Object;
+
 // ReSharper disable AssignNullToNotNullAttribute
-#pragma warning disable CS8620 // Argument cannot be used for parameter due to differences in the nullability of reference types.
+#pragma warning disable CS8620 // Argument cannot be used for parameter due to differences in the nullability of
+// reference types.
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
 #pragma warning disable CS8604 // Possible null reference argument.
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
@@ -61,7 +63,7 @@ internal class SaveManager {
     /// Dictionary of BossStatue.Completion structs in the PlayerData for comparing changes against.
     /// </summary>
     private readonly Dictionary<string?, BossStatue.Completion> _bsCompHashes;
-    
+
     /// <summary>
     /// Dictionary of hash codes for list variables in the PlayerData for comparing changes against.
     /// </summary>
@@ -90,7 +92,7 @@ internal class SaveManager {
     /// to the server.
     /// </summary>
     public bool IsHostingServer { get; set; }
-    
+
     public SaveManager(NetClient netClient, EntityManager entityManager) {
         _netClient = netClient;
         _entityManager = entityManager;
@@ -113,12 +115,12 @@ internal class SaveManager {
         foreach (var field in typeof(PlayerData).GetFields()) {
             var fieldName = field.Name;
 
-            if (!SaveDataMapping.PlayerDataVarProperties.TryGetValue(fieldName, out var varProps) 
+            if (!SaveDataMapping.PlayerDataVarProperties.TryGetValue(fieldName, out var varProps)
                 || !varProps.Sync
-            ) {
+               ) {
                 continue;
             }
-            
+
             var compoundField = SaveDataMapping.StringListVariables.Contains(fieldName) ||
                                 SaveDataMapping.BossSequenceDoorCompletionVariables.Contains(fieldName) ||
                                 SaveDataMapping.BossStatueCompletionVariables.Contains(fieldName) ||
@@ -181,7 +183,7 @@ internal class SaveManager {
             Logger.Error("Could not find protected constructor of PlayerData");
             return;
         }
-        
+
         _lastPlayerData = (PlayerData) pdConstructor.Invoke([]);
 
         foreach (var field in _playerDataSimpleSyncFields) {
@@ -194,7 +196,7 @@ internal class SaveManager {
             field.SetValue(_lastPlayerData, GetCompoundCopy(value));
         }
     }
-    
+
     /// <summary>
     /// Update hook to check for changes in the PlayerData instance.
     /// </summary>
@@ -227,8 +229,8 @@ internal class SaveManager {
 
             if (field.FieldType == typeof(int)) {
                 CheckSendSaveUpdate(
-                    field.Name, 
-                    () => EncodeSaveDataValue(currentValue), 
+                    field.Name,
+                    () => EncodeSaveDataValue(currentValue),
                     () => {
                         var delta = (int) currentValue - (int) lastValue;
                         return EncodeSaveDataValue(delta);
@@ -322,7 +324,7 @@ internal class SaveManager {
                 getCurrentBoolFunc = () => dreamPlant.completed;
                 setCurrentBoolAction = value => dreamPlant.completed = value;
             }
-            
+
             var dreamPlantOrb = itemObject.GetComponent<DreamPlantOrb>();
             if (dreamPlantOrb) {
                 getCurrentBoolFunc = () => dreamPlantOrb.pickedUp;
@@ -332,7 +334,7 @@ internal class SaveManager {
             if (getCurrentBoolFunc == null || setCurrentBoolAction == null) {
                 continue;
             }
-            
+
             var persistentFsmData = new PersistentFsmData {
                 PersistentItemKey = persistentItemData,
                 GetCurrentBool = getCurrentBoolFunc,
@@ -389,7 +391,7 @@ internal class SaveManager {
         if (!_netClient.IsConnected || PlayerData.instance.GetInt("permadeathMode") == 2) {
             return;
         }
-        
+
         if (!SaveDataMapping.PlayerDataVarProperties.TryGetValue(name, out var varProps)) {
             Logger.Info($"Not in save data values, not sending save update ({name})");
             return;
@@ -399,7 +401,7 @@ internal class SaveManager {
             Logger.Info($"Value should not sync, not sending save update ({name})");
             return;
         }
-        
+
         // If we should do the scene host check and the player is not scene host, skip sending
         if (!varProps.IgnoreSceneHost && !_entityManager.IsSceneHost) {
             Logger.Info($"Not scene host, but required, not sending save update ({name})");
@@ -414,11 +416,11 @@ internal class SaveManager {
         Func<byte[]> toUseEncodeFunc;
         if (varProps.Additive && deltaEncodeFunc != null) {
             toUseEncodeFunc = deltaEncodeFunc;
-            
+
             Logger.Debug($"Sending \"{name}\" as save update (additive)");
         } else {
             toUseEncodeFunc = encodeFunc;
-            
+
             Logger.Debug($"Sending \"{name}\" as save update");
         }
 
@@ -459,13 +461,15 @@ internal class SaveManager {
                 if (SaveDataMapping.GeoRockBools.TryGetValue(itemData, out var shouldSync) && shouldSync) {
                     if (!_entityManager.IsSceneHost) {
                         Logger.Info(
-                            $"Not scene host, not sending geo rock save update ({itemData.Id}, {itemData.SceneName})");
+                            $"Not scene host, not sending geo rock save update ({itemData.Id}, {itemData.SceneName})"
+                        );
                         continue;
                     }
-                    
+
                     if (!SaveDataMapping.GeoRockIndices.TryGetValue(itemData, out var index)) {
                         Logger.Info(
-                            $"Cannot find geo rock save data index, not sending save update ({itemData.Id}, {itemData.SceneName})");
+                            $"Cannot find geo rock save data index, not sending save update ({itemData.Id}, {itemData.SceneName})"
+                        );
                         continue;
                     }
 
@@ -476,19 +480,21 @@ internal class SaveManager {
                         [(byte) value]
                     );
                 } else if (
-                    SaveDataMapping.PersistentIntVarProperties.TryGetValue(itemData, out var varProps) && 
+                    SaveDataMapping.PersistentIntVarProperties.TryGetValue(itemData, out var varProps) &&
                     varProps.Sync
                 ) {
                     // If we should do the scene host check and the player is not scene host, skip sending
                     if (!varProps.IgnoreSceneHost && !_entityManager.IsSceneHost) {
                         Logger.Info(
-                            $"Not scene host, not sending persistent int save update ({itemData.Id}, {itemData.SceneName})");
+                            $"Not scene host, not sending persistent int save update ({itemData.Id}, {itemData.SceneName})"
+                        );
                         continue;
                     }
 
                     if (!SaveDataMapping.PersistentIntIndices.TryGetValue(itemData, out var index)) {
                         Logger.Info(
-                            $"Cannot find persistent int save data index, not sending save update ({itemData.Id}, {itemData.SceneName})");
+                            $"Cannot find persistent int save data index, not sending save update ({itemData.Id}, {itemData.SceneName})"
+                        );
                         continue;
                     }
 
@@ -512,7 +518,7 @@ internal class SaveManager {
                 var itemData = persistentFsmData.PersistentItemKey;
 
                 Logger.Info($"Value for {itemData} changed to: {value}");
-                
+
                 if (!_netClient.IsConnected) {
                     continue;
                 }
@@ -520,20 +526,23 @@ internal class SaveManager {
                 if (!SaveDataMapping.PersistentBoolVarProperties.TryGetValue(itemData, out var varProps) ||
                     !varProps.Sync) {
                     Logger.Info(
-                        $"Not in persistent bool save data values or false in sync props, not sending save update ({itemData.Id}, {itemData.SceneName})");
+                        $"Not in persistent bool save data values or false in sync props, not sending save update ({itemData.Id}, {itemData.SceneName})"
+                    );
                     continue;
                 }
-                
+
                 // If we should do the scene host check and the player is not scene host, skip sending
                 if (!varProps.IgnoreSceneHost && !_entityManager.IsSceneHost) {
                     Logger.Info(
-                        $"Not scene host, not sending persistent bool save update ({itemData.Id}, {itemData.SceneName})");
+                        $"Not scene host, not sending persistent bool save update ({itemData.Id}, {itemData.SceneName})"
+                    );
                     continue;
                 }
 
                 if (!SaveDataMapping.PersistentBoolIndices.TryGetValue(itemData, out var index)) {
                     Logger.Info(
-                        $"Cannot find persistent bool save data index, not sending save update ({itemData.Id}, {itemData.SceneName})");
+                        $"Cannot find persistent bool save data index, not sending save update ({itemData.Id}, {itemData.SceneName})"
+                    );
                     continue;
                 }
 
@@ -612,8 +621,10 @@ internal class SaveManager {
                 // TODO: also allow for negative updates, where something is deleted from the list
                 // this also holds for the other two lambdas below
                 var deltaList = currentList!.Except(lastList!).ToList();
-                
-                Logger.Debug($"String list var updated, currentList: {string.Join(", ", currentList)}, lastList: {string.Join(", ", lastList)}, deltaList: {string.Join(", ", deltaList)}");
+
+                Logger.Debug(
+                    $"String list var updated, currentList: {string.Join(", ", currentList)}, lastList: {string.Join(", ", lastList)}, deltaList: {string.Join(", ", deltaList)}"
+                );
 
                 return EncodeSaveDataValue(deltaList);
             }
@@ -648,7 +659,7 @@ internal class SaveManager {
                 b1.seenTier3Unlock != b2.seenTier3Unlock ||
                 b1.usingAltVersion != b2.usingAltVersion
         );
-        
+
         CheckUpdates<List<Vector3>, int>(
             SaveDataMapping.VectorListVariables,
             _listHashes,
@@ -659,13 +670,15 @@ internal class SaveManager {
                 var lastList = lastValue as List<Vector3>;
 
                 var deltaList = currentList!.Except(lastList!).ToList();
-                
-                Logger.Debug($"Vector3 list var updated, currentList: {string.Join(", ", currentList)}, lastList: {string.Join(", ", lastList)}, deltaList: {string.Join(", ", deltaList)}");
+
+                Logger.Debug(
+                    $"Vector3 list var updated, currentList: {string.Join(", ", currentList)}, lastList: {string.Join(", ", lastList)}, deltaList: {string.Join(", ", deltaList)}"
+                );
 
                 return EncodeSaveDataValue(deltaList);
             }
         );
-        
+
         CheckUpdates<List<int>, int>(
             SaveDataMapping.IntListVariables,
             _listHashes,
@@ -676,8 +689,10 @@ internal class SaveManager {
                 var lastList = lastValue as List<int>;
 
                 var deltaList = currentList!.Except(lastList!).ToList();
-                
-                Logger.Debug($"Integer list var updated, currentList: {string.Join(", ", currentList)}, lastList: {string.Join(", ", lastList)}, deltaList: {string.Join(", ", deltaList)}");
+
+                Logger.Debug(
+                    $"Integer list var updated, currentList: {string.Join(", ", currentList)}, lastList: {string.Join(", ", lastList)}, deltaList: {string.Join(", ", deltaList)}"
+                );
 
                 return EncodeSaveDataValue(deltaList);
             }
@@ -706,7 +721,7 @@ internal class SaveManager {
             Logger.Info("Received current save, but player is hosting, not updating");
             return;
         }
-        
+
         Logger.Info("Received current save, updating...");
 
         foreach (var keyValuePair in currentSave.SaveData) {
@@ -749,6 +764,9 @@ internal class SaveManager {
             } else if (decodedObject is string decodedString) {
                 _lastPlayerData?.SetString(name, decodedString);
                 pd.SetString(name, decodedString);
+            } else if (decodedObject is Vector2 decodedVec2) {
+                _lastPlayerData?.SetVariable(name, decodedVec2);
+                pd.SetVariable(name, decodedVec2);
             } else if (decodedObject is Vector3 decodedVec3) {
                 _lastPlayerData?.SetVector3(name, decodedVec3);
                 pd.SetVector3(name, decodedVec3);
@@ -782,10 +800,17 @@ internal class SaveManager {
                 _listHashes[name] = GetListHashCode(decodedIntList);
                 _lastPlayerData?.SetVariable(name, (List<int>) GetCompoundCopy(decodedIntList));
                 pd.SetVariable(name, decodedIntList);
+            } else if (decodedObject is byte[] decodedBytes) {
+                var copy = decodedBytes.ToArray();
+                _lastPlayerData?.SetVariable(name, copy.ToArray());
+                pd.SetVariable(name, copy);
+            } else if (decodedObject.GetType().IsEnum) {
+                _lastPlayerData?.SetVariable(name, decodedObject);
+                pd.SetVariable(name, decodedObject);
             } else {
                 throw new ArgumentException($"Could not decode type: {decodedObject.GetType()}");
             }
-            
+
             _saveChanges.ApplyPlayerDataSaveChange(name);
         }
 
@@ -803,11 +828,13 @@ internal class SaveManager {
                 }
             }
 
-            sceneData.SaveMyState(new GeoRockData {
-                id = itemData.Id,
-                sceneName = itemData.SceneName,
-                hitsLeft = value
-            });
+            sceneData.SaveMyState(
+                new GeoRockData {
+                    id = itemData.Id,
+                    sceneName = itemData.SceneName,
+                    hitsLeft = value
+                }
+            );
         } else if (SaveDataMapping.PersistentBoolIndices.TryGetValue(index, out itemData)) {
             if (CheckPlayerSpecificHosting(SaveDataMapping.PersistentBoolVarProperties, itemData)) {
                 return;
@@ -827,7 +854,7 @@ internal class SaveManager {
                 }
             }
 
-            
+
             // sceneData.SaveMyState(new GeoRockData {
             //     id = itemData.Id,
             //     sceneName = itemData.SceneName,
@@ -863,7 +890,7 @@ internal class SaveManager {
             //     sceneName = itemData.SceneName,
             //     value = value
             // });
-            
+
             _saveChanges.ApplyPersistentValueSaveChange(itemData);
         }
 
@@ -896,7 +923,9 @@ internal class SaveManager {
         // First cast HK or Unity internal types to SSMP types, this is to make sure we can use our internal
         // EncodeUtil to encode all types. This util is also used on the server side, where (in the case of the
         // standalone server) we have no reference of HK or Unity internal types
-        if (value is Vector3 vector3) {
+        if (value is Vector2 vector2) {
+            value = (Math.Vector2) vector2;
+        } else if (value is Vector3 vector3) {
             value = (Math.Vector3) vector3;
         } else if (value is MapZone mapZone) {
             value = (Serialization.MapZone) mapZone;
@@ -919,11 +948,13 @@ internal class SaveManager {
     /// <returns>The decoded object.</returns>
     private static object? DecodeSaveDataValue(string? name, byte[] encodedValue) {
         var decodedValue = EncodeUtil.DecodeSaveDataValue(name, encodedValue);
-        
+
         // Now we cast SSMP types to SS or Unity internal types, this is to make sure we can use our internal
         // EncodeUtil to decode all types. This util is also used on the server side, where (in the case of the
         // standalone server) we have no reference of SS or Unity internal types
-        if (decodedValue is Math.Vector3 vector3) {
+        if (decodedValue is Math.Vector2 vector2) {
+            decodedValue = (Vector2) vector2;
+        } else if (decodedValue is Math.Vector3 vector3) {
             decodedValue = (Vector3) vector3;
         } else if (decodedValue is Serialization.MapZone mapZone) {
             decodedValue = (MapZone) mapZone;
@@ -933,6 +964,11 @@ internal class SaveManager {
             decodedValue = (BossSequenceDoor.Completion) bsdCompletion;
         } else if (decodedValue is List<Math.Vector3> vector3List) {
             decodedValue = vector3List.Select(v => (Vector3) v).ToList();
+        } else if (decodedValue is int intValue && name != null) {
+            var fieldType = typeof(PlayerData).GetField(name)?.FieldType;
+            if (fieldType?.IsEnum == true) {
+                decodedValue = Enum.ToObject(fieldType, intValue);
+            }
         }
 
         return decodedValue;
@@ -1036,7 +1072,7 @@ internal class SaveManager {
         //     SaveDataMapping.PersistentIntIndices,
         //     intData => intData.value
         // );
-        
+
         return saveData;
     }
 
@@ -1052,8 +1088,8 @@ internal class SaveManager {
         }
 
         return list
-            .Select(item => item.GetHashCode())
-            .Aggregate((total, nextCode) => total ^ nextCode);
+               .Select(item => item.GetHashCode())
+               .Aggregate((total, nextCode) => total ^ nextCode);
     }
 
     /// <summary>
@@ -1068,7 +1104,7 @@ internal class SaveManager {
         if (value == null) {
             throw new ArgumentException("Cannot get copy of null");
         }
-        
+
         if (value is List<string> stringListValue) {
             return new List<string>(stringListValue);
         }
@@ -1076,7 +1112,7 @@ internal class SaveManager {
         if (value is List<int> intListValue) {
             return new List<int>(intListValue);
         }
-        
+
         if (value is List<Vector3> vecListValue) {
             return new List<Vector3>(vecListValue);
         }
@@ -1092,8 +1128,8 @@ internal class SaveManager {
                 boundShell = bsdComp.boundShell,
                 boundCharms = bsdComp.boundCharms,
                 boundSoul = bsdComp.boundSoul,
-                viewedBossSceneCompletions = bsdComp.viewedBossSceneCompletions == null 
-                    ? [] 
+                viewedBossSceneCompletions = bsdComp.viewedBossSceneCompletions == null
+                    ? []
                     : [..bsdComp.viewedBossSceneCompletions]
             };
         }
