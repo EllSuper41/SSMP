@@ -8,6 +8,8 @@ using SSMP.Networking.Transport.Common;
 using SSMP.Networking.Transport.HolePunch;
 using SSMP.Networking.Transport.SteamP2P;
 using SSMP.Networking.Transport.UDP;
+using SSMP.Game.Server.Save;
+using SSMP.Game.Client.Save;
 using SSMP.Ui;
 
 namespace SSMP.Game.Server;
@@ -32,11 +34,11 @@ internal class ModServerManager : ServerManager {
     /// </summary>
     private readonly SettingsCommand _settingsCommand;
     
-    // /// <summary>
-    // /// Save data that was loaded from selecting a save file. Will be retroactively applied to a server, if one was
-    // /// requested to be started after selecting a save file.
-    // /// </summary>
-    // private ServerSaveData? _loadedLocalSaveData;
+    /// <summary>
+    /// Save data that was loaded from selecting a save file. Will be retroactively applied to a server, if one was
+    /// requested to be started after selecting a save file.
+    /// </summary>
+    private ServerSaveData? _loadedLocalSaveData;
     
     public ModServerManager(
         NetServer netServer,
@@ -77,21 +79,21 @@ internal class ModServerManager : ServerManager {
     /// <param name="fullSynchronisation">Whether full synchronisation is enabled.</param>
     /// <param name="transportType">The type of transport to use.</param>
     private void OnRequestServerStartHost(int port, bool fullSynchronisation, TransportType transportType) {
-        // if (fullSynchronisation) {
-        //     // Get the global save data from the save manager, which obtains the global save data from the loaded
-        //     // save file that the user selected
-        //     ServerSaveData.GlobalSaveData = SaveManager.GetCurrentSaveData(true);
-        //
-        //     // Then we import the player save data from the (potentially) loaded modded save file from the user selected
-        //     // save file
-        //     if (_loadedLocalSaveData != null) {
-        //         ServerSaveData.PlayerSaveData = _loadedLocalSaveData.PlayerSaveData;
-        //     }
-        //
-        //     // Lastly, we get the player save data from the save manager, which obtains the player save data from the
-        //     // loaded save file that the user selected. We add this data to the server save as the local player
-        //     ServerSaveData.PlayerSaveData[_modSettings.AuthKey!] = SaveManager.GetCurrentSaveData(false);
-        // }
+        if (fullSynchronisation) {
+            // Get the global save data from the save manager, which obtains the global save data from the loaded
+            // save file that the user selected
+            ServerSaveData.GlobalSaveData = SaveManager.GetCurrentSaveData(true);
+
+            // Then we import the player save data from the (potentially) loaded modded save file from the user selected
+            // save file
+            if (_loadedLocalSaveData != null) {
+                ServerSaveData.PlayerSaveData = _loadedLocalSaveData.PlayerSaveData;
+            }
+
+            // Lastly, we get the player save data from the save manager, which obtains the player save data from the
+            // loaded save file that the user selected. We add this data to the server save as the local player
+            ServerSaveData.PlayerSaveData[_modSettings.AuthKey!] = SaveManager.GetCurrentSaveData(false);
+        }
 
         IEncryptedTransportServer transportServer = transportType switch {
             TransportType.Udp => new UdpEncryptedTransportServer(),

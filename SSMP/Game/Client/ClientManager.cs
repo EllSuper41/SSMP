@@ -260,8 +260,8 @@ internal class ClientManager : IClientManager {
         _animationManager.Initialize(_serverSettings);
         _mapManager.Initialize();
 
-        // _entityManager.Initialize();
-        // _saveManager.Initialize();
+        //_entityManager.Initialize();
+        _saveManager.Initialize();
 
         RegisterCommands();
 
@@ -311,10 +311,10 @@ internal class ClientManager : IClientManager {
         _gamePatcher.RegisterHooks();
         _fsmPatcher.RegisterHooks();
 
-        // if (_fullSynchronisation) {
-        //     _entityManager.RegisterHooks();
-        //     _saveManager.RegisterHooks();
-        // }
+        if (_fullSynchronisation) {
+            _entityManager.RegisterHooks();
+            _saveManager.RegisterHooks();
+        }
 
         // Register handlers for various things
         SceneManager.activeSceneChanged += OnSceneChange;
@@ -339,10 +339,10 @@ internal class ClientManager : IClientManager {
         _gamePatcher.DeregisterHooks();
         _fsmPatcher.DeregisterHooks();
 
-        // if (_fullSynchronisation) {
-        //     _entityManager.DeregisterHooks();
-        //     _saveManager.DeregisterHooks();
-        // }
+        if (_fullSynchronisation) {
+            _entityManager.DeregisterHooks();
+            _saveManager.DeregisterHooks();
+        }
 
         // Deregister handlers for various things
         SceneManager.activeSceneChanged -= OnSceneChange;
@@ -673,8 +673,8 @@ internal class ClientManager : IClientManager {
                 // This was not an auto-connect and full synchronisation is enabled, so we set save data.
                 // Otherwise, with hosting we already have the save data, or with no full synchronisation, we don't
                 // need it.
-                // _saveManager.SetSaveWithData(serverInfo.CurrentSave);
-                // _uiManager.EnterGameFromMultiplayerMenu(serverInfo.CurrentSave.NewForPlayer);
+                _saveManager.SetSaveWithData(serverInfo.CurrentSave);
+                _uiManager.EnterGameFromMultiplayerMenu(serverInfo.CurrentSave.NewForPlayer);
             } else {
                 // This was not an auto-connect and full synchronisation is disabled, so we need to prompt the user
                 // with a local save file that they want to use
