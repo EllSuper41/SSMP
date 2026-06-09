@@ -88,6 +88,16 @@ internal class SaveManager {
     private PlayerData? _lastPlayerData;
 
     /// <summary>
+    /// List of HashSet variables in PlayerData.
+    /// </summary>
+    private static readonly List<string> HashSetVariables = new() {
+        "scenesEncounteredBench",
+        "scenesEncounteredCocoon",
+        "scenesMapped",
+        "scenesVisited"
+    };
+
+    /// <summary>
     /// Whether the player is hosting the server, which means that player specific save data is not networked
     /// to the server.
     /// </summary>
@@ -125,7 +135,8 @@ internal class SaveManager {
                                 SaveDataMapping.BossSequenceDoorCompletionVariables.Contains(fieldName) ||
                                 SaveDataMapping.BossStatueCompletionVariables.Contains(fieldName) ||
                                 SaveDataMapping.VectorListVariables.Contains(fieldName) ||
-                                SaveDataMapping.IntListVariables.Contains(fieldName);
+                                SaveDataMapping.IntListVariables.Contains(fieldName) ||
+                                HashSetVariables.Contains(fieldName);
 
             if (compoundField) {
                 _playerDataCompoundSyncFields.Add(field);
@@ -697,6 +708,25 @@ internal class SaveManager {
                 return EncodeSaveDataValue(deltaList);
             }
         );
+
+        CheckUpdates<HashSet<string>, int>(
+            HashSetVariables,
+            _listHashes,
+            hashSet => GetListHashCode(hashSet.ToList()),
+            (hash1, hash2) => hash1 != hash2,
+            (currentValue, lastValue) => {
+                var currentSet = currentValue as HashSet<string>;
+                var lastSet = lastValue as HashSet<string>;
+
+                var deltaList = currentSet!.Except(lastSet!).ToList();
+
+                Logger.Debug(
+                    $"HashSet string var updated, currentSet: {string.Join(", ", currentSet)}, lastSet: {string.Join(", ", lastSet)}, deltaList: {string.Join(", ", deltaList)}"
+                );
+
+                return EncodeSaveDataValue(deltaList);
+            }
+        );
     }
 
     /// <summary>
@@ -804,6 +834,11 @@ internal class SaveManager {
                 var copy = decodedBytes.ToArray();
                 _lastPlayerData?.SetVariable(name, copy.ToArray());
                 pd.SetVariable(name, copy);
+            } else if (decodedObject is HashSet<string> decodedHashSet) {
+                var listRepresentation = decodedHashSet.ToList();
+                _listHashes[name] = GetListHashCode(listRepresentation);
+                _lastPlayerData?.SetVariable(name, (HashSet<string>) GetCompoundCopy(decodedHashSet));
+                pd.SetVariable(name, decodedHashSet);
             } else if (decodedObject.GetType().IsEnum) {
                 _lastPlayerData?.SetVariable(name, decodedObject);
                 pd.SetVariable(name, decodedObject);
@@ -1144,6 +1179,10 @@ internal class SaveManager {
                 seenTier3Unlock = bsComp.seenTier3Unlock,
                 usingAltVersion = bsComp.usingAltVersion
             };
+        }
+
+        if (value is HashSet<string> hashSetStringValue) {
+            return new HashSet<string>(hashSetStringValue);
         }
 
         throw new ArgumentException($"Cannot get copy of value with type: {value.GetType()}");

@@ -1806,6 +1806,15 @@ internal abstract class ServerManager : IServerManager {
                         }
 
                         decodedNewValue = decodedCurrentStringList;
+                    } else if (decodedCurrentValue is HashSet<string> decodedCurrentSet &&
+                               decodedDeltaValue is List<string> decodedDeltaSet) {
+
+                        // Loop over the delta list and add to the HashSet
+                        foreach (var str in decodedDeltaSet) {
+                            decodedCurrentSet.Add(str);
+                        }
+
+                        decodedNewValue = decodedCurrentSet;
                     } else {
                         Logger.Debug($"  Type of decoded values did not match: {decodedCurrentValue.GetType()}");
                         return;

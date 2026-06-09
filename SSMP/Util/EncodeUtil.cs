@@ -139,6 +139,22 @@ public static class EncodeUtil {
 
                 return byteArray.ToArray();
             }
+            case HashSet<string> { Count: > ushort.MaxValue } hashSetValue:
+                throw new ArgumentOutOfRangeException($"Could not encode hashset string list length: {hashSetValue.Count}");
+            case HashSet<string> hashSetValue: {
+                var listValue = hashSetValue.ToList();
+                var length = (ushort) listValue.Count;
+
+                IEnumerable<byte> byteArray = BitConverter.GetBytes(length);
+
+                for (var i = 0; i < length; i++) {
+                    var encoded = EncodeString(listValue[i]);
+
+                    byteArray = byteArray.Concat(encoded);
+                }
+
+                return byteArray.ToArray();
+            }
             case BossSequenceDoorCompletion bsdCompValue: {
                 // For now we only encode the bools of completion struct
                 var firstBools = new[] {
@@ -303,6 +319,22 @@ public static class EncodeUtil {
                 }
 
                 return list;
+            }
+            case "HashSet<string>": {
+                var length = BitConverter.ToUInt16(encodedValue, 0);
+
+                var hashSet = new HashSet<string>();
+                for (var i = 0; i < length; i++) {
+                    var sceneIndex = BitConverter.ToUInt16(encodedValue, 2 + i * 2);
+
+                    if (!TryGetStringName(sceneIndex, out var sceneName)) {
+                        throw new ArgumentException($"Could not decode string in hashset from save update: {sceneIndex}");
+                    }
+
+                    hashSet.Add(sceneName);
+                }
+
+                return hashSet;
             }
             case "SSMP.Serialization.BossSequenceDoorCompletion": {
                 var byte1 = encodedValue[0];
