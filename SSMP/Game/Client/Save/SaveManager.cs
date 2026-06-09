@@ -606,17 +606,17 @@ internal class SaveManager {
                     CheckSendSaveUpdate(varName, () => EncodeSaveDataValue(varName, currentValue));
                 } else {
                     var lastValue = _lastPlayerData.GetVariable<TVar>(varName);
- 
-                     CheckSendSaveUpdate(
-                         varName,
-                         () => EncodeSaveDataValue(varName, currentValue),
-                         () => deltaEncodeFunc.Invoke(currentValue, lastValue)
-                     );
- 
-                     // Also update the current value in the PlayerData instance for last values
-                     // We copy the value, because otherwise it will be updated whenever the list is updated
-                     _lastPlayerData.SetVariable(varName, (TVar) GetCompoundCopy(currentValue));
-                 }
+
+                    CheckSendSaveUpdate(
+                        varName,
+                        () => EncodeSaveDataValue(varName, currentValue),
+                        () => deltaEncodeFunc.Invoke(currentValue, lastValue)
+                    );
+
+                    // Also update the current value in the PlayerData instance for last values
+                    // We copy the value, because otherwise it will be updated whenever the list is updated
+                    _lastPlayerData.SetVariable(varName, (TVar) GetCompoundCopy(currentValue));
+                }
             }
         }
 
@@ -791,6 +791,24 @@ internal class SaveManager {
             } else if (decodedObject is int decodedInt) {
                 _lastPlayerData?.SetInt(name, decodedInt);
                 pd.SetInt(name, decodedInt);
+            } else if (decodedObject is long decodedLong) {
+                _lastPlayerData?.SetVariable(name, decodedLong);
+                pd.SetVariable(name, decodedLong);
+            } else if (decodedObject is ulong decodedULong) {
+                _lastPlayerData?.SetVariable(name, decodedULong);
+                pd.SetVariable(name, decodedULong);
+            } else if (decodedObject is uint decodedUInt) {
+                _lastPlayerData?.SetVariable(name, decodedUInt);
+                pd.SetVariable(name, decodedUInt);
+            } else if (decodedObject is short decodedShort) {
+                _lastPlayerData?.SetVariable(name, decodedShort);
+                pd.SetVariable(name, decodedShort);
+            } else if (decodedObject is ushort decodedUShort) {
+                _lastPlayerData?.SetVariable(name, decodedUShort);
+                pd.SetVariable(name, decodedUShort);
+            } else if (decodedObject is double decodedDouble) {
+                _lastPlayerData?.SetVariable(name, decodedDouble);
+                pd.SetVariable(name, decodedDouble);
             } else if (decodedObject is string decodedString) {
                 _lastPlayerData?.SetString(name, decodedString);
                 pd.SetString(name, decodedString);

@@ -115,11 +115,12 @@ public static class EncodeUtil {
                     case "HashSet<string>":
                     case "System.Collections.Generic.List`1[SSMP.Math.Vector3]":
                     case "System.Byte[]":
-                        return [0, 0]; // 0 length ushort
+                        return [0, 0];// 0 length ushort
                     case "System.Collections.Generic.List`1[System.Int32]":
                         return [0]; // 0 length byte
                 }
             }
+
             // Fallback representation for unspecified nulls: default empty string/list bytes
             return [255, 255, 0, 0];
         }
@@ -173,7 +174,9 @@ public static class EncodeUtil {
                 return byteArray.ToArray();
             }
             case HashSet<string> { Count: > ushort.MaxValue } hashSetValue:
-                throw new ArgumentOutOfRangeException($"Could not encode hashset string list length: {hashSetValue.Count}");
+                throw new ArgumentOutOfRangeException(
+                    $"Could not encode hashset string list length: {hashSetValue.Count}"
+                );
             case HashSet<string> hashSetValue: {
                 var listValue = hashSetValue.ToList();
                 var length = (ushort) listValue.Count;
@@ -254,17 +257,20 @@ public static class EncodeUtil {
                 if (TryGetStringIndex(null, out var nullIndex)) {
                     return BitConverter.GetBytes(nullIndex);
                 }
+
                 stringValue = string.Empty;
             }
+
             if (!TryGetStringIndex(stringValue, out var index)) {
                 Logger.Info($"String '{stringValue}' not found in static indices, encoding dynamically.");
                 var utf8Bytes = System.Text.Encoding.UTF8.GetBytes(stringValue);
                 if (utf8Bytes.Length > ushort.MaxValue - 3) {
                     throw new ArgumentOutOfRangeException($"String is too long to encode: {stringValue}");
                 }
+
                 var result = new byte[2 + 2 + utf8Bytes.Length];
                 // Sentinel index ushort.MaxValue (65535) indicates dynamic string
-                Array.Copy(BitConverter.GetBytes((ushort) ushort.MaxValue), 0, result, 0, 2);
+                Array.Copy(BitConverter.GetBytes(ushort.MaxValue), 0, result, 0, 2);
                 // String length
                 Array.Copy(BitConverter.GetBytes((ushort) utf8Bytes.Length), 0, result, 2, 2);
                 // String bytes
@@ -325,36 +331,72 @@ public static class EncodeUtil {
                 );
             case "System.Single":
                 return BitConverter.ToSingle(encodedValue, 0);
+            case "System.Int32" when encodedValue.Length == 8:
+                return (int) BitConverter.ToInt64(encodedValue, 0);
+            case "System.Int32" when encodedValue.Length == 2:
+                return (int) BitConverter.ToInt16(encodedValue, 0);
+            case "System.Int32" when encodedValue.Length == 1:
+                return (int) encodedValue[0];
             case "System.Int32" when encodedValue.Length != 4:
                 throw new ArgumentOutOfRangeException(
                     $"Encoded value has incorrect value length for int: {encodedValue.Length}"
                 );
             case "System.Int32":
                 return BitConverter.ToInt32(encodedValue, 0);
+            case "System.UInt64" when encodedValue.Length == 4:
+                return (ulong) BitConverter.ToUInt32(encodedValue, 0);
+            case "System.UInt64" when encodedValue.Length == 2:
+                return (ulong) BitConverter.ToUInt16(encodedValue, 0);
+            case "System.UInt64" when encodedValue.Length == 1:
+                return (ulong) encodedValue[0];
             case "System.UInt64" when encodedValue.Length != 8:
                 throw new ArgumentOutOfRangeException(
                     $"Encoded value has incorrect value length for ulong: {encodedValue.Length}"
                 );
             case "System.UInt64":
                 return BitConverter.ToUInt64(encodedValue, 0);
+            case "System.Int64" when encodedValue.Length == 4:
+                return (long) BitConverter.ToInt32(encodedValue, 0);
+            case "System.Int64" when encodedValue.Length == 2:
+                return (long) BitConverter.ToInt16(encodedValue, 0);
+            case "System.Int64" when encodedValue.Length == 1:
+                return (long) encodedValue[0];
             case "System.Int64" when encodedValue.Length != 8:
                 throw new ArgumentOutOfRangeException(
                     $"Encoded value has incorrect value length for long: {encodedValue.Length}"
                 );
             case "System.Int64":
                 return BitConverter.ToInt64(encodedValue, 0);
+            case "System.UInt32" when encodedValue.Length == 8:
+                return (uint) BitConverter.ToUInt64(encodedValue, 0);
+            case "System.UInt32" when encodedValue.Length == 2:
+                return (uint) BitConverter.ToUInt16(encodedValue, 0);
+            case "System.UInt32" when encodedValue.Length == 1:
+                return (uint) encodedValue[0];
             case "System.UInt32" when encodedValue.Length != 4:
                 throw new ArgumentOutOfRangeException(
                     $"Encoded value has incorrect value length for uint: {encodedValue.Length}"
                 );
             case "System.UInt32":
                 return BitConverter.ToUInt32(encodedValue, 0);
+            case "System.UInt16" when encodedValue.Length == 8:
+                return (ushort) BitConverter.ToUInt64(encodedValue, 0);
+            case "System.UInt16" when encodedValue.Length == 4:
+                return (ushort) BitConverter.ToUInt32(encodedValue, 0);
+            case "System.UInt16" when encodedValue.Length == 1:
+                return (ushort) encodedValue[0];
             case "System.UInt16" when encodedValue.Length != 2:
                 throw new ArgumentOutOfRangeException(
                     $"Encoded value has incorrect value length for ushort: {encodedValue.Length}"
                 );
             case "System.UInt16":
                 return BitConverter.ToUInt16(encodedValue, 0);
+            case "System.Int16" when encodedValue.Length == 8:
+                return (short) BitConverter.ToInt64(encodedValue, 0);
+            case "System.Int16" when encodedValue.Length == 4:
+                return (short) BitConverter.ToInt32(encodedValue, 0);
+            case "System.Int16" when encodedValue.Length == 1:
+                return (short) encodedValue[0];
             case "System.Int16" when encodedValue.Length != 2:
                 throw new ArgumentOutOfRangeException(
                     $"Encoded value has incorrect value length for short: {encodedValue.Length}"
@@ -402,8 +444,11 @@ public static class EncodeUtil {
                         offset += 4 + strLen;
                     } else {
                         if (!TryGetStringName(sceneIndex, out var sceneName)) {
-                            throw new ArgumentException($"Could not decode string in list from save update: {sceneIndex}");
+                            throw new ArgumentException(
+                                $"Could not decode string in list from save update: {sceneIndex}"
+                            );
                         }
+
                         list.Add(sceneName);
                         offset += 2;
                     }
@@ -425,8 +470,11 @@ public static class EncodeUtil {
                         offset += 4 + strLen;
                     } else {
                         if (!TryGetStringName(sceneIndex, out var sceneName)) {
-                            throw new ArgumentException($"Could not decode string in hashset from save update: {sceneIndex}");
+                            throw new ArgumentException(
+                                $"Could not decode string in hashset from save update: {sceneIndex}"
+                            );
                         }
+
                         hashSet.Add(sceneName);
                         offset += 2;
                     }

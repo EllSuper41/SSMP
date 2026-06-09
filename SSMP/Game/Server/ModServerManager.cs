@@ -1,5 +1,8 @@
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using Newtonsoft.Json;
 using SSMP.Game.Command.Server;
 using SSMP.Game.Settings;
 using SSMP.Networking.Packet;
@@ -10,7 +13,9 @@ using SSMP.Networking.Transport.SteamP2P;
 using SSMP.Networking.Transport.UDP;
 using SSMP.Game.Server.Save;
 using SSMP.Game.Client.Save;
+using SSMP.Hooks;
 using SSMP.Ui;
+using SSMP.Util;
 
 namespace SSMP.Game.Server;
 
@@ -22,7 +27,7 @@ internal class ModServerManager : ServerManager {
     /// The UiManager instance for registering events for starting and stopping a server.
     /// </summary>
     private readonly UiManager _uiManager;
-    
+
     /// <summary>
     /// The mod settings instance for retrieving the auth key of the local player to set player save data when
     /// hosting a server.
@@ -33,13 +38,13 @@ internal class ModServerManager : ServerManager {
     /// The settings command.
     /// </summary>
     private readonly SettingsCommand _settingsCommand;
-    
+
+
     /// <summary>
-    /// Save data that was loaded from selecting a save file. Will be retroactively applied to a server, if one was
-    /// requested to be started after selecting a save file.
+    /// The NetServer instance to check whether the server is started.
     /// </summary>
-    private ServerSaveData? _loadedLocalSaveData;
-    
+    private readonly NetServer _netServer;
+
     public ModServerManager(
         NetServer netServer,
         PacketManager packetManager,
@@ -47,6 +52,7 @@ internal class ModServerManager : ServerManager {
         UiManager uiManager,
         ModSettings modSettings
     ) : base(netServer, packetManager, serverSettings) {
+        _netServer = netServer;
         _uiManager = uiManager;
         _modSettings = modSettings;
         _settingsCommand = new SettingsCommand(this, InternalServerSettings);
@@ -55,7 +61,7 @@ internal class ModServerManager : ServerManager {
     /// <inheritdoc />
     public override void Initialize() {
         base.Initialize();
-        
+
         // Start addon loading, since all addons that are also mods should be registered during the Awake phase of
         // their MonoBehaviour
         AddonManager.LoadAddons();
@@ -67,6 +73,8 @@ internal class ModServerManager : ServerManager {
         PlayerConnectEvent += _ => UpdateMatchmakingRemotePlayerCount();
         PlayerDisconnectEvent += _ => UpdateMatchmakingRemotePlayerCount();
         ServerShutdownEvent += () => UpdateMatchmakingRemotePlayerCount(0);
+
+        EventHooks.GameManagerSaveGame += OnGameSave;
 
         // Register application quit handler
         // ModHooks.ApplicationQuitHook += Stop;
@@ -84,10 +92,25 @@ internal class ModServerManager : ServerManager {
             // save file that the user selected
             ServerSaveData.GlobalSaveData = SaveManager.GetCurrentSaveData(true);
 
-            // Then we import the player save data from the (potentially) loaded modded save file from the user selected
-            // save file
-            if (_loadedLocalSaveData != null) {
-                ServerSaveData.PlayerSaveData = _loadedLocalSaveData.PlayerSaveData;
+            // Load remote players' player-specific data from disk for the current profile ID
+            var profileId = global::GameManager.instance.profileID;
+            var modSavePath = Path.Combine(FileUtil.GetConfigPath(), $"user{profileId}.modsav");
+            if (File.Exists(modSavePath)) {
+                try {
+                    var json = File.ReadAllText(modSavePath);
+                    var modSaveFile = JsonConvert.DeserializeObject<ModSaveFile>(json);
+                    if (modSaveFile != null) {
+                        ServerSaveData.PlayerSaveData = modSaveFile.ToServerSaveData().PlayerSaveData;
+                        Logging.Logger.Info($"Loaded remote players' save data from: {modSavePath}");
+                    }
+                } catch (Exception e) {
+                    Logging.Logger.Error($"Could not load remote players' save data: {e}");
+                }
+            } else {
+                ServerSaveData.PlayerSaveData = new Dictionary<string, Dictionary<ushort, byte[]>>();
+                Logging.Logger.Info(
+                    $"No remote player save file found at: {modSavePath}, initialized empty player save data."
+                );
             }
 
             // Lastly, we get the player save data from the save manager, which obtains the player save data from the
@@ -123,7 +146,7 @@ internal class ModServerManager : ServerManager {
     /// <inheritdoc />
     protected override void DeregisterCommands() {
         base.DeregisterCommands();
-        
+
         CommandManager.DeregisterCommand(_settingsCommand);
     }
 
@@ -137,11 +160,47 @@ internal class ModServerManager : ServerManager {
             _uiManager.ConnectInterface.MmsClient.SetConnectedPlayers(count);
             return;
         }
-        
+
         var hostAuthKey = _modSettings.AuthKey;
         var remotePlayerCount = hostAuthKey == null
             ? 0
             : Players.Count(player => player.AuthKey != hostAuthKey);
         _uiManager.ConnectInterface.MmsClient.SetConnectedPlayers(remotePlayerCount);
+    }
+
+    /// <summary>
+    /// Intercepts native save events to serialize remote player-specific save data to disk.
+    /// </summary>
+    /// <param name="saveSlot">The save slot index.</param>
+    private void OnGameSave(int saveSlot) {
+        if (!_netServer.IsStarted || !FullSynchronisation) {
+            return;
+        }
+
+        try {
+            Logging.Logger.Info($"Intercepted native save for slot {saveSlot}. Saving remote players' save data...");
+
+            // Create a copy of ServerSaveData for serialization
+            var modSaveFile = ModSaveFile.FromServerSaveData(ServerSaveData);
+
+            // Filter out the host player's auth key to avoid duplicate/redundant data in the remote players' file
+            var hostAuthKey = _modSettings.AuthKey;
+            if (hostAuthKey != null) {
+                modSaveFile.PlayerSaveData.Remove(hostAuthKey);
+            }
+
+            var configPath = FileUtil.GetConfigPath();
+            if (!System.IO.Directory.Exists(configPath)) {
+                System.IO.Directory.CreateDirectory(configPath);
+            }
+
+            var modSavePath = Path.Combine(configPath, $"user{saveSlot}.modsav");
+            var json = JsonConvert.SerializeObject(modSaveFile, Formatting.Indented);
+            File.WriteAllText(modSavePath, json);
+
+            Logging.Logger.Info($"Remote players' save data successfully written to {modSavePath}");
+        } catch (Exception e) {
+            Logging.Logger.Error($"Could not save remote players' save data to disk: {e}");
+        }
     }
 }
