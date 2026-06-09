@@ -525,14 +525,14 @@ internal class MusicComponent : EntityComponent {
 /// </summary>
 internal class MusicCueData {
     /// <summary>
-    /// Gets the type category of the music cue.
+    /// Gets or sets the type category of the music cue.
     /// </summary>
-    public string Type { get; private set; }
+    public string Type { get; set; }
 
     /// <summary>
-    /// Gets the name of the music cue.
+    /// Gets or sets the name of the music cue.
     /// </summary>
-    public string Name { get; private set; }
+    public string Name { get; set; }
 
     /// <summary>
     /// Gets or sets the network index associated with the music cue.
@@ -553,14 +553,14 @@ internal class MusicCueData {
 /// </summary>
 internal class AudioMixerSnapshotData {
     /// <summary>
-    /// Gets the type category of the snapshot.
+    /// Gets or sets the type category of the snapshot.
     /// </summary>
-    public string Type { get; private set; }
+    public string Type { get; set; }
 
     /// <summary>
-    /// Gets the name of the snapshot.
+    /// Gets or sets the name of the snapshot.
     /// </summary>
-    public string Name { get; private set; }
+    public string Name { get; set; }
 
     /// <summary>
     /// Gets or sets the network index associated with the snapshot.
