@@ -90,12 +90,12 @@ internal class SaveManager {
     /// <summary>
     /// List of HashSet variables in PlayerData.
     /// </summary>
-    private static readonly List<string> HashSetVariables = new() {
+    private static readonly List<string> HashSetVariables = [
         "scenesEncounteredBench",
         "scenesEncounteredCocoon",
         "scenesMapped",
         "scenesVisited"
-    };
+    ];
 
     /// <summary>
     /// Whether the player is hosting the server, which means that player specific save data is not networked
@@ -120,7 +120,7 @@ internal class SaveManager {
     /// Initializes the save manager by loading the save data json.
     /// </summary>
     public void Initialize() {
-        _netClient.ConnectEvent += serverInfo => OnConnect(serverInfo);
+        _netClient.ConnectEvent += OnConnect;
 
         foreach (var field in typeof(PlayerData).GetFields()) {
             var fieldName = field.Name;
@@ -626,8 +626,8 @@ internal class SaveManager {
             GetListHashCode,
             (hash1, hash2) => hash1 != hash2,
             (currentValue, lastValue) => {
-                var currentList = currentValue as List<string> ?? new List<string>();
-                var lastList = lastValue as List<string> ?? new List<string>();
+                var currentList = currentValue as List<string> ?? [];
+                var lastList = lastValue as List<string> ?? [];
 
                 // TODO: also allow for negative updates, where something is deleted from the list
                 // this also holds for the other two lambdas below
@@ -696,8 +696,8 @@ internal class SaveManager {
             GetListHashCode,
             (hash1, hash2) => hash1 != hash2,
             (currentValue, lastValue) => {
-                var currentList = currentValue as List<int> ?? new List<int>();
-                var lastList = lastValue as List<int> ?? new List<int>();
+                var currentList = currentValue as List<int> ?? [];
+                var lastList = lastValue as List<int> ?? [];
 
                 var deltaList = currentList.Except(lastList).ToList();
 

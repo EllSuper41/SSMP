@@ -16,11 +16,7 @@ internal class ModSaveFile {
     /// The player specific save data mapped to player's auth keys.
     /// </summary>
     [JsonProperty("playerSaveData")]
-    public Dictionary<string, SaveData> PlayerSaveData { get; set; }
-
-    public ModSaveFile() {
-        PlayerSaveData = new Dictionary<string, SaveData>();
-    }
+    public Dictionary<string, SaveData> PlayerSaveData { get; set; } = new();
 
     /// <summary>
     /// Convert this class to an encoded ServerSaveData.
@@ -65,18 +61,13 @@ internal class ModSaveFile {
         /// <seealso cref="PlayerSaveDataConverter"/>
         /// </summary>
         [JsonProperty("playerData")]
-        public PlayerDataEntries PlayerDataEntries { get; set; }
+        public PlayerDataEntries PlayerDataEntries { get; set; } = [];
 
         /// <summary>
         /// SceneData instance that contains geo rocks and persistent items.
         /// </summary>
         [JsonProperty("sceneData")]
-        public SceneData SceneData { get; set; }
-
-        public SaveData() {
-            PlayerDataEntries = [];
-            SceneData = new SceneData();
-        }
+        public SceneData SceneData { get; set; } = new();
     }
 
     /// <summary>
@@ -87,23 +78,19 @@ internal class ModSaveFile {
         /// List of individual geo rocks.
         /// </summary>
         [JsonProperty("geoRocks")]
-        public List<GeoRockData> GeoRockData { get; set; }
+        public List<GeoRockData> GeoRockData { get; set; } = [];
+
         /// <summary>
         /// List of persistent booleans.
         /// </summary>
         [JsonProperty("persistentBoolItems")]
-        public List<PersistentBoolData> PersistentBoolData { get; set; }
+        public List<PersistentBoolData> PersistentBoolData { get; set; } = [];
+
         /// <summary>
         /// List of persistent integers.
         /// </summary>
         [JsonProperty("persistentIntItems")]
-        public List<PersistentIntData> PersistentIntData { get; set; }
-
-        public SceneData() {
-            GeoRockData = [];
-            PersistentBoolData = [];
-            PersistentIntData = [];
-        }
+        public List<PersistentIntData> PersistentIntData { get; set; } = [];
     }
 
     /// <summary>
@@ -183,7 +170,7 @@ internal class ModSaveFile {
         /// <summary>
         /// The name of the PlayerData variable.
         /// </summary>
-        public string? Name { get; set; }
+        public string? Name { get; init; }
         /// <summary>
         /// The value of the PlayerData variable as an object.
         /// </summary>

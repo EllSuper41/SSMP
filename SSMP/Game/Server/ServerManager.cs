@@ -24,8 +24,8 @@ using SSMP.Networking.Server;
 using SSMP.Networking.Transport.Common;
 using SSMP.Game.Server.Save;
 using SSMP.Game.Client.Save;
-using SSMP.Serialization;
 using SSMP.Util;
+
 // ReSharper disable InconsistentlySynchronizedField
 
 namespace SSMP.Game.Server;
@@ -63,7 +63,7 @@ internal abstract class ServerManager : IServerManager {
     private readonly ConcurrentDictionary<ushort, ServerPlayerData> _playerData;
 
     private readonly ConcurrentDictionary<ServerEntityKey, ServerEntityData> _entityData;
-    
+
     /// <summary>
     /// The white-list for managing player logins.
     /// </summary>
@@ -108,13 +108,12 @@ internal abstract class ServerManager : IServerManager {
     /// The save data for the server. The instance will be created in the constructor and is passed around to other
     /// objects. Therefore, it should not change instances.
     /// </summary>
-    protected ServerSaveData ServerSaveData;
+    protected readonly ServerSaveData ServerSaveData;
 
     #endregion
-    
+
     #region Internal server manager commands
 
-    
     /// <summary>
     /// The help command.
     /// </summary>
@@ -124,39 +123,47 @@ internal abstract class ServerManager : IServerManager {
     /// The list command.
     /// </summary>
     private readonly IServerCommand _listCommand;
+
     /// <summary>
     /// The whitelist command.
     /// </summary>
     private readonly IServerCommand _whiteListCommand;
+
     /// <summary>
     /// The authorize command.
     /// </summary>
     private readonly IServerCommand _authorizeCommand;
+
     /// <summary>
     /// The announce command.
     /// </summary>
     private readonly IServerCommand _announceCommand;
+
     /// <summary>
     /// The ban command.
     /// </summary>
     private readonly IServerCommand _banCommand;
+
     /// <summary>
     /// The kick command.
     /// </summary>
     private readonly IServerCommand _kickCommand;
+
     /// <summary>
     /// The team command.
     /// </summary>
     private readonly IServerCommand _teamCommand;
+
     /// <summary>
     /// The skin command.
     /// </summary>
     private readonly IServerCommand _skinCommand;
+
     /// <summary>
     /// The copy save command.
     /// </summary>
     private readonly IServerCommand _copySaveCommand;
-    
+
     #endregion
 
     #region IServerManager properties
@@ -219,7 +226,7 @@ internal abstract class ServerManager : IServerManager {
         _whiteList = WhiteList.LoadFromFile();
         _authorizedList = AuthKeyList.LoadFromFile(AuthorizedFileName);
         _banList = BanList.LoadFromFile();
-        
+
         _listCommand = new ListCommand(this);
         _whiteListCommand = new WhiteListCommand(_whiteList, this);
         _authorizeCommand = new AuthorizeCommand(_authorizedList, this);
@@ -291,7 +298,7 @@ internal abstract class ServerManager : IServerManager {
     /// </summary>
     private void RegisterPacketHandlers() {
         Logger.Debug("Registering packet handlers");
-        
+
         _packetManager.RegisterServerUpdatePacketHandler<ServerPlayerEnterScene>(
             ServerUpdatePacketId.PlayerEnterScene,
             OnClientEnterScene
@@ -354,7 +361,7 @@ internal abstract class ServerManager : IServerManager {
     /// </summary>
     private void DeregisterPacketHandlers() {
         Logger.Debug("Deregistering packet handlers");
-        
+
         _packetManager.DeregisterServerUpdatePacketHandler(ServerUpdatePacketId.PlayerEnterScene);
         _packetManager.DeregisterServerUpdatePacketHandler(ServerUpdatePacketId.PlayerLeaveScene);
         _packetManager.DeregisterServerUpdatePacketHandler(ServerUpdatePacketId.PlayerUpdate);
@@ -388,7 +395,7 @@ internal abstract class ServerManager : IServerManager {
             }
 
             FullSynchronisation = fullSynchronisation;
-            
+
             RegisterCommands();
             RegisterPacketHandlers();
 
@@ -414,9 +421,7 @@ internal abstract class ServerManager : IServerManager {
 
         // Before shutting down, send TCP packets to all clients indicating
         // that the server is shutting down
-        _netServer.SetDataForAllClients(updateManager => {
-            updateManager.SetDisconnect(DisconnectReason.Shutdown);
-        });
+        _netServer.SetDataForAllClients(updateManager => { updateManager.SetDisconnect(DisconnectReason.Shutdown); });
 
         _netServer.Stop();
 
@@ -443,7 +448,8 @@ internal abstract class ServerManager : IServerManager {
             return;
         }
 
-        _netServer.SetDataForAllClients(updateManager => { updateManager.UpdateServerSettings(InternalServerSettings); });
+        _netServer.SetDataForAllClients(updateManager => { updateManager.UpdateServerSettings(InternalServerSettings); }
+        );
     }
 
     /// <summary>
@@ -510,12 +516,14 @@ internal abstract class ServerManager : IServerManager {
 
                 // Also send a packet to the client that switched scenes,
                 // notifying that these players are already in this new scene.
-                enterSceneList.Add(new ClientPlayerEnterScene {
-                    Id = idPlayerDataPair.Key,
-                    Position = otherPlayerData.Position ?? Vector2.Zero,
-                    Scale = otherPlayerData.Scale,
-                    AnimationClipId = otherPlayerData.AnimationId
-                });
+                enterSceneList.Add(
+                    new ClientPlayerEnterScene {
+                        Id = idPlayerDataPair.Key,
+                        Position = otherPlayerData.Position ?? Vector2.Zero,
+                        Scale = otherPlayerData.Scale,
+                        AnimationClipId = otherPlayerData.AnimationId
+                    }
+                );
             }
         }
 
@@ -535,7 +543,8 @@ internal abstract class ServerManager : IServerManager {
                 var entityData = keyDataPair.Value;
                 if (entityData.Spawned) {
                     Logger.Info(
-                        $"Sending that entity '{entityKey.EntityId}' has spawned in the scene to '{playerData.Id}'");
+                        $"Sending that entity '{entityKey.EntityId}' has spawned in the scene to '{playerData.Id}'"
+                    );
 
                     var entitySpawn = new EntitySpawn {
                         Id = entityKey.EntityId,
@@ -746,7 +755,7 @@ internal abstract class ServerManager : IServerManager {
             }
         }
     }
-    
+
     /// <summary>
     /// Callback method for when an entity spawn is received from a player.
     /// </summary>
@@ -766,26 +775,28 @@ internal abstract class ServerManager : IServerManager {
         if (!playerData.IsSceneHost) {
             return;
         }
-        
+
         // Create the key for the entity data
         var serverEntityKey = new ServerEntityKey(
             playerData.CurrentScene,
             entitySpawn.Id
         );
-        
+
         // Check with the created key whether we have an existing entry
         if (!_entityData.TryGetValue(serverEntityKey, out var entityData)) {
             // If the entry for this entity did not yet exist, we insert a new one
             entityData = new ServerEntityData();
             _entityData[serverEntityKey] = entityData;
         }
-        
-        Logger.Info($"Received EntitySpawn from {id}, with entity {entitySpawn.Id}, {entitySpawn.SpawningType}, {entitySpawn.SpawnedType}");
+
+        Logger.Info(
+            $"Received EntitySpawn from {id}, with entity {entitySpawn.Id}, {entitySpawn.SpawningType}, {entitySpawn.SpawnedType}"
+        );
 
         entityData.Spawned = true;
         entityData.SpawningType = entitySpawn.SpawningType;
         entityData.SpawnedType = entitySpawn.SpawnedType;
-        
+
         SendDataInSameScene(
             id,
             playerData.CurrentScene,
@@ -813,13 +824,13 @@ internal abstract class ServerManager : IServerManager {
             Logger.Warn($"Received EntityUpdate data, but player with ID {id} is not in mapping");
             return;
         }
-        
+
         // Create the key for the entity data
         var serverEntityKey = new ServerEntityKey(
             playerData.CurrentScene,
             entityUpdate.Id
         );
-        
+
         // Check with the created key whether we have an existing entry
         if (!_entityData.TryGetValue(serverEntityKey, out var entityData)) {
             // If the entry for this entity did not yet exist, we insert a new one
@@ -902,7 +913,7 @@ internal abstract class ServerManager : IServerManager {
             entityData = new ServerEntityData();
             _entityData[serverEntityKey] = entityData;
         }
-        
+
         if (entityUpdate.UpdateTypes.Contains(EntityUpdateType.Active)) {
             SendDataInSameScene(
                 id,
@@ -931,14 +942,15 @@ internal abstract class ServerManager : IServerManager {
             );
 
             void ReplaceExistingDataWithSameType(EntityComponentType type, Packet data) {
-                var existingData = entityData.GenericData.Find(
-                    d => d.Type == type
+                var existingData = entityData.GenericData.Find(d => d.Type == type
                 );
                 if (existingData == null) {
-                    entityData.GenericData.Add(new EntityNetworkData {
-                        Type = type,
-                        Packet = data
-                    });
+                    entityData.GenericData.Add(
+                        new EntityNetworkData {
+                            Type = type,
+                            Packet = data
+                        }
+                    );
                 } else {
                     existingData.Packet = data;
                 }
@@ -962,7 +974,7 @@ internal abstract class ServerManager : IServerManager {
                 }
 
                 existingData.MergeData(data);
-                
+
                 SendDataInSameScene(
                     id,
                     playerData.CurrentScene,
@@ -1024,7 +1036,7 @@ internal abstract class ServerManager : IServerManager {
             Logger.Warn($"Handling player leave scene for ID {id}, but there was no last scene registered");
             return;
         }
-        
+
         Logger.Info($"Handling player leave scene (dc: {disconnected}) for ID {id}, left scene: {sceneName}");
 
         // If the current scene of the player is the one being left, we can set it to an empty string
@@ -1035,7 +1047,7 @@ internal abstract class ServerManager : IServerManager {
         }
 
         var username = playerData.Username;
-        
+
         // Keep track of whether the scene that the player has left is now empty
         var isSceneNowEmpty = true;
 
@@ -1045,7 +1057,7 @@ internal abstract class ServerManager : IServerManager {
             }
 
             var otherPlayerData = idPlayerDataPair.Value;
-            
+
             // Send a packet to all clients in the scene that the player has left their scene
             if (otherPlayerData.CurrentScene == sceneName) {
                 Logger.Info($"Sending leave scene packet to {idPlayerDataPair.Key}");
@@ -1063,10 +1075,10 @@ internal abstract class ServerManager : IServerManager {
                     // Reset the scene host variable in the leaving player, so only a single other player
                     // becomes the scene host
                     playerData.IsSceneHost = false;
-                    
+
                     // Also set the player data of the new scene host
                     otherPlayerData.IsSceneHost = true;
-                    
+
                     Logger.Info($"  {idPlayerDataPair.Key} has become scene host");
                 }
 
@@ -1130,7 +1142,7 @@ internal abstract class ServerManager : IServerManager {
 
         // Now remove the client from the player data mapping
         _playerData.TryRemove(id, out _);
-        
+
         HandlePlayerLeaveScene(id, true, timeout);
 
         try {
@@ -1155,7 +1167,7 @@ internal abstract class ServerManager : IServerManager {
         if (ServerSaveData.IsSteelSoul()) {
             // We are running a Steel Soul save file, so we wipe the player-specific data for the player
             ServerSaveData.PlayerSaveData.Remove(playerData.AuthKey);
-            
+
             Logger.Info("  Wiped player save data (Steel Soul)");
         }
 
@@ -1229,48 +1241,48 @@ internal abstract class ServerManager : IServerManager {
     public bool TryUpdatePlayerSkin(ushort id, byte skinId, [MaybeNullWhen(true)] out string reason) {
         if (!_playerData.TryGetValue(id, out var playerData)) {
             Logger.Warn($"Received PlayerSkinUpdate data, but player with ID {id} is not in mapping");
-            
+
             reason = "Could not find player";
             return false;
         }
-        
+
         Logger.Info($"Received PlayerSkinUpdate data from ({id}, {playerData.Username}) for skin ID: {skinId}");
-        
+
         if (!ServerSettings.AllowSkins) {
             Logger.Info("  Skins are not allowed, won't update skin");
-            
+
             reason = "Unable to change skin";
             return false;
         }
 
         if (playerData.SkinId == skinId) {
             Logger.Info("  Skins is the same as current, won't update skin");
-            
+
             reason = "Skin is already in use";
             return false;
         }
 
         // Update the skin ID in the player data
         playerData.SkinId = skinId;
-        
+
         foreach (var idPlayerDataPair in _playerData) {
             var otherId = idPlayerDataPair.Key;
-            
+
             if (otherId == id) {
                 _netServer.GetUpdateManagerForClient(id)?.AddPlayerSettingUpdateData(skinId: skinId);
                 continue;
             }
-            
+
             var otherPd = idPlayerDataPair.Value;
-            
+
             // Skip sending skin to players not in the same scene
             if (!string.Equals(otherPd.CurrentScene, playerData.CurrentScene)) {
                 continue;
             }
-            
+
             _netServer.GetUpdateManagerForClient(otherId)?.AddOtherPlayerSettingUpdateData(id, skinId: skinId);
         }
-        
+
         reason = null;
         return true;
     }
@@ -1281,7 +1293,7 @@ internal abstract class ServerManager : IServerManager {
     private void OnServerShutdown() {
         // Clear all existing player data
         _playerData.Clear();
-        
+
         try {
             ServerShutdownEvent?.Invoke();
         } catch (Exception e) {
@@ -1312,7 +1324,7 @@ internal abstract class ServerManager : IServerManager {
 
         // Get the unique identifier (IP address for UDP, Steam ID for Steam clients)
         var uniqueIdentifier = netServerClient.TransportClient.GetUniqueIdentifier();
-    
+
         // Check if the unique identifier is banned (supports both IPEndPoint and SteamID)
         if (_banList.IsIpBanned(uniqueIdentifier)) {
             var displayType = IPAddress.TryParse(uniqueIdentifier, out _) ? "IP" : "Steam ID";
@@ -1347,11 +1359,11 @@ internal abstract class ServerManager : IServerManager {
                 _whiteList.RemovePreList(clientInfo.Username);
             }
         }
-        
+
         // Check whether the username is valid
         if (clientInfo.Username.Length > MaxUsernameLength) {
             Logger.Debug("  Client has username that is too long, rejected connection");
-            
+
             serverInfo.ConnectionResult = ServerConnectionResult.RejectedOther;
             serverInfo.ConnectionRejectedMessage = "Invalid username";
             return;
@@ -1360,7 +1372,7 @@ internal abstract class ServerManager : IServerManager {
         foreach (var character in clientInfo.Username) {
             if (!char.IsLetterOrDigit(character)) {
                 Logger.Debug("  Client has invalid characters in username, rejected connection");
-                
+
                 serverInfo.ConnectionResult = ServerConnectionResult.RejectedOther;
                 serverInfo.ConnectionRejectedMessage = "Invalid username";
                 return;
@@ -1374,7 +1386,7 @@ internal abstract class ServerManager : IServerManager {
         foreach (var existingPlayerData in _playerData.Values) {
             if (existingPlayerData.Username.ToLower().Equals(clientInfo.Username.ToLower())) {
                 Logger.Debug("  Client username is already in use, rejected connection");
-                
+
                 serverInfo.ConnectionResult = ServerConnectionResult.RejectedOther;
                 serverInfo.ConnectionRejectedMessage = "Username already in use";
                 return;
@@ -1384,7 +1396,7 @@ internal abstract class ServerManager : IServerManager {
         var addonData = clientInfo.AddonData;
         if (addonData == null) {
             Logger.Warn("  Addon data was null for client");
-            
+
             serverInfo.ConnectionResult = ServerConnectionResult.RejectedOther;
             serverInfo.ConnectionRejectedMessage = "Internal error";
             return;
@@ -1398,7 +1410,7 @@ internal abstract class ServerManager : IServerManager {
         // we can immediately invalidate the request
         if (addonData.Count != AddonManager.GetNetworkedAddonData().Count) {
             Logger.Debug("  Client addons are invalid, rejected connection");
-            
+
             HandleInvalidLoginAddons(serverInfo);
             return;
         }
@@ -1414,7 +1426,7 @@ internal abstract class ServerManager : IServerManager {
                     out var correspondingServerAddon
                 )) {
                 Logger.Debug("  Client addons are invalid, rejected connection");
-                
+
                 // There was no corresponding server addon, so we send a login response with an invalid status
                 // and the addon data that is present on the server, so the client knows what is invalid
                 HandleInvalidLoginAddons(serverInfo);
@@ -1428,9 +1440,9 @@ internal abstract class ServerManager : IServerManager {
             // If the addon is also present on the server, we append the addon order with the correct index
             addonOrder.Add(correspondingServerAddon.Id.Value);
         }
-        
+
         Logger.Debug("  Accepting client connection, preparing server info");
-        
+
         // Finally after all the checks, the client is accepted, and we note that in the server info
         serverInfo.ConnectionResult = ServerConnectionResult.Accepted;
         serverInfo.AddonOrder = addonOrder.ToArray();
@@ -1440,7 +1452,7 @@ internal abstract class ServerManager : IServerManager {
         };
 
         serverInfo.FullSynchronisation = FullSynchronisation;
-        
+
         // Construct the player info to send to the new client in the server info
         var playerInfo = new List<ServerInfo.PlayerInfo>();
 
@@ -1452,13 +1464,15 @@ internal abstract class ServerManager : IServerManager {
 
             var otherPd = idPlayerDataPair.Value;
 
-            playerInfo.Add(new ServerInfo.PlayerInfo {
-                Id = otherId,
-                Username = otherPd.Username,
-                Team = otherPd.Team,
-                SkinId = otherPd.SkinId,
-                CrestType = otherPd.CrestType
-            });
+            playerInfo.Add(
+                new ServerInfo.PlayerInfo {
+                    Id = otherId,
+                    Username = otherPd.Username,
+                    Team = otherPd.Team,
+                    SkinId = otherPd.SkinId,
+                    CrestType = otherPd.CrestType
+                }
+            );
 
             // Send to the other players that this client has just connected
             _netServer.GetUpdateManagerForClient(otherId)?.AddPlayerConnectData(
@@ -1483,14 +1497,14 @@ internal abstract class ServerManager : IServerManager {
             _authorizedList
         );
         _playerData[netServerClient.Id] = playerData;
-        
+
         try {
             PlayerConnectEvent?.Invoke(playerData);
         } catch (Exception e) {
             Logger.Error($"Exception thrown while invoking PlayerConnect event:\n{e}");
         }
     }
-    
+
     /// <summary>
     /// If the connecting client matches an active player identity, disconnect the old session so the new
     /// transport can take over cleanly.
@@ -1506,14 +1520,16 @@ internal abstract class ServerManager : IServerManager {
         var existingPlayer = _playerData.Values.FirstOrDefault(playerData =>
             playerData.Id != netServerClient.Id
             && (string.Equals(playerData.UniqueClientIdentifier, uniqueIdentifier, StringComparison.OrdinalIgnoreCase)
-                || string.Equals(playerData.AuthKey, clientInfo.AuthKey, StringComparison.OrdinalIgnoreCase)));
+                || string.Equals(playerData.AuthKey, clientInfo.AuthKey, StringComparison.OrdinalIgnoreCase))
+        );
 
         if (existingPlayer is null)
             return;
 
         Logger.Warn(
             $"Replacing existing session for player '{existingPlayer.Username}' " +
-            $"(ID {existingPlayer.Id}) with new connection from {uniqueIdentifier}");
+            $"(ID {existingPlayer.Id}) with new connection from {uniqueIdentifier}"
+        );
 
         ProcessPlayerDisconnect(existingPlayer.Id);
     }
@@ -1593,7 +1609,7 @@ internal abstract class ServerManager : IServerManager {
         }
 
         var playerChatEvent = new PlayerChatEvent(playerData, chatMessage.Message);
-        
+
         try {
             PlayerChatEvent?.Invoke(playerChatEvent);
         } catch (Exception e) {
@@ -1625,18 +1641,18 @@ internal abstract class ServerManager : IServerManager {
             Logger.Debug($"Could not process server settings update from unknown player ID: {id}");
             return;
         }
-        
+
         Logger.Info($"Received server settings update from ({id}, {playerData.Username})");
 
         if (!playerData.IsAuthorized) {
             Logger.Info("  Player is not authorized");
-            
+
             SendMessage(id, "You are not authorized to change server settings");
             _netServer.GetUpdateManagerForClient(id)?.UpdateServerSettings(InternalServerSettings);
-            
+
             return;
         }
-        
+
         InternalServerSettings.SetAllProperties(serverSettingsUpdate.ServerSettings);
         OnUpdateServerSettings();
     }
@@ -1672,16 +1688,19 @@ internal abstract class ServerManager : IServerManager {
 
             var crestType = playerSettingUpdate.CrestType;
 
-            Logger.Info($"Received crest update for player: ({id}, {playerData.Username}), from '{playerData.CrestType}' to '{crestType}'");
+            Logger.Info(
+                $"Received crest update for player: ({id}, {playerData.Username}), from '{playerData.CrestType}' to '{crestType}'"
+            );
 
             playerData.CrestType = crestType;
-            
+
             foreach (var otherId in _playerData.Keys) {
                 if (otherId == id) {
                     continue;
                 }
 
-                _netServer.GetUpdateManagerForClient(otherId)?.AddOtherPlayerSettingUpdateData(id, crestType: crestType);
+                _netServer.GetUpdateManagerForClient(otherId)
+                          ?.AddOtherPlayerSettingUpdateData(id, crestType: crestType);
             }
         }
     }
@@ -1709,7 +1728,7 @@ internal abstract class ServerManager : IServerManager {
         string? pdVarName = null;
         if (SaveDataMapping.Instance.GeoRockIndices.TryGetValue(packet.SaveDataIndex, out var persistentItemData)) {
             Logger.Debug($"  Found GeoRockData: {persistentItemData.Id}, {persistentItemData.SceneName}");
-            
+
             if (!SaveDataMapping.Instance.GeoRockBools.TryGetValue(persistentItemData, out _)) {
                 return;
             }
@@ -1721,25 +1740,27 @@ internal abstract class ServerManager : IServerManager {
             };
         } else if (SaveDataMapping.Instance.PlayerDataIndices.TryGetValue(packet.SaveDataIndex, out pdVarName)) {
             Logger.Debug($"  Found PlayerData: {pdVarName}");
-            
+
             if (!SaveDataMapping.Instance.PlayerDataVarProperties.TryGetValue(pdVarName, out varProps)) {
                 return;
             }
         } else if (SaveDataMapping.Instance.PersistentBoolIndices.TryGetValue(
-            packet.SaveDataIndex, 
-            out persistentItemData)
-        ) {
+                       packet.SaveDataIndex,
+                       out persistentItemData
+                   )
+                  ) {
             Logger.Debug($"  Found PersistentBoolData: {persistentItemData.Id}, {persistentItemData.SceneName}");
-            
+
             if (!SaveDataMapping.Instance.PersistentBoolVarProperties.TryGetValue(persistentItemData, out varProps)) {
                 return;
             }
         } else if (SaveDataMapping.Instance.PersistentIntIndices.TryGetValue(
-            packet.SaveDataIndex, 
-            out persistentItemData)
-        ) {
+                       packet.SaveDataIndex,
+                       out persistentItemData
+                   )
+                  ) {
             Logger.Debug($"  Found PersistentIntData: {persistentItemData.Id}, {persistentItemData.SceneName}");
-            
+
             if (!SaveDataMapping.Instance.PersistentIntVarProperties.TryGetValue(persistentItemData, out varProps)) {
                 return;
             }
@@ -1756,13 +1777,13 @@ internal abstract class ServerManager : IServerManager {
 
         if (varProps.SyncType == SaveDataMapping.SyncType.Player) {
             Logger.Debug("  SyncType is Player");
-            
+
             if (!ServerSaveData.PlayerSaveData.TryGetValue(playerData.AuthKey, out var playerSaveData)) {
                 Logger.Debug("  No PlayerSaveData for player yet, creating one");
                 playerSaveData = new Dictionary<ushort, byte[]>();
                 ServerSaveData.PlayerSaveData[playerData.AuthKey] = playerSaveData;
             }
-            
+
             Logger.Debug("  Storing player data");
 
             playerSaveData[packet.SaveDataIndex] = packet.Value;
@@ -1785,7 +1806,7 @@ internal abstract class ServerManager : IServerManager {
                     } else {
                         Logger.Debug("  No initial value defined, using delta as absolute");
                         packet.Value = EncodeUtil.EncodeSaveDataValue(decodedDeltaValue, pdVarName);
-                      }
+                    }
                 } else {
                     decodedCurrentValue = EncodeUtil.DecodeSaveDataValue(pdVarName, currentValue);
                 }
@@ -1797,7 +1818,6 @@ internal abstract class ServerManager : IServerManager {
                         decodedNewValue = decodedCurrentInt + decodedDeltaInt;
                     } else if (decodedCurrentValue is List<string> decodedCurrentStringList &&
                                decodedDeltaValue is List<string> decodedDeltaStringList) {
-
                         // Loop over the delta list and add only non-duplicates
                         foreach (var str in decodedDeltaStringList) {
                             if (!decodedCurrentStringList.Contains(str)) {
@@ -1808,7 +1828,6 @@ internal abstract class ServerManager : IServerManager {
                         decodedNewValue = decodedCurrentStringList;
                     } else if (decodedCurrentValue is HashSet<string> decodedCurrentSet &&
                                decodedDeltaValue is List<string> decodedDeltaSet) {
-
                         // Loop over the delta list and add to the HashSet
                         foreach (var str in decodedDeltaSet) {
                             decodedCurrentSet.Add(str);
@@ -1823,11 +1842,11 @@ internal abstract class ServerManager : IServerManager {
                     packet.Value = EncodeUtil.EncodeSaveDataValue(decodedNewValue, pdVarName);
                 }
             }
-            
+
             Logger.Debug("  SyncType is Server, broadcasting save update");
-            
+
             ServerSaveData.GlobalSaveData[packet.SaveDataIndex] = packet.Value;
-            
+
             foreach (var idPlayerDataPair in _playerData) {
                 var otherId = idPlayerDataPair.Key;
                 // For additive properties, it might happen (due to race conditions) that the resulting value needs to
@@ -1840,7 +1859,7 @@ internal abstract class ServerManager : IServerManager {
             }
         }
     }
-    
+
     #endregion
 
     #region IServerManager methods
@@ -1879,7 +1898,7 @@ internal abstract class ServerManager : IServerManager {
         CheckValidMessage(message);
 
         var updateManager = _netServer.GetUpdateManagerForClient(id);
-        
+
         // Break message up in parts denoted by newline
         var messages = message.Split('\n');
         foreach (var line in messages) {
@@ -1919,12 +1938,12 @@ internal abstract class ServerManager : IServerManager {
         if (serverSettings == null) {
             throw new ArgumentException("Cannot apply null ServerSettings", nameof(serverSettings));
         }
-    
+
         // If these ServerSettings instances are equal in value, we can immediately return
         if (InternalServerSettings.Equals(serverSettings)) {
             return;
         }
-        
+
         // Set all properties of the given instance and then call the OnUpdate method to network the changes
         InternalServerSettings.SetAllProperties(serverSettings);
         OnUpdateServerSettings();

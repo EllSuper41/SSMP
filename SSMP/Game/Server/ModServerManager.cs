@@ -190,8 +190,8 @@ internal class ModServerManager : ServerManager {
             }
 
             var configPath = FileUtil.GetConfigPath();
-            if (!System.IO.Directory.Exists(configPath)) {
-                System.IO.Directory.CreateDirectory(configPath);
+            if (!Directory.Exists(configPath)) {
+                Directory.CreateDirectory(configPath);
             }
 
             var modSavePath = Path.Combine(configPath, $"user{saveSlot}.modsav");
