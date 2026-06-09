@@ -2,8 +2,10 @@ using System.Collections.Generic;
 using Newtonsoft.Json;
 using SSMP.Game.Client.Save;
 using SSMP.Util;
+
 // ReSharper disable MemberHidesStaticFromOuterClass
-#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider
+// adding the 'required' modifier or declaring as nullable.
 
 namespace SSMP.Game.Server.Save;
 
@@ -19,17 +21,25 @@ internal class ModSaveFile {
     public Dictionary<string, SaveData> PlayerSaveData { get; set; } = new();
 
     /// <summary>
+    /// The global save data for the server. E.g. broken walls, open doors, etc.
+    /// </summary>
+    [JsonProperty("globalSaveData")]
+    public SaveData GlobalSaveData { get; set; } = new();
+
+    /// <summary>
     /// Convert this class to an encoded ServerSaveData.
     /// </summary>
     /// <returns>The converted ServerSaveData instance.</returns>
     public virtual ServerSaveData ToServerSaveData() {
         // Create new instance of server save data, which we return at the end
-        var serverSaveData = new ServerSaveData();
+        var serverSaveData = new ServerSaveData {
+            GlobalSaveData = EncodeUtil.ConvertToServerSaveData(GlobalSaveData)
+        };
 
         foreach (var authKey in PlayerSaveData.Keys) {
             serverSaveData.PlayerSaveData[authKey] = EncodeUtil.ConvertToServerSaveData(PlayerSaveData[authKey]);
         }
-        
+
         return serverSaveData;
     }
 
@@ -40,7 +50,9 @@ internal class ModSaveFile {
     /// <returns>An instance of this class.</returns>
     public static ModSaveFile FromServerSaveData(ServerSaveData serverSaveData) {
         // Create new instance of this class, which we return at the end
-        var modSaveFile = new ModSaveFile();
+        var modSaveFile = new ModSaveFile {
+            GlobalSaveData = EncodeUtil.ConvertFromServerSaveData(serverSaveData.GlobalSaveData)
+        };
 
         var playerSaveData = serverSaveData.PlayerSaveData;
         foreach (var authKey in playerSaveData.Keys) {
@@ -134,7 +146,7 @@ internal class ModSaveFile {
         [JsonProperty("hitsLeft")]
         public int HitsLeft { get; set; }
     }
-    
+
     /// <summary>
     /// Serializable persistent boolean.
     /// </summary>
@@ -145,7 +157,7 @@ internal class ModSaveFile {
         [JsonProperty("activated")]
         public bool Activated { get; set; }
     }
-    
+
     /// <summary>
     /// Serializable persistent integer.
     /// </summary>
@@ -171,6 +183,7 @@ internal class ModSaveFile {
         /// The name of the PlayerData variable.
         /// </summary>
         public string? Name { get; init; }
+
         /// <summary>
         /// The value of the PlayerData variable as an object.
         /// </summary>

@@ -109,20 +109,20 @@ public static class EncodeUtil {
                 var type = varProps.VarType;
                 switch (type) {
                     case "System.String":
-                        // Sentinel index ushort.MaxValue (65535) and 0 length prefix
-                        return [255, 255, 0, 0];
+                        // Sentinel index ushort.MaxValue (65535) and dynamic string prefix ushort.MaxValue for null
+                        return [255, 255, 255, 255];
                     case "System.Collections.Generic.List`1[System.String]":
                     case "HashSet<string>":
                     case "System.Collections.Generic.List`1[SSMP.Math.Vector3]":
                     case "System.Byte[]":
-                        return [0, 0];// 0 length ushort
+                        return [0, 0]; // 0 length ushort
                     case "System.Collections.Generic.List`1[System.Int32]":
                         return [0]; // 0 length byte
                 }
             }
 
             // Fallback representation for unspecified nulls: default empty string/list bytes
-            return [255, 255, 0, 0];
+            return [255, 255, 255, 255];
         }
 
         switch (value) {
@@ -258,7 +258,7 @@ public static class EncodeUtil {
                     return BitConverter.GetBytes(nullIndex);
                 }
 
-                stringValue = string.Empty;
+                return [255, 255, 255, 255];
             }
 
             if (!TryGetStringIndex(stringValue, out var index)) {
@@ -562,11 +562,15 @@ public static class EncodeUtil {
         throw new ArgumentException($"Could not decode type: {type}");
 
         // Decode a string from the given byte array and start index in that array
-        string DecodeString(byte[] encoded, int startIndex) {
+        string? DecodeString(byte[] encoded, int startIndex) {
             var sceneIndex = BitConverter.ToUInt16(encoded, startIndex);
 
             if (sceneIndex == ushort.MaxValue) {
                 var strLen = BitConverter.ToUInt16(encoded, startIndex + 2);
+                if (strLen == ushort.MaxValue) {
+                    return null;
+                }
+
                 return System.Text.Encoding.UTF8.GetString(encoded, startIndex + 4, strLen);
             }
 

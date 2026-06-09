@@ -1140,10 +1140,10 @@ internal abstract class ServerManager : IServerManager {
             );
         }
 
+        HandlePlayerLeaveScene(id, true, timeout);
+
         // Now remove the client from the player data mapping
         _playerData.TryRemove(id, out _);
-
-        HandlePlayerLeaveScene(id, true, timeout);
 
         try {
             PlayerDisconnectEvent?.Invoke(playerData);
@@ -1775,6 +1775,15 @@ internal abstract class ServerManager : IServerManager {
             return;
         }
 
+        // Validate and normalize the packet value by decoding and re-encoding it
+        var normalizedValue = ValidateAndNormalizeSaveData(packet.SaveDataIndex, packet.Value, pdVarName);
+        if (normalizedValue == null) {
+            Logger.Warn($"Save update value validation failed for index {packet.SaveDataIndex}, rejecting update");
+            return;
+        }
+
+        packet.Value = normalizedValue;
+
         if (varProps.SyncType == SaveDataMapping.SyncType.Player) {
             Logger.Debug("  SyncType is Player");
 
@@ -1817,9 +1826,9 @@ internal abstract class ServerManager : IServerManager {
                     if (decodedCurrentValue is int decodedCurrentInt && decodedDeltaValue is int decodedDeltaInt) {
                         decodedNewValue = decodedCurrentInt + decodedDeltaInt;
                     } else if (decodedCurrentValue is List<string> decodedCurrentStringList &&
-                               decodedDeltaValue is List<string> decodedDeltaStringList) {
+                               decodedDeltaValue is IEnumerable<string> decodedDeltaStringEnum) {
                         // Loop over the delta list and add only non-duplicates
-                        foreach (var str in decodedDeltaStringList) {
+                        foreach (var str in decodedDeltaStringEnum) {
                             if (!decodedCurrentStringList.Contains(str)) {
                                 decodedCurrentStringList.Add(str);
                             }
@@ -1827,9 +1836,9 @@ internal abstract class ServerManager : IServerManager {
 
                         decodedNewValue = decodedCurrentStringList;
                     } else if (decodedCurrentValue is HashSet<string> decodedCurrentSet &&
-                               decodedDeltaValue is List<string> decodedDeltaSet) {
+                               decodedDeltaValue is IEnumerable<string> decodedDeltaEnum) {
                         // Loop over the delta list and add to the HashSet
-                        foreach (var str in decodedDeltaSet) {
+                        foreach (var str in decodedDeltaEnum) {
                             decodedCurrentSet.Add(str);
                         }
 
@@ -1858,6 +1867,39 @@ internal abstract class ServerManager : IServerManager {
                 _netServer.GetUpdateManagerForClient(otherId)?.SetSaveUpdate(packet.SaveDataIndex, packet.Value);
             }
         }
+    }
+
+    /// <summary>
+    /// Validates and normalizes the incoming save data packet value by decoding and re-encoding it.
+    /// </summary>
+    private byte[]? ValidateAndNormalizeSaveData(ushort index, byte[] value, string? pdVarName) {
+        try {
+            if (pdVarName != null) {
+                // PlayerData variable
+                var decoded = EncodeUtil.DecodeSaveDataValue(pdVarName, value);
+                return EncodeUtil.EncodeSaveDataValue(decoded, pdVarName);
+            }
+
+            // Persistent items (GeoRock, PersistentBool, PersistentInt)
+            if (SaveDataMapping.Instance.GeoRockIndices.ContainsSecond(index)) {
+                if (value.Length < 1) return null;
+                return [value[0]];
+            }
+
+            if (SaveDataMapping.Instance.PersistentBoolIndices.ContainsSecond(index)) {
+                if (value.Length < 1) return null;
+                return [(byte) (value[0] == 1 ? 1 : 0)];
+            }
+
+            if (SaveDataMapping.Instance.PersistentIntIndices.ContainsSecond(index)) {
+                if (value.Length < 1) return null;
+                return [value[0]];
+            }
+        } catch (Exception e) {
+            Logger.Warn($"Failed to validate and normalize save data for index {index}: {e}");
+        }
+
+        return null;
     }
 
     #endregion

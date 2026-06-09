@@ -230,7 +230,7 @@ internal class SaveManager {
             var currentValue = field.GetValue(pd);
             var lastValue = field.GetValue(_lastPlayerData);
 
-            if (currentValue.Equals(lastValue)) {
+            if (Equals(currentValue, lastValue)) {
                 continue;
             }
 

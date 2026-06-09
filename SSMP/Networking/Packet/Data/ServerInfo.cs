@@ -72,7 +72,9 @@ internal class ServerInfo : IPacketData {
 
             packet.Write(FullSynchronisation);
 
-            CurrentSave.WriteData(packet);
+            if (FullSynchronisation)
+                CurrentSave.WriteData(packet);
+
 
             packet.Write((ushort) PlayerInfos.Count);
 
@@ -116,8 +118,10 @@ internal class ServerInfo : IPacketData {
 
             FullSynchronisation = packet.ReadBool();
 
-            CurrentSave = new CurrentSave();
-            CurrentSave.ReadData(packet);
+            if (FullSynchronisation) {
+                CurrentSave = new CurrentSave();
+                CurrentSave.ReadData(packet);
+            }
 
             var length = packet.ReadUShort();
 

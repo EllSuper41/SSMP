@@ -100,7 +100,12 @@ internal class ModServerManager : ServerManager {
                     var json = File.ReadAllText(modSavePath);
                     var modSaveFile = JsonConvert.DeserializeObject<ModSaveFile>(json);
                     if (modSaveFile != null) {
-                        ServerSaveData.PlayerSaveData = modSaveFile.ToServerSaveData().PlayerSaveData;
+                        var serverSave = modSaveFile.ToServerSaveData();
+                        ServerSaveData.PlayerSaveData = serverSave.PlayerSaveData;
+                        if (serverSave.GlobalSaveData.Count > 0) {
+                            ServerSaveData.GlobalSaveData = serverSave.GlobalSaveData;
+                        }
+
                         Logging.Logger.Info($"Loaded remote players' save data from: {modSavePath}");
                     }
                 } catch (Exception e) {
@@ -148,6 +153,8 @@ internal class ModServerManager : ServerManager {
         base.DeregisterCommands();
 
         CommandManager.DeregisterCommand(_settingsCommand);
+
+        EventHooks.GameManagerSaveGame -= OnGameSave;
     }
 
     /// <summary>

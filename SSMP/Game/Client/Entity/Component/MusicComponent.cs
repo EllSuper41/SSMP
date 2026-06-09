@@ -22,6 +22,11 @@ using Logger = SSMP.Logging.Logger;
 namespace SSMP.Game.Client.Entity.Component;
 
 /// <inheritdoc />
+/// <summary>
+/// Manages boss fight music synchronisation across the network.
+/// Note: This component relies heavily on PlayMakerFSM internals (via reflection on OnEnable)
+/// and is fragile; it may break if game updates change PlayMaker structures or method signatures.
+/// </summary>
 /// <remarks>Manages boss fight music synchronisation across the network.</remarks>
 internal class MusicComponent : EntityComponent {
     #region Constants
@@ -451,6 +456,14 @@ internal class MusicComponent : EntityComponent {
         CustomHooks.ApplyMusicCueFromFsmAction += OnCapturedApplyMusicCue;
         CustomHooks.TransitionToAudioSnapshotFromFsmAction += OnCapturedTransitionToAudioSnapshot;
         */
+    }
+
+    /// <summary>
+    /// Deinitializes the music capture system, unregistering event handlers.
+    /// </summary>
+    public static void DeinitializeCapture() {
+        //CustomHooks.ApplyMusicCueFromFsmAction -= OnCapturedApplyMusicCue;
+        //CustomHooks.TransitionToAudioSnapshotFromFsmAction -= OnCapturedTransitionToAudioSnapshot;
     }
 
     #endregion
