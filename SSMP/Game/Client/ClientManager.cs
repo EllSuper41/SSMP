@@ -312,7 +312,7 @@ internal class ClientManager : IClientManager {
         _fsmPatcher.RegisterHooks();
 
         if (_fullSynchronisation) {
-            _entityManager.RegisterHooks();
+            //_entityManager.RegisterHooks();
             _saveManager.RegisterHooks();
         }
 
@@ -340,7 +340,7 @@ internal class ClientManager : IClientManager {
         _fsmPatcher.DeregisterHooks();
 
         if (_fullSynchronisation) {
-            _entityManager.DeregisterHooks();
+            //_entityManager.DeregisterHooks();
             _saveManager.DeregisterHooks();
         }
 
