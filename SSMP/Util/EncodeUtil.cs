@@ -133,6 +133,18 @@ public static class EncodeUtil {
                 return BitConverter.GetBytes(fValue);
             case int iValue:
                 return BitConverter.GetBytes(iValue);
+            case ulong ulValue:
+                return BitConverter.GetBytes(ulValue);
+            case long lValue:
+                return BitConverter.GetBytes(lValue);
+            case uint uiValue:
+                return BitConverter.GetBytes(uiValue);
+            case ushort usValue:
+                return BitConverter.GetBytes(usValue);
+            case short sValue:
+                return BitConverter.GetBytes(sValue);
+            case double dValue:
+                return BitConverter.GetBytes(dValue);
             case string sValue:
                 return EncodeString(sValue);
             case Vector2 vec2Value:
@@ -319,6 +331,42 @@ public static class EncodeUtil {
                 );
             case "System.Int32":
                 return BitConverter.ToInt32(encodedValue, 0);
+            case "System.UInt64" when encodedValue.Length != 8:
+                throw new ArgumentOutOfRangeException(
+                    $"Encoded value has incorrect value length for ulong: {encodedValue.Length}"
+                );
+            case "System.UInt64":
+                return BitConverter.ToUInt64(encodedValue, 0);
+            case "System.Int64" when encodedValue.Length != 8:
+                throw new ArgumentOutOfRangeException(
+                    $"Encoded value has incorrect value length for long: {encodedValue.Length}"
+                );
+            case "System.Int64":
+                return BitConverter.ToInt64(encodedValue, 0);
+            case "System.UInt32" when encodedValue.Length != 4:
+                throw new ArgumentOutOfRangeException(
+                    $"Encoded value has incorrect value length for uint: {encodedValue.Length}"
+                );
+            case "System.UInt32":
+                return BitConverter.ToUInt32(encodedValue, 0);
+            case "System.UInt16" when encodedValue.Length != 2:
+                throw new ArgumentOutOfRangeException(
+                    $"Encoded value has incorrect value length for ushort: {encodedValue.Length}"
+                );
+            case "System.UInt16":
+                return BitConverter.ToUInt16(encodedValue, 0);
+            case "System.Int16" when encodedValue.Length != 2:
+                throw new ArgumentOutOfRangeException(
+                    $"Encoded value has incorrect value length for short: {encodedValue.Length}"
+                );
+            case "System.Int16":
+                return BitConverter.ToInt16(encodedValue, 0);
+            case "System.Double" when encodedValue.Length != 8:
+                throw new ArgumentOutOfRangeException(
+                    $"Encoded value has incorrect value length for double: {encodedValue.Length}"
+                );
+            case "System.Double":
+                return BitConverter.ToDouble(encodedValue, 0);
             case "System.String":
                 return DecodeString(encodedValue, 0);
             case "SSMP.Math.Vector2" when encodedValue.Length != 8:
