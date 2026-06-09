@@ -97,12 +97,33 @@ public static class EncodeUtil {
     /// Encode a given value into a byte array in the context of save data.
     /// </summary>
     /// <param name="value">The value to encode.</param>
+    /// <param name="name">Optional name of the variable to assist with encoding nulls.</param>
     /// <returns>A byte array containing the encoded value.</returns>
     /// <exception cref="ArgumentOutOfRangeException">Thrown when the given value is out of range to be encoded.
     /// </exception>
     /// <exception cref="NotImplementedException">Thrown when the given value has a type that cannot be encoded due to
     /// missing implementation.</exception>
-    public static byte[] EncodeSaveDataValue(object? value) {
+    public static byte[] EncodeSaveDataValue(object? value, string? name = null) {
+        if (value == null) {
+            if (name != null && SaveDataMapping.Instance.PlayerDataVarProperties.TryGetValue(name, out var varProps)) {
+                var type = varProps.VarType;
+                switch (type) {
+                    case "System.String":
+                        // Sentinel index ushort.MaxValue (65535) and 0 length prefix
+                        return [255, 255, 0, 0];
+                    case "System.Collections.Generic.List`1[System.String]":
+                    case "HashSet<string>":
+                    case "System.Collections.Generic.List`1[SSMP.Math.Vector3]":
+                    case "System.Byte[]":
+                        return [0, 0]; // 0 length ushort
+                    case "System.Collections.Generic.List`1[System.Int32]":
+                        return [0]; // 0 length byte
+                }
+            }
+            // Fallback representation for unspecified nulls: default empty string/list bytes
+            return [255, 255, 0, 0];
+        }
+
         switch (value) {
             case bool bValue:
                 return [(byte) (bValue ? 1 : 0)];
@@ -210,8 +231,6 @@ public static class EncodeUtil {
 
                 return byteArray;
             }
-            case null:
-                throw new ArgumentException($"No encoding implementation for value null");
         }
 
         throw new ArgumentException($"No encoding implementation for type: {value.GetType()}");
@@ -512,7 +531,7 @@ public static class EncodeUtil {
             // Try to encode the value into our byte array representation
             byte[] encodedValue;
             try {
-                encodedValue = EncodeSaveDataValue(decodedObject);
+                encodedValue = EncodeSaveDataValue(decodedObject, key as string);
             } catch (Exception e) {
                 Logger.Warn(
                     decodedObject == null

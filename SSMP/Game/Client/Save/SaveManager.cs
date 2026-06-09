@@ -241,14 +241,14 @@ internal class SaveManager {
             if (field.FieldType == typeof(int)) {
                 CheckSendSaveUpdate(
                     field.Name,
-                    () => EncodeSaveDataValue(currentValue),
+                    () => EncodeSaveDataValue(field.Name, currentValue),
                     () => {
                         var delta = (int) currentValue - (int) lastValue;
-                        return EncodeSaveDataValue(delta);
+                        return EncodeSaveDataValue(field.Name, delta);
                     }
                 );
             } else {
-                CheckSendSaveUpdate(field.Name, () => EncodeSaveDataValue(currentValue));
+                CheckSendSaveUpdate(field.Name, () => EncodeSaveDataValue(field.Name, currentValue));
             }
         }
     }
@@ -603,20 +603,20 @@ internal class SaveManager {
                 checkDict[varName] = currentCheckValue;
 
                 if (deltaEncodeFunc == null) {
-                    CheckSendSaveUpdate(varName, () => EncodeSaveDataValue(currentValue));
+                    CheckSendSaveUpdate(varName, () => EncodeSaveDataValue(varName, currentValue));
                 } else {
                     var lastValue = _lastPlayerData.GetVariable<TVar>(varName);
-
-                    CheckSendSaveUpdate(
-                        varName,
-                        () => EncodeSaveDataValue(currentValue),
-                        () => deltaEncodeFunc.Invoke(currentValue, lastValue)
-                    );
-
-                    // Also update the current value in the PlayerData instance for last values
-                    // We copy the value, because otherwise it will be updated whenever the list is updated
-                    _lastPlayerData.SetVariable(varName, (TVar) GetCompoundCopy(currentValue));
-                }
+ 
+                     CheckSendSaveUpdate(
+                         varName,
+                         () => EncodeSaveDataValue(varName, currentValue),
+                         () => deltaEncodeFunc.Invoke(currentValue, lastValue)
+                     );
+ 
+                     // Also update the current value in the PlayerData instance for last values
+                     // We copy the value, because otherwise it will be updated whenever the list is updated
+                     _lastPlayerData.SetVariable(varName, (TVar) GetCompoundCopy(currentValue));
+                 }
             }
         }
 
@@ -955,6 +955,16 @@ internal class SaveManager {
     /// <param name="value">The object to encode, which should be part of save data.</param>
     /// <returns>A byte array containing the encoded data.</returns>
     private static byte[] EncodeSaveDataValue(object? value) {
+        return EncodeSaveDataValue(null, value);
+    }
+
+    /// <summary>
+    /// Encode a save data value by first recasting HK/Unity internal types to SSMP types and then using the EncodeUtil.
+    /// </summary>
+    /// <param name="name">The name of the save data variable.</param>
+    /// <param name="value">The object to encode, which should be part of save data.</param>
+    /// <returns>A byte array containing the encoded data.</returns>
+    private static byte[] EncodeSaveDataValue(string? name, object? value) {
         // First cast HK or Unity internal types to SSMP types, this is to make sure we can use our internal
         // EncodeUtil to encode all types. This util is also used on the server side, where (in the case of the
         // standalone server) we have no reference of HK or Unity internal types
@@ -972,7 +982,7 @@ internal class SaveManager {
             value = vector3List.Select(v => (Math.Vector3) v).ToList();
         }
 
-        return EncodeUtil.EncodeSaveDataValue(value);
+        return EncodeUtil.EncodeSaveDataValue(value, name);
     }
 
     /// <summary>
@@ -1063,7 +1073,7 @@ internal class SaveManager {
 
                 var value = valueFunc.Invoke(collectionValue);
 
-                saveData.Add(index, EncodeSaveDataValue(value));
+                saveData.Add(index, EncodeSaveDataValue(key as string, value));
             }
         }
 

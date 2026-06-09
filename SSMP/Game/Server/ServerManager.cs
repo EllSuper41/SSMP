@@ -1784,7 +1784,7 @@ internal abstract class ServerManager : IServerManager {
                         decodedCurrentValue = varProps.InitialValue;
                     } else {
                         Logger.Debug("  No initial value defined, using delta as absolute");
-                        packet.Value = EncodeUtil.EncodeSaveDataValue(decodedDeltaValue);
+                        packet.Value = EncodeUtil.EncodeSaveDataValue(decodedDeltaValue, pdVarName);
                       }
                 } else {
                     decodedCurrentValue = EncodeUtil.DecodeSaveDataValue(pdVarName, currentValue);
@@ -1820,7 +1820,7 @@ internal abstract class ServerManager : IServerManager {
                         return;
                     }
 
-                    packet.Value = EncodeUtil.EncodeSaveDataValue(decodedNewValue);
+                    packet.Value = EncodeUtil.EncodeSaveDataValue(decodedNewValue, pdVarName);
                 }
             }
             
