@@ -547,7 +547,7 @@ internal class UiManager : IUiManager {
     /// <param name="newGame">True to start a new game, false to continue existing save</param>
     public void EnterGameFromMultiplayerMenu(bool newGame) {
         IH.StopUIInput();
-        HideMultiplayerMenu();
+        _connectGroup.SetActive(false);
         PlayMenuTransitionAudio();
 
         Logger.Debug($"Entering game from MP menu for {(newGame ? "new" : "continued")} game");
@@ -858,6 +858,7 @@ internal class UiManager : IUiManager {
     /// </summary>
     private IEnumerator GoToSaveMenu() {
         HideMultiplayerMenu();
+        yield return UM.HideCurrentMenu();
 
         // Safety check before verifying game UI state
         if (UM != null) {

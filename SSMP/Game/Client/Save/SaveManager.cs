@@ -637,7 +637,7 @@ internal class SaveManager {
                     $"String list var updated, currentList: {string.Join(", ", currentList)}, lastList: {string.Join(", ", lastList)}, deltaList: {string.Join(", ", deltaList)}"
                 );
 
-                return EncodeSaveDataValue(deltaList);
+                return EncodeSaveDataValue(null, deltaList);
             }
         );
 
@@ -677,8 +677,8 @@ internal class SaveManager {
             GetListHashCode,
             (hash1, hash2) => hash1 != hash2,
             (currentValue, lastValue) => {
-                var currentList = currentValue as List<Vector3> ?? new List<Vector3>();
-                var lastList = lastValue as List<Vector3> ?? new List<Vector3>();
+                var currentList = currentValue as List<Vector3> ?? [];
+                var lastList = lastValue as List<Vector3> ?? [];
 
                 var deltaList = currentList.Except(lastList).ToList();
 
@@ -686,7 +686,7 @@ internal class SaveManager {
                     $"Vector3 list var updated, currentList: {string.Join(", ", currentList)}, lastList: {string.Join(", ", lastList)}, deltaList: {string.Join(", ", deltaList)}"
                 );
 
-                return EncodeSaveDataValue(deltaList);
+                return EncodeSaveDataValue(null, deltaList);
             }
         );
 
@@ -705,7 +705,7 @@ internal class SaveManager {
                     $"Integer list var updated, currentList: {string.Join(", ", currentList)}, lastList: {string.Join(", ", lastList)}, deltaList: {string.Join(", ", deltaList)}"
                 );
 
-                return EncodeSaveDataValue(deltaList);
+                return EncodeSaveDataValue(null, deltaList);
             }
         );
 
@@ -715,8 +715,8 @@ internal class SaveManager {
             hashSet => GetListHashCode(hashSet?.ToList()),
             (hash1, hash2) => hash1 != hash2,
             (currentValue, lastValue) => {
-                var currentSet = currentValue as HashSet<string> ?? new HashSet<string>();
-                var lastSet = lastValue as HashSet<string> ?? new HashSet<string>();
+                var currentSet = currentValue as HashSet<string> ?? [];
+                var lastSet = lastValue as HashSet<string> ?? [];
 
                 var deltaList = currentSet.Except(lastSet).ToList();
 
@@ -724,7 +724,7 @@ internal class SaveManager {
                     $"HashSet string var updated, currentSet: {string.Join(", ", currentSet)}, lastSet: {string.Join(", ", lastSet)}, deltaList: {string.Join(", ", deltaList)}"
                 );
 
-                return EncodeSaveDataValue(deltaList);
+                return EncodeSaveDataValue(null, deltaList);
             }
         );
     }
@@ -754,10 +754,7 @@ internal class SaveManager {
 
         Logger.Info("Received current save, updating...");
 
-        foreach (var keyValuePair in currentSave.SaveData) {
-            var index = keyValuePair.Key;
-            var value = keyValuePair.Value;
-
+        foreach (var (index, value) in currentSave.SaveData) {
             UpdateSaveWithData(index, value);
         }
     }
@@ -782,86 +779,117 @@ internal class SaveManager {
 
             var decodedObject = DecodeSaveDataValue(name, encodedValue);
 
-            if (decodedObject is bool decodedBool) {
-                _lastPlayerData?.SetBool(name, decodedBool);
-                pd.SetBool(name, decodedBool);
-            } else if (decodedObject is float decodedFloat) {
-                _lastPlayerData?.SetFloat(name, decodedFloat);
-                pd.SetFloat(name, decodedFloat);
-            } else if (decodedObject is int decodedInt) {
-                _lastPlayerData?.SetInt(name, decodedInt);
-                pd.SetInt(name, decodedInt);
-            } else if (decodedObject is long decodedLong) {
-                _lastPlayerData?.SetVariable(name, decodedLong);
-                pd.SetVariable(name, decodedLong);
-            } else if (decodedObject is ulong decodedULong) {
-                _lastPlayerData?.SetVariable(name, decodedULong);
-                pd.SetVariable(name, decodedULong);
-            } else if (decodedObject is uint decodedUInt) {
-                _lastPlayerData?.SetVariable(name, decodedUInt);
-                pd.SetVariable(name, decodedUInt);
-            } else if (decodedObject is short decodedShort) {
-                _lastPlayerData?.SetVariable(name, decodedShort);
-                pd.SetVariable(name, decodedShort);
-            } else if (decodedObject is ushort decodedUShort) {
-                _lastPlayerData?.SetVariable(name, decodedUShort);
-                pd.SetVariable(name, decodedUShort);
-            } else if (decodedObject is double decodedDouble) {
-                _lastPlayerData?.SetVariable(name, decodedDouble);
-                pd.SetVariable(name, decodedDouble);
-            } else if (decodedObject is string decodedString) {
-                _lastPlayerData?.SetString(name, decodedString);
-                pd.SetString(name, decodedString);
-            } else if (decodedObject is Vector2 decodedVec2) {
-                _lastPlayerData?.SetVariable(name, decodedVec2);
-                pd.SetVariable(name, decodedVec2);
-            } else if (decodedObject is Vector3 decodedVec3) {
-                _lastPlayerData?.SetVector3(name, decodedVec3);
-                pd.SetVector3(name, decodedVec3);
-            } else if (decodedObject is List<string> decodedStringList) {
-                // First set the new string list hash, so we don't trigger an update and subsequently a feedback loop
-                _listHashes[name] = GetListHashCode(decodedStringList);
-                _lastPlayerData?.SetVariable(name, (List<string>) GetCompoundCopy(decodedStringList));
-                pd.SetVariable(name, decodedStringList);
-            } else if (decodedObject is BossSequenceDoor.Completion decodedBsdComp) {
-                // First set the new bsdComp obj in the dict, so we don't trigger an update and subsequently a
-                // feedback loop
-                _bsdCompHashes[name] = decodedBsdComp;
-                _lastPlayerData?.SetVariable(name, (BossSequenceDoor.Completion) GetCompoundCopy(decodedBsdComp));
-                pd.SetVariable(name, decodedBsdComp);
-            } else if (decodedObject is BossStatue.Completion decodedBsComp) {
-                // First set the new bsComp obj in the dict, so we don't trigger an update and subsequently a
-                // feedback loop
-                _bsCompHashes[name] = decodedBsComp;
-                _lastPlayerData?.SetVariable(name, (BossStatue.Completion) GetCompoundCopy(decodedBsComp));
-                pd.SetVariable(name, decodedBsComp);
-            } else if (decodedObject is List<Vector3> decodedVec3List) {
-                // First set the new string list hash, so we don't trigger an update and subsequently a feedback loop
-                _listHashes[name] = GetListHashCode(decodedVec3List);
-                _lastPlayerData?.SetVariable(name, (List<Vector3>) GetCompoundCopy(decodedVec3List));
-                pd.SetVariable(name, decodedVec3List);
-            } else if (decodedObject is MapZone decodedMapZone) {
-                _lastPlayerData?.SetVariable(name, decodedMapZone);
-                pd.SetVariable(name, decodedMapZone);
-            } else if (decodedObject is List<int> decodedIntList) {
-                // First set the new string list hash, so we don't trigger an update and subsequently a feedback loop
-                _listHashes[name] = GetListHashCode(decodedIntList);
-                _lastPlayerData?.SetVariable(name, (List<int>) GetCompoundCopy(decodedIntList));
-                pd.SetVariable(name, decodedIntList);
-            } else if (decodedObject is byte[] decodedBytes) {
-                var copy = decodedBytes.ToArray();
-                _lastPlayerData?.SetVariable(name, copy.ToArray());
-                pd.SetVariable(name, copy);
-            } else if (decodedObject is HashSet<string> decodedHashSet) {
-                var listRepresentation = decodedHashSet.ToList();
-                _listHashes[name] = GetListHashCode(listRepresentation);
-                _lastPlayerData?.SetVariable(name, (HashSet<string>) GetCompoundCopy(decodedHashSet));
-                pd.SetVariable(name, decodedHashSet);
-            } else if (decodedObject.GetType().IsEnum) {
-                _lastPlayerData?.SetVariable(name, decodedObject);
-                pd.SetVariable(name, decodedObject);
-            } else {
-                throw new ArgumentException($"Could not decode type: {decodedObject.GetType()}");
+            switch (decodedObject) {
+                case bool decodedBool:
+                    _lastPlayerData?.SetBool(name, decodedBool);
+                    pd.SetBool(name, decodedBool);
+                    break;
+                case float decodedFloat:
+                    _lastPlayerData?.SetFloat(name, decodedFloat);
+                    pd.SetFloat(name, decodedFloat);
+                    break;
+                case int decodedInt:
+                    _lastPlayerData?.SetInt(name, decodedInt);
+                    pd.SetInt(name, decodedInt);
+                    break;
+                case long decodedLong:
+                    _lastPlayerData?.SetVariable(name, decodedLong);
+                    pd.SetVariable(name, decodedLong);
+                    break;
+                case ulong decodedULong:
+                    _lastPlayerData?.SetVariable(name, decodedULong);
+                    pd.SetVariable(name, decodedULong);
+                    break;
+                case uint decodedUInt:
+                    _lastPlayerData?.SetVariable(name, decodedUInt);
+                    pd.SetVariable(name, decodedUInt);
+                    break;
+                case short decodedShort:
+                    _lastPlayerData?.SetVariable(name, decodedShort);
+                    pd.SetVariable(name, decodedShort);
+                    break;
+                case ushort decodedUShort:
+                    _lastPlayerData?.SetVariable(name, decodedUShort);
+                    pd.SetVariable(name, decodedUShort);
+                    break;
+                case double decodedDouble:
+                    _lastPlayerData?.SetVariable(name, decodedDouble);
+                    pd.SetVariable(name, decodedDouble);
+                    break;
+                case string decodedString:
+                    _lastPlayerData?.SetString(name, decodedString);
+                    pd.SetString(name, decodedString);
+                    break;
+                case Vector2 decodedVec2:
+                    _lastPlayerData?.SetVariable(name, decodedVec2);
+                    pd.SetVariable(name, decodedVec2);
+                    break;
+                case Vector3 decodedVec3:
+                    _lastPlayerData?.SetVector3(name, decodedVec3);
+                    pd.SetVector3(name, decodedVec3);
+                    break;
+                case List<string> decodedStringList:
+                    // First set the new string list hash, so we don't trigger an update and subsequently a feedback
+                    // loop
+                    _listHashes[name] = GetListHashCode(decodedStringList);
+                    _lastPlayerData?.SetVariable(name, (List<string>) GetCompoundCopy(decodedStringList));
+                    pd.SetVariable(name, decodedStringList);
+                    break;
+                case BossSequenceDoor.Completion decodedBsdComp:
+                    // First set the new bsdComp obj in the dict, so we don't trigger an update and subsequently a
+                    // feedback loop
+                    _bsdCompHashes[name] = decodedBsdComp;
+                    _lastPlayerData?.SetVariable(name, (BossSequenceDoor.Completion) GetCompoundCopy(decodedBsdComp));
+                    pd.SetVariable(name, decodedBsdComp);
+                    break;
+                case BossStatue.Completion decodedBsComp:
+                    // First set the new bsComp obj in the dict, so we don't trigger an update and subsequently a
+                    // feedback loop
+                    _bsCompHashes[name] = decodedBsComp;
+                    _lastPlayerData?.SetVariable(name, (BossStatue.Completion) GetCompoundCopy(decodedBsComp));
+                    pd.SetVariable(name, decodedBsComp);
+                    break;
+                case List<Vector3> decodedVec3List:
+                    // First set the new string list hash, so we don't trigger an update and subsequently a feedback
+                    // loop
+                    _listHashes[name] = GetListHashCode(decodedVec3List);
+                    _lastPlayerData?.SetVariable(name, (List<Vector3>) GetCompoundCopy(decodedVec3List));
+                    pd.SetVariable(name, decodedVec3List);
+                    break;
+                case MapZone decodedMapZone:
+                    _lastPlayerData?.SetVariable(name, decodedMapZone);
+                    pd.SetVariable(name, decodedMapZone);
+                    break;
+                case List<int> decodedIntList:
+                    // First set the new string list hash, so we don't trigger an update and subsequently a feedback
+                    // loop
+                    _listHashes[name] = GetListHashCode(decodedIntList);
+                    _lastPlayerData?.SetVariable(name, (List<int>) GetCompoundCopy(decodedIntList));
+                    pd.SetVariable(name, decodedIntList);
+                    break;
+                case byte[] decodedBytes: {
+                    var copy = decodedBytes.ToArray();
+                    _lastPlayerData?.SetVariable(name, copy.ToArray());
+                    pd.SetVariable(name, copy);
+                    break;
+                }
+                case HashSet<string> decodedHashSet: {
+                    var listRepresentation = decodedHashSet.ToList();
+                    _listHashes[name] = GetListHashCode(listRepresentation);
+                    _lastPlayerData?.SetVariable(name, (HashSet<string>) GetCompoundCopy(decodedHashSet));
+                    pd.SetVariable(name, decodedHashSet);
+                    break;
+                }
+                default: {
+                    if (decodedObject.GetType().IsEnum) {
+                        _lastPlayerData?.SetVariable(name, decodedObject);
+                        pd.SetVariable(name, decodedObject);
+                    } else {
+                        throw new ArgumentException($"Could not decode type: {decodedObject.GetType()}");
+                    }
+
+                    break;
+                }
             }
 
             _saveChanges.ApplyPlayerDataSaveChange(name);
@@ -970,15 +998,6 @@ internal class SaveManager {
     /// <summary>
     /// Encode a save data value by first recasting HK/Unity internal types to SSMP types and then using the EncodeUtil.
     /// </summary>
-    /// <param name="value">The object to encode, which should be part of save data.</param>
-    /// <returns>A byte array containing the encoded data.</returns>
-    private static byte[] EncodeSaveDataValue(object? value) {
-        return EncodeSaveDataValue(null, value);
-    }
-
-    /// <summary>
-    /// Encode a save data value by first recasting HK/Unity internal types to SSMP types and then using the EncodeUtil.
-    /// </summary>
     /// <param name="name">The name of the save data variable.</param>
     /// <param name="value">The object to encode, which should be part of save data.</param>
     /// <returns>A byte array containing the encoded data.</returns>
@@ -986,21 +1005,17 @@ internal class SaveManager {
         // First cast HK or Unity internal types to SSMP types, this is to make sure we can use our internal
         // EncodeUtil to encode all types. This util is also used on the server side, where (in the case of the
         // standalone server) we have no reference of HK or Unity internal types
-        if (value is Vector2 vector2) {
-            value = (Math.Vector2) vector2;
-        } else if (value is Vector3 vector3) {
-            value = (Math.Vector3) vector3;
-        } else if (value is MapZone mapZone) {
-            value = (Serialization.MapZone) mapZone;
-        } else if (value is BossStatue.Completion bsCompletion) {
-            value = (BossStatueCompletion) bsCompletion;
-        } else if (value is BossSequenceDoor.Completion bsdCompletion) {
-            value = (BossSequenceDoorCompletion) bsdCompletion;
-        } else if (value is List<Vector3> vector3List) {
-            value = vector3List.Select(v => (Math.Vector3) v).ToList();
-        }
+        var casted = value switch {
+            Vector2 v => (Math.Vector2) v,
+            Vector3 v => (Math.Vector3) v,
+            MapZone m => (Serialization.MapZone) m,
+            BossStatue.Completion c => (BossStatueCompletion) c,
+            BossSequenceDoor.Completion c => (BossSequenceDoorCompletion) c,
+            List<Vector3> l => l.Select(v => (Math.Vector3) v).ToList(),
+            _ => value
+        };
 
-        return EncodeUtil.EncodeSaveDataValue(value, name);
+        return EncodeUtil.EncodeSaveDataValue(casted, name);
     }
 
     /// <summary>
@@ -1010,31 +1025,22 @@ internal class SaveManager {
     /// <param name="encodedValue">A byte array containing the encoded data.</param>
     /// <returns>The decoded object.</returns>
     private static object? DecodeSaveDataValue(string? name, byte[] encodedValue) {
-        var decodedValue = EncodeUtil.DecodeSaveDataValue(name, encodedValue);
+        var val = EncodeUtil.DecodeSaveDataValue(name, encodedValue);
 
         // Now we cast SSMP types to SS or Unity internal types, this is to make sure we can use our internal
         // EncodeUtil to decode all types. This util is also used on the server side, where (in the case of the
         // standalone server) we have no reference of SS or Unity internal types
-        if (decodedValue is Math.Vector2 vector2) {
-            decodedValue = (Vector2) vector2;
-        } else if (decodedValue is Math.Vector3 vector3) {
-            decodedValue = (Vector3) vector3;
-        } else if (decodedValue is Serialization.MapZone mapZone) {
-            decodedValue = (MapZone) mapZone;
-        } else if (decodedValue is BossStatueCompletion bsCompletion) {
-            decodedValue = (BossStatue.Completion) bsCompletion;
-        } else if (decodedValue is BossSequenceDoorCompletion bsdCompletion) {
-            decodedValue = (BossSequenceDoor.Completion) bsdCompletion;
-        } else if (decodedValue is List<Math.Vector3> vector3List) {
-            decodedValue = vector3List.Select(v => (Vector3) v).ToList();
-        } else if (decodedValue is int intValue && name != null) {
-            var fieldType = typeof(PlayerData).GetField(name)?.FieldType;
-            if (fieldType?.IsEnum == true) {
-                decodedValue = Enum.ToObject(fieldType, intValue);
-            }
-        }
-
-        return decodedValue;
+        return val switch {
+            Math.Vector2 v => (Vector2) v,
+            Math.Vector3 v => (Vector3) v,
+            Serialization.MapZone m => (MapZone) m,
+            BossStatueCompletion c => (BossStatue.Completion) c,
+            BossSequenceDoorCompletion c => (BossSequenceDoor.Completion) c,
+            List<Math.Vector3> l => l.Select(v => (Vector3) v).ToList(),
+            int i when name != null && typeof(PlayerData).GetField(name)?.FieldType is { IsEnum: true } t => Enum
+                .ToObject(t, i),
+            _ => val
+        };
     }
 
     /// <summary>
@@ -1164,55 +1170,44 @@ internal class SaveManager {
     /// <exception cref="ArgumentException">Thrown when a copy cannot be made, due to the given value being null or
     /// of a non-compound or non-PlayerData type.</exception>
     private static object GetCompoundCopy(object value) {
-        if (value == null) {
-            throw new ArgumentException("Cannot get copy of null");
+        switch (value) {
+            case null:
+                throw new ArgumentException("Cannot get copy of null");
+            case List<string> stringListValue:
+                return new List<string>(stringListValue);
+            case List<int> intListValue:
+                return new List<int>(intListValue);
+            case List<Vector3> vecListValue:
+                return new List<Vector3>(vecListValue);
+            case BossSequenceDoor.Completion bsdComp:
+                return new BossSequenceDoor.Completion {
+                    canUnlock = bsdComp.canUnlock,
+                    unlocked = bsdComp.unlocked,
+                    completed = bsdComp.completed,
+                    allBindings = bsdComp.allBindings,
+                    noHits = bsdComp.noHits,
+                    boundNail = bsdComp.boundNail,
+                    boundShell = bsdComp.boundShell,
+                    boundCharms = bsdComp.boundCharms,
+                    boundSoul = bsdComp.boundSoul,
+                    viewedBossSceneCompletions = bsdComp.viewedBossSceneCompletions == null
+                        ? []
+                        : [..bsdComp.viewedBossSceneCompletions]
+                };
+            case BossStatue.Completion bsComp:
+                return new BossStatue.Completion {
+                    hasBeenSeen = bsComp.hasBeenSeen,
+                    isUnlocked = bsComp.isUnlocked,
+                    completedTier1 = bsComp.completedTier1,
+                    completedTier2 = bsComp.completedTier2,
+                    completedTier3 = bsComp.completedTier3,
+                    seenTier3Unlock = bsComp.seenTier3Unlock,
+                    usingAltVersion = bsComp.usingAltVersion
+                };
+            case HashSet<string> hashSetStringValue:
+                return new HashSet<string>(hashSetStringValue);
+            default:
+                throw new ArgumentException($"Cannot get copy of value with type: {value.GetType()}");
         }
-
-        if (value is List<string> stringListValue) {
-            return new List<string>(stringListValue);
-        }
-
-        if (value is List<int> intListValue) {
-            return new List<int>(intListValue);
-        }
-
-        if (value is List<Vector3> vecListValue) {
-            return new List<Vector3>(vecListValue);
-        }
-
-        if (value is BossSequenceDoor.Completion bsdComp) {
-            return new BossSequenceDoor.Completion {
-                canUnlock = bsdComp.canUnlock,
-                unlocked = bsdComp.unlocked,
-                completed = bsdComp.completed,
-                allBindings = bsdComp.allBindings,
-                noHits = bsdComp.noHits,
-                boundNail = bsdComp.boundNail,
-                boundShell = bsdComp.boundShell,
-                boundCharms = bsdComp.boundCharms,
-                boundSoul = bsdComp.boundSoul,
-                viewedBossSceneCompletions = bsdComp.viewedBossSceneCompletions == null
-                    ? []
-                    : [..bsdComp.viewedBossSceneCompletions]
-            };
-        }
-
-        if (value is BossStatue.Completion bsComp) {
-            return new BossStatue.Completion {
-                hasBeenSeen = bsComp.hasBeenSeen,
-                isUnlocked = bsComp.isUnlocked,
-                completedTier1 = bsComp.completedTier1,
-                completedTier2 = bsComp.completedTier2,
-                completedTier3 = bsComp.completedTier3,
-                seenTier3Unlock = bsComp.seenTier3Unlock,
-                usingAltVersion = bsComp.usingAltVersion
-            };
-        }
-
-        if (value is HashSet<string> hashSetStringValue) {
-            return new HashSet<string>(hashSetStringValue);
-        }
-
-        throw new ArgumentException($"Cannot get copy of value with type: {value.GetType()}");
     }
 }
