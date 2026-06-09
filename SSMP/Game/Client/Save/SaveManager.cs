@@ -626,12 +626,12 @@ internal class SaveManager {
             GetListHashCode,
             (hash1, hash2) => hash1 != hash2,
             (currentValue, lastValue) => {
-                var currentList = currentValue as List<string>;
-                var lastList = lastValue as List<string>;
+                var currentList = currentValue as List<string> ?? new List<string>();
+                var lastList = lastValue as List<string> ?? new List<string>();
 
                 // TODO: also allow for negative updates, where something is deleted from the list
                 // this also holds for the other two lambdas below
-                var deltaList = currentList!.Except(lastList!).ToList();
+                var deltaList = currentList.Except(lastList).ToList();
 
                 Logger.Debug(
                     $"String list var updated, currentList: {string.Join(", ", currentList)}, lastList: {string.Join(", ", lastList)}, deltaList: {string.Join(", ", deltaList)}"
@@ -677,10 +677,10 @@ internal class SaveManager {
             GetListHashCode,
             (hash1, hash2) => hash1 != hash2,
             (currentValue, lastValue) => {
-                var currentList = currentValue as List<Vector3>;
-                var lastList = lastValue as List<Vector3>;
+                var currentList = currentValue as List<Vector3> ?? new List<Vector3>();
+                var lastList = lastValue as List<Vector3> ?? new List<Vector3>();
 
-                var deltaList = currentList!.Except(lastList!).ToList();
+                var deltaList = currentList.Except(lastList).ToList();
 
                 Logger.Debug(
                     $"Vector3 list var updated, currentList: {string.Join(", ", currentList)}, lastList: {string.Join(", ", lastList)}, deltaList: {string.Join(", ", deltaList)}"
@@ -696,10 +696,10 @@ internal class SaveManager {
             GetListHashCode,
             (hash1, hash2) => hash1 != hash2,
             (currentValue, lastValue) => {
-                var currentList = currentValue as List<int>;
-                var lastList = lastValue as List<int>;
+                var currentList = currentValue as List<int> ?? new List<int>();
+                var lastList = lastValue as List<int> ?? new List<int>();
 
-                var deltaList = currentList!.Except(lastList!).ToList();
+                var deltaList = currentList.Except(lastList).ToList();
 
                 Logger.Debug(
                     $"Integer list var updated, currentList: {string.Join(", ", currentList)}, lastList: {string.Join(", ", lastList)}, deltaList: {string.Join(", ", deltaList)}"
@@ -712,13 +712,13 @@ internal class SaveManager {
         CheckUpdates<HashSet<string>, int>(
             HashSetVariables,
             _listHashes,
-            hashSet => GetListHashCode(hashSet.ToList()),
+            hashSet => GetListHashCode(hashSet?.ToList()),
             (hash1, hash2) => hash1 != hash2,
             (currentValue, lastValue) => {
-                var currentSet = currentValue as HashSet<string>;
-                var lastSet = lastValue as HashSet<string>;
+                var currentSet = currentValue as HashSet<string> ?? new HashSet<string>();
+                var lastSet = lastValue as HashSet<string> ?? new HashSet<string>();
 
-                var deltaList = currentSet!.Except(lastSet!).ToList();
+                var deltaList = currentSet.Except(lastSet).ToList();
 
                 Logger.Debug(
                     $"HashSet string var updated, currentSet: {string.Join(", ", currentSet)}, lastSet: {string.Join(", ", lastSet)}, deltaList: {string.Join(", ", deltaList)}"
@@ -1125,15 +1125,15 @@ internal class SaveManager {
     /// Get the hash code of the combined values in a list.
     /// </summary>
     /// <param name="list">The list to calculate the hash code for.</param>
-    /// <returns>0 if the list is empty, otherwise a hash code matching the specific order of values in the list.
+    /// <returns>0 if the list is empty or null, otherwise a hash code matching the specific order of values in the list.
     /// </returns>
-    private static int GetListHashCode<T>(List<T> list) {
-        if (list.Count == 0) {
+    private static int GetListHashCode<T>(List<T>? list) {
+        if (list == null || list.Count == 0) {
             return 0;
         }
 
         return list
-               .Select(item => item.GetHashCode())
+               .Select(item => item?.GetHashCode() ?? 0)
                .Aggregate((total, nextCode) => total ^ nextCode);
     }
 
