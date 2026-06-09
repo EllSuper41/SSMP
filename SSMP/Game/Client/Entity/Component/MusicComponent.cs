@@ -421,7 +421,9 @@ internal class MusicComponent : EntityComponent {
     /// <summary>
     /// Initializes the music capture system, loading previously captured music references.
     /// </summary>
+    // TODO: Call this method during development/debugging to capture and dump music cues and snapshots to a file.
     public static void InitializeCapture() {
+        /*
         try {
             var filePath = Path.Combine(FileUtil.GetConfigPath(), CapturedMusicFileName);
 
@@ -448,6 +450,7 @@ internal class MusicComponent : EntityComponent {
 
         CustomHooks.ApplyMusicCueFromFsmAction += OnCapturedApplyMusicCue;
         CustomHooks.TransitionToAudioSnapshotFromFsmAction += OnCapturedTransitionToAudioSnapshot;
+        */
     }
 
     #endregion
@@ -524,27 +527,18 @@ internal class MusicComponent : EntityComponent {
 /// Data for music cues, used for looking up the index or the music cue from index for networking purposes.
 /// </summary>
 internal class MusicCueData {
-    /// <summary>
-    /// Gets or sets the type category of the music cue.
-    /// </summary>
-    public string Type { get; set; }
+    public string Type { get; }
+    public string Name { get; }
 
-    /// <summary>
-    /// Gets or sets the name of the music cue.
-    /// </summary>
-    public string Name { get; set; }
+    [JsonConstructor]
+    public MusicCueData(string type, string name) {
+        Type = type;
+        Name = name;
+    }
 
-    /// <summary>
-    /// Gets or sets the network index associated with the music cue.
-    /// </summary>
-    [JsonIgnore]
-    public byte Index { get; set; }
+    [JsonIgnore] public byte Index { get; set; }
 
-    /// <summary>
-    /// Gets or sets the resolved in-game MusicCue object.
-    /// </summary>
-    [JsonIgnore]
-    public MusicCue? MusicCue { get; set; }
+    [JsonIgnore] public MusicCue? MusicCue { get; set; }
 }
 
 // ReSharper disable ClassNeverInstantiated.Global
@@ -552,27 +546,18 @@ internal class MusicCueData {
 /// Data for audio snapshots, used for looking up the index or the audio snapshot from index for networking purposes.
 /// </summary>
 internal class AudioMixerSnapshotData {
-    /// <summary>
-    /// Gets or sets the type category of the snapshot.
-    /// </summary>
-    public string Type { get; set; }
+    public string Type { get; }
+    public string Name { get; }
 
-    /// <summary>
-    /// Gets or sets the name of the snapshot.
-    /// </summary>
-    public string Name { get; set; }
+    [JsonConstructor]
+    public AudioMixerSnapshotData(string type, string name) {
+        Type = type;
+        Name = name;
+    }
 
-    /// <summary>
-    /// Gets or sets the network index associated with the snapshot.
-    /// </summary>
-    [JsonIgnore]
-    public byte Index { get; set; }
+    [JsonIgnore] public byte Index { get; set; }
 
-    /// <summary>
-    /// Gets or sets the resolved in-game AudioMixerSnapshot object.
-    /// </summary>
-    [JsonIgnore]
-    public AudioMixerSnapshot? Snapshot { get; set; }
+    [JsonIgnore] public AudioMixerSnapshot? Snapshot { get; set; }
 }
 
 /// <summary>
