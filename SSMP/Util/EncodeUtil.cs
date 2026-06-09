@@ -219,9 +219,26 @@ public static class EncodeUtil {
         // To preserve network bandwidth, we encode known strings into indices, since there is a limited number of
         // strings in the save data
         byte[] EncodeString(string? stringValue) {
+            if (stringValue == null) {
+                if (TryGetStringIndex(null, out var nullIndex)) {
+                    return BitConverter.GetBytes(nullIndex);
+                }
+                stringValue = string.Empty;
+            }
             if (!TryGetStringIndex(stringValue, out var index)) {
-                Logger.Warn($"Could not encode string value: {stringValue}");
-                throw new Exception($"Could not encode string value: {stringValue}");
+                Logger.Info($"String '{stringValue}' not found in static indices, encoding dynamically.");
+                var utf8Bytes = System.Text.Encoding.UTF8.GetBytes(stringValue);
+                if (utf8Bytes.Length > ushort.MaxValue - 3) {
+                    throw new ArgumentOutOfRangeException($"String is too long to encode: {stringValue}");
+                }
+                var result = new byte[2 + 2 + utf8Bytes.Length];
+                // Sentinel index ushort.MaxValue (65535) indicates dynamic string
+                Array.Copy(BitConverter.GetBytes((ushort) ushort.MaxValue), 0, result, 0, 2);
+                // String length
+                Array.Copy(BitConverter.GetBytes((ushort) utf8Bytes.Length), 0, result, 2, 2);
+                // String bytes
+                Array.Copy(utf8Bytes, 0, result, 4, utf8Bytes.Length);
+                return result;
             }
 
             return BitConverter.GetBytes(index);
@@ -308,14 +325,21 @@ public static class EncodeUtil {
                 var length = BitConverter.ToUInt16(encodedValue, 0);
 
                 var list = new List<string>();
+                var offset = 2;
                 for (var i = 0; i < length; i++) {
-                    var sceneIndex = BitConverter.ToUInt16(encodedValue, 2 + i * 2);
-
-                    if (!TryGetStringName(sceneIndex, out var sceneName)) {
-                        throw new ArgumentException($"Could not decode string in list from save update: {sceneIndex}");
+                    var sceneIndex = BitConverter.ToUInt16(encodedValue, offset);
+                    if (sceneIndex == ushort.MaxValue) {
+                        var strLen = BitConverter.ToUInt16(encodedValue, offset + 2);
+                        var decodedStr = System.Text.Encoding.UTF8.GetString(encodedValue, offset + 4, strLen);
+                        list.Add(decodedStr);
+                        offset += 4 + strLen;
+                    } else {
+                        if (!TryGetStringName(sceneIndex, out var sceneName)) {
+                            throw new ArgumentException($"Could not decode string in list from save update: {sceneIndex}");
+                        }
+                        list.Add(sceneName);
+                        offset += 2;
                     }
-
-                    list.Add(sceneName);
                 }
 
                 return list;
@@ -324,14 +348,21 @@ public static class EncodeUtil {
                 var length = BitConverter.ToUInt16(encodedValue, 0);
 
                 var hashSet = new HashSet<string>();
+                var offset = 2;
                 for (var i = 0; i < length; i++) {
-                    var sceneIndex = BitConverter.ToUInt16(encodedValue, 2 + i * 2);
-
-                    if (!TryGetStringName(sceneIndex, out var sceneName)) {
-                        throw new ArgumentException($"Could not decode string in hashset from save update: {sceneIndex}");
+                    var sceneIndex = BitConverter.ToUInt16(encodedValue, offset);
+                    if (sceneIndex == ushort.MaxValue) {
+                        var strLen = BitConverter.ToUInt16(encodedValue, offset + 2);
+                        var decodedStr = System.Text.Encoding.UTF8.GetString(encodedValue, offset + 4, strLen);
+                        hashSet.Add(decodedStr);
+                        offset += 4 + strLen;
+                    } else {
+                        if (!TryGetStringName(sceneIndex, out var sceneName)) {
+                            throw new ArgumentException($"Could not decode string in hashset from save update: {sceneIndex}");
+                        }
+                        hashSet.Add(sceneName);
+                        offset += 2;
                     }
-
-                    hashSet.Add(sceneName);
                 }
 
                 return hashSet;
@@ -418,6 +449,11 @@ public static class EncodeUtil {
         // Decode a string from the given byte array and start index in that array
         string DecodeString(byte[] encoded, int startIndex) {
             var sceneIndex = BitConverter.ToUInt16(encoded, startIndex);
+
+            if (sceneIndex == ushort.MaxValue) {
+                var strLen = BitConverter.ToUInt16(encoded, startIndex + 2);
+                return System.Text.Encoding.UTF8.GetString(encoded, startIndex + 4, strLen);
+            }
 
             return !TryGetStringName(sceneIndex, out var value)
                 ? throw new ArgumentException($"Could not decode string from save update: {encodedValue}")
