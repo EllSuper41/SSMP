@@ -1872,6 +1872,24 @@ internal abstract class ServerManager : IServerManager {
     /// <summary>
     /// Validates and normalizes the incoming save data packet value by decoding and re-encoding it.
     /// </summary>
+    /// <remarks>
+    /// This sanitization step prevents server and client-side corruption by:
+    /// <list type="bullet">
+    /// <item>
+    /// <description><b>Sanitization:</b> Decoding the byte payload against the expected schema/serializer type to ensure the data is well-formed.</description>
+    /// </item>
+    /// <item>
+    /// <description><b>Normalization:</b> Re-encoding the parsed object to ensure a standardized binary layout before persisting or broadcasting.</description>
+    /// </item>
+    /// <item>
+    /// <description><b>Fail-Safe Protection:</b> Catching serialization errors early so malformed inputs are discarded instead of corrupting save state files.</description>
+    /// </item>
+    /// </list>
+    /// </remarks>
+    /// <param name="index">The mapped save data index corresponding to the variable or persistent item.</param>
+    /// <param name="value">The raw encoded byte array value received from the player.</param>
+    /// <param name="pdVarName">The PlayerData variable name, or null if the index represents a persistent item.</param>
+    /// <returns>A normalized byte array representing the validated value if successful; otherwise, <c>null</c>.</returns>
     private byte[]? ValidateAndNormalizeSaveData(ushort index, byte[] value, string? pdVarName) {
         try {
             if (pdVarName != null) {
