@@ -13,6 +13,7 @@ using TeamCherry.SharedUtils;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Logger = SSMP.Logging.Logger;
+using SyncLog = SSMP.Logging.SyncLog;
 using MapZone = GlobalEnums.MapZone;
 using Object = UnityEngine.Object;
 
@@ -427,13 +428,13 @@ internal class SaveManager {
         Func<byte[]> toUseEncodeFunc;
         if (varProps.Additive && deltaEncodeFunc != null) {
             toUseEncodeFunc = deltaEncodeFunc;
-
-            Logger.Debug($"Sending \"{name}\" as save update (additive)");
         } else {
             toUseEncodeFunc = encodeFunc;
-
-            Logger.Debug($"Sending \"{name}\" as save update");
         }
+
+        SyncLog.Log(SyncLog.World,
+            $"send playerData | var={name} index={index} policy={varProps.SyncType} " +
+            $"additive={varProps.Additive} ignoreSceneHost={varProps.IgnoreSceneHost}");
 
         _netClient.UpdateManager.SetSaveUpdate(
             index,
@@ -480,7 +481,8 @@ internal class SaveManager {
                         continue;
                     }
 
-                    Logger.Info($"Sending geo rock ({itemData.Id}, {itemData.SceneName}) as save update");
+                    SyncLog.Log(SyncLog.World,
+                        $"send geoRock | id={itemData.Id} scene={itemData.SceneName} hits={value} policy=Player");
 
                     _netClient.UpdateManager.SetSaveUpdate(
                         index,
@@ -505,7 +507,9 @@ internal class SaveManager {
                         continue;
                     }
 
-                    Logger.Info($"Sending persistent int ({itemData.Id}, {itemData.SceneName}) as save update");
+                    SyncLog.Log(SyncLog.World,
+                        $"send persistentInt | id={itemData.Id} scene={itemData.SceneName} value={value} " +
+                        $"policy={varProps.SyncType} ignoreSceneHost={varProps.IgnoreSceneHost}");
 
                     _netClient.UpdateManager.SetSaveUpdate(
                         index,
@@ -553,7 +557,9 @@ internal class SaveManager {
                     continue;
                 }
 
-                Logger.Info($"Sending persistent bool ({itemData.Id}, {itemData.SceneName}) as save update");
+                SyncLog.Log(SyncLog.World,
+                    $"send persistentBool | id={itemData.Id} scene={itemData.SceneName} value={value} " +
+                    $"policy={varProps.SyncType} ignoreSceneHost={varProps.IgnoreSceneHost}");
 
                 _netClient.UpdateManager.SetSaveUpdate(
                     index,
@@ -730,12 +736,38 @@ internal class SaveManager {
     /// </summary>
     /// <param name="saveUpdate">The save update that was received.</param>
     public void UpdateSaveWithData(SaveUpdate saveUpdate) {
-        Logger.Info($"Received save update for index: {saveUpdate.SaveDataIndex}");
-
         var index = saveUpdate.SaveDataIndex;
         var value = saveUpdate.Value;
 
+        SyncLog.Log(SyncLog.World, $"recv update | index={index} name={ResolveSaveDataName(index)} bytes={value.Length}");
+
         UpdateSaveWithData(index, value);
+    }
+
+    /// <summary>
+    /// Resolves a save data index to a human-readable name (PlayerData var, geo rock or persistent item)
+    /// for logging purposes.
+    /// </summary>
+    /// <param name="index">The save data index.</param>
+    /// <returns>A readable name, or "?" if the index is unknown.</returns>
+    private static string ResolveSaveDataName(ushort index) {
+        if (SaveDataMapping.PlayerDataIndices.TryGetValue(index, out var pdName)) {
+            return pdName;
+        }
+
+        if (SaveDataMapping.GeoRockIndices.TryGetValue(index, out var geoRock)) {
+            return $"geoRock:{geoRock.Id}@{geoRock.SceneName}";
+        }
+
+        if (SaveDataMapping.PersistentBoolIndices.TryGetValue(index, out var pbItem)) {
+            return $"persistentBool:{pbItem.Id}@{pbItem.SceneName}";
+        }
+
+        if (SaveDataMapping.PersistentIntIndices.TryGetValue(index, out var piItem)) {
+            return $"persistentInt:{piItem.Id}@{piItem.SceneName}";
+        }
+
+        return "?";
     }
 
     /// <summary>
@@ -748,11 +780,14 @@ internal class SaveManager {
             return;
         }
 
-        Logger.Info("Received current save, updating...");
+        SyncLog.Log(SyncLog.World,
+            $"recv currentSave | entries={currentSave.SaveData.Count} newForPlayer={currentSave.NewForPlayer} - applying all");
 
         foreach (var (index, value) in currentSave.SaveData) {
             UpdateSaveWithData(index, value);
         }
+
+        SyncLog.Log(SyncLog.World, "currentSave applied");
     }
 
     /// <summary>

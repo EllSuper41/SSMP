@@ -5,6 +5,7 @@ using System.Reflection;
 using SSMP.Util;
 using HutongGames.PlayMaker.Actions;
 using SSMP.Game.Client.Entity.Action;
+using SSMP.Logging;
 using SSMP.Game.Client.Entity.Component;
 using SSMP.Networking.Client;
 using SSMP.Networking.Packet.Data;
@@ -102,7 +103,8 @@ internal class EntityManager {
     /// Initializes the entity manager if we are the scene host.
     /// </summary>
     public void InitializeSceneHost(uint sceneHostEpoch = 0) {
-        Logger.Info($"We are scene host, releasing control of all registered entities (epoch {sceneHostEpoch})");
+        SyncLog.Log(SyncLog.Entity,
+            $"scene role = HOST | epoch={sceneHostEpoch} entities={_entities.Count} (simulating + broadcasting)");
         IsSceneHost = true;
         foreach (var entity in _entities.Values) entity.InitializeHost(sceneHostEpoch);
         _sceneRoleDetermined = true;
@@ -113,7 +115,8 @@ internal class EntityManager {
     /// Initializes the entity manager if we are a scene client.
     /// </summary>
     public void InitializeSceneClient(uint sceneHostEpoch = 0) {
-        Logger.Info($"We are scene client, taking control of all registered entities (epoch {sceneHostEpoch})");
+        SyncLog.Log(SyncLog.Entity,
+            $"scene role = CLIENT | epoch={sceneHostEpoch} entities={_entities.Count} (puppets, receiving)");
         IsSceneHost = false;
         foreach (var entity in _entities.Values) entity.InitializeClient(sceneHostEpoch);
         _sceneRoleDetermined = true;
@@ -124,7 +127,8 @@ internal class EntityManager {
     /// Updates the entity manager if we become the scene host.
     /// </summary>
     public void BecomeSceneHost(uint sceneHostEpoch = 0) {
-        Logger.Info($"Becoming scene host (epoch {sceneHostEpoch})");
+        SyncLog.Log(SyncLog.Entity,
+            $"scene role = HOST (transferred) | epoch={sceneHostEpoch} entities={_entities.Count}");
         IsSceneHost = true;
         foreach (var entity in _entities.Values) entity.MakeHost(sceneHostEpoch);
 
@@ -136,7 +140,7 @@ internal class EntityManager {
     /// Attempts to spawn a networked entity. No-ops if the ID is already registered (assumed spawned by action).
     /// </summary>
     public void SpawnEntity(ushort id, EntityType spawningType, EntityType spawnedType) {
-        Logger.Info($"Trying to spawn entity with ID {id} with types: {spawningType}, {spawnedType}");
+        SyncLog.Log(SyncLog.Entity, $"recv entitySpawn | id={id} spawner={spawningType} spawned={spawnedType}");
 
         if (_entities.ContainsKey(id)) {
             Logger.Info($"  Entity with ID {id} already exists, assuming it has been spawned by action");
@@ -353,14 +357,15 @@ internal class EntityManager {
         }
 
         if (!EntityRegistry.TryGetEntry(details.Action.Fsm.GameObject, out var entry)) {
-            Logger.Warn("Could not find registry entry for spawning type of object");
+            SyncLog.Log(SyncLog.Entity,
+                $"spawn NOT registered | object={details.GameObject.name} reason=no-registry-entry-for-spawner");
             return false;
         }
 
         var topLevel = processor.Entities[0];
-        Logger.Info(
-            $"Notifying server of entity ({details.Action.Fsm.GameObject.name}, {entry.Type}) spawning entity ({details.GameObject.name}, {topLevel.Type}) with ID {topLevel.Id}"
-        );
+        SyncLog.Log(SyncLog.Entity,
+            $"send entitySpawn | spawner={details.Action.Fsm.GameObject.name}({entry.Type}) " +
+            $"spawned={details.GameObject.name}({topLevel.Type}) id={topLevel.Id}");
         _netClient.UpdateManager.SetEntitySpawn(topLevel.Id, entry.Type, topLevel.Type);
 
         return true;

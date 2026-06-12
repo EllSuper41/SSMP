@@ -3,6 +3,7 @@ using System.Reflection;
 using GlobalEnums;
 using MonoMod.RuntimeDetour;
 using SSMP.Hooks;
+using SSMP.Logging;
 using SSMP.Networking.Client;
 using UnityEngine;
 
@@ -314,6 +315,8 @@ internal sealed class PauseManager {
 
         rigidbody.linearVelocity = Vector2.zero;
         rigidbody.constraints = RigidbodyConstraints2D.FreezeAll;
+
+        SyncLog.Log(SyncLog.Pause, $"freeze local hero | cachedVelocity={_frozenHeroVelocity}");
     }
 
     /// <summary>
@@ -340,6 +343,8 @@ internal sealed class PauseManager {
 
         rigidbody.constraints = _frozenHeroConstraints;
         rigidbody.linearVelocity = _frozenHeroVelocity;
+
+        SyncLog.Log(SyncLog.Pause, $"unfreeze local hero | restoredVelocity={_frozenHeroVelocity}");
     }
 
     /// <summary>

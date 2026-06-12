@@ -1785,7 +1785,8 @@ internal abstract class ServerManager : IServerManager {
             return;
         }
 
-        Logger.Info($"Save update from ({id}, {playerData.Username}), index: {packet.SaveDataIndex}");
+        SyncLog.Log(SyncLog.Server,
+            $"recv update | from={id}({playerData.Username}) index={packet.SaveDataIndex} bytes={packet.Value.Length}");
 
         // Find the properties for syncing this save update, based on whether it is a geo rock, player data or 
         // persistent bool/int item
@@ -1838,14 +1839,16 @@ internal abstract class ServerManager : IServerManager {
 
         // Check whether this save update requires the player to be scene host and do the check for it
         if (!varProps.IgnoreSceneHost && !playerData.IsSceneHost) {
-            Logger.Debug("  Player is not scene host, but should be for update, not broadcasting");
+            SyncLog.Log(SyncLog.Server,
+                $"REJECT update | from={id} index={packet.SaveDataIndex} reason=not-scene-host");
             return;
         }
 
         // Validate and normalize the packet value by decoding and re-encoding it
         var normalizedValue = ValidateAndNormalizeSaveData(packet.SaveDataIndex, packet.Value, pdVarName);
         if (normalizedValue == null) {
-            Logger.Warn($"Save update value validation failed for index {packet.SaveDataIndex}, rejecting update");
+            SyncLog.Log(SyncLog.Server,
+                $"REJECT update | from={id} index={packet.SaveDataIndex} reason=validation-failed");
             return;
         }
 
@@ -1860,9 +1863,10 @@ internal abstract class ServerManager : IServerManager {
                 ServerSaveData.PlayerSaveData[playerData.AuthKey] = playerSaveData;
             }
 
-            Logger.Debug("  Storing player data");
-
             playerSaveData[packet.SaveDataIndex] = packet.Value;
+
+            SyncLog.Log(SyncLog.Server,
+                $"store PER-PLAYER | from={id}({playerData.Username}) index={packet.SaveDataIndex} (no broadcast)");
         } else if (varProps.SyncType == SaveDataMapping.SyncType.Server) {
             if (varProps.Additive) {
                 if (pdVarName == null) {
@@ -1919,10 +1923,9 @@ internal abstract class ServerManager : IServerManager {
                 }
             }
 
-            Logger.Debug("  SyncType is Server, broadcasting save update");
-
             ServerSaveData.GlobalSaveData[packet.SaveDataIndex] = packet.Value;
 
+            var broadcastCount = 0;
             foreach (var idPlayerDataPair in _playerData) {
                 var otherId = idPlayerDataPair.Key;
                 // For additive properties, it might happen (due to race conditions) that the resulting value needs to
@@ -1932,7 +1935,12 @@ internal abstract class ServerManager : IServerManager {
                 }
 
                 _netServer.GetUpdateManagerForClient(otherId)?.SetSaveUpdate(packet.SaveDataIndex, packet.Value);
+                broadcastCount++;
             }
+
+            SyncLog.Log(SyncLog.Server,
+                $"store GLOBAL | from={id}({playerData.Username}) index={packet.SaveDataIndex} " +
+                $"additive={varProps.Additive} broadcastTo={broadcastCount} players");
         }
     }
 

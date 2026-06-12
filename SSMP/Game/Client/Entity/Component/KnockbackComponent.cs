@@ -1,5 +1,6 @@
 using System;
 using MonoMod.RuntimeDetour;
+using SSMP.Logging;
 using SSMP.Networking.Client;
 using SSMP.Networking.Packet.Data;
 using UnityEngine;
@@ -103,6 +104,10 @@ internal class KnockbackComponent : EntityComponent {
         data.Packet.Write(attackMagnitude);
 
         SendData(data);
+
+        SyncLog.Log(SyncLog.Knockback,
+            $"send recoil | entity={EntityName()} dir={attackDirection} magnitude={attackMagnitude} " +
+            $"side={(IsControlled ? "puppet(local-hit)" : "host-object")}");
     }
 
     /// <inheritdoc />
@@ -123,12 +128,24 @@ internal class KnockbackComponent : EntityComponent {
             return;
         }
 
+        SyncLog.Log(SyncLog.Knockback,
+            $"apply recoil | entity={EntityName()} dir={attackDirection} magnitude={attackMagnitude} " +
+            $"side={(IsControlled ? "puppet" : "host-object(authoritative)")}");
+
         _isApplyingReceivedRecoil = true;
         try {
             recoil.RecoilByDirection(attackDirection, attackMagnitude);
         } finally {
             _isApplyingReceivedRecoil = false;
         }
+    }
+
+    /// <summary>
+    /// Readable entity identifier for trace logging.
+    /// </summary>
+    private string EntityName() {
+        var hostObject = GameObject.Host;
+        return hostObject != null ? hostObject.name : "?";
     }
 
     /// <inheritdoc />
