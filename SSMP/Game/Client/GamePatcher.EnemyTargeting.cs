@@ -455,10 +455,24 @@ internal partial class GamePatcher {
         }
 
         var owner = GetEnemyTargetOwner(requester);
-        return owner != null && EnemyApprovedTargets.TryGetValue(owner.GetInstanceID(), out var target) &&
-               target != null
-            ? target
-            : null;
+        if (owner == null) {
+            return null;
+        }
+
+        var ownerId = owner.GetInstanceID();
+        if (!EnemyApprovedTargets.TryGetValue(ownerId, out var target)) {
+            return null;
+        }
+
+        // Remote player containers are deactivated (not destroyed) when their player leaves the
+        // scene or disconnects; without this check the enemy would keep targeting the ghost forever
+        if (target == null || !target.activeInHierarchy) {
+            EnemyApprovedTargets.Remove(ownerId);
+            EnemyAggroLockUntil.Remove(ownerId);
+            return null;
+        }
+
+        return target;
     }
 
     /// <summary>
@@ -543,7 +557,7 @@ internal partial class GamePatcher {
     ) {
         orig(self, hitInstance);
 
-        var attackerRoot = PlayerTargetRegistry.GetTrackedPlayerRoot(hitInstance.Source);
+        var attackerRoot = ResolveAttackerPlayerRoot(hitInstance.Source);
         if (attackerRoot == null) {
             // Hit did not come from a (tracked) player - environmental damage, enemy infighting etc.
             return;
@@ -569,6 +583,27 @@ internal partial class GamePatcher {
             // right away, so the very next attack/face/chase decision uses the attacker
             ForceImmediateRetarget();
         }
+    }
+
+    /// <summary>
+    /// Resolves the player root that owns an attack source object. Parented attacks (nail slashes)
+    /// resolve through the transform hierarchy; detached attacks (projectiles, silk skills) resolve
+    /// through the <see cref="SSMP.Util.EffectOwnerComponent"/> tag applied when the effect was created.
+    /// </summary>
+    /// <param name="source">The damager object from the hit instance.</param>
+    /// <returns>The tracked player root, or null if the hit is not attributable to a player.</returns>
+    private static GameObject? ResolveAttackerPlayerRoot(GameObject? source) {
+        if (source == null) {
+            return null;
+        }
+
+        var root = PlayerTargetRegistry.GetTrackedPlayerRoot(source);
+        if (root != null) {
+            return root;
+        }
+
+        var ownerTag = source.GetComponentInParent<SSMP.Util.EffectOwnerComponent>();
+        return ownerTag == null ? null : PlayerTargetRegistry.GetTrackedPlayerRoot(ownerTag.Owner);
     }
 
     private static void OnActiveSceneChanged(
