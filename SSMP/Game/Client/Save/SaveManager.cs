@@ -470,12 +470,8 @@ internal class SaveManager {
                 }
 
                 if (SaveDataMapping.GeoRockBools.TryGetValue(itemData, out var shouldSync) && shouldSync) {
-                    if (!_entityManager.IsSceneHost) {
-                        Logger.Info(
-                            $"Not scene host, not sending geo rock save update ({itemData.Id}, {itemData.SceneName})"
-                        );
-                        continue;
-                    }
+                    // Geo rocks are per-player currency pickups (SyncType.Player on the server),
+                    // so breaking one is sent regardless of who the scene host is
 
                     if (!SaveDataMapping.GeoRockIndices.TryGetValue(itemData, out var index)) {
                         Logger.Info(

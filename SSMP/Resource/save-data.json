@@ -9627,8 +9627,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -9718,8 +9718,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -9887,8 +9887,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -10368,8 +10368,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -10901,8 +10901,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -11187,8 +11187,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -11356,8 +11356,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -11408,8 +11408,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -11434,8 +11434,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -11486,8 +11486,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -11811,8 +11811,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -11941,8 +11941,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -12058,8 +12058,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -12071,8 +12071,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -12084,8 +12084,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -12110,8 +12110,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -12734,8 +12734,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -12955,8 +12955,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -12968,8 +12968,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -13254,8 +13254,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -13280,8 +13280,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -13306,8 +13306,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -13319,8 +13319,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -13332,8 +13332,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -13345,8 +13345,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -13397,8 +13397,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -13449,8 +13449,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -13709,8 +13709,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -14177,8 +14177,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -14307,8 +14307,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -14320,8 +14320,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -14333,8 +14333,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -14346,8 +14346,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -14541,8 +14541,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -14554,8 +14554,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -14658,8 +14658,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -14671,8 +14671,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -14684,8 +14684,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -14775,8 +14775,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -14788,8 +14788,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -14905,8 +14905,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -14918,8 +14918,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -14931,8 +14931,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -14944,8 +14944,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -14957,8 +14957,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -14970,8 +14970,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -14983,8 +14983,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -15178,8 +15178,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -15581,8 +15581,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -15594,8 +15594,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -15607,8 +15607,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -15620,8 +15620,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -15828,8 +15828,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -15841,8 +15841,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -15932,8 +15932,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -15945,8 +15945,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -15958,8 +15958,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -15997,8 +15997,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -16166,8 +16166,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -16192,8 +16192,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -16231,8 +16231,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -16244,8 +16244,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -16257,8 +16257,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -16296,8 +16296,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -16673,8 +16673,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -17063,8 +17063,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -17271,8 +17271,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -17635,8 +17635,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -17648,8 +17648,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -17661,8 +17661,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -18051,8 +18051,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -18064,8 +18064,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -18766,8 +18766,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -19013,8 +19013,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -19065,8 +19065,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -19156,8 +19156,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -19377,8 +19377,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -19546,8 +19546,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -19559,8 +19559,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -19572,8 +19572,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -19585,8 +19585,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -19598,8 +19598,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -19611,8 +19611,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -19780,8 +19780,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -19819,8 +19819,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -19832,8 +19832,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -19845,8 +19845,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -19858,8 +19858,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -19871,8 +19871,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -20001,8 +20001,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -20014,8 +20014,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -20027,8 +20027,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -20040,8 +20040,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -20196,8 +20196,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -21041,8 +21041,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -21184,8 +21184,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -21340,8 +21340,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -21678,8 +21678,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -21873,8 +21873,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -22341,8 +22341,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -22354,8 +22354,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -22367,8 +22367,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -22471,8 +22471,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -22900,8 +22900,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -22939,8 +22939,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -23108,8 +23108,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -23329,8 +23329,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -23641,8 +23641,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -25110,8 +25110,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -25123,8 +25123,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -25136,8 +25136,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -25669,8 +25669,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -25682,8 +25682,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -25734,8 +25734,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -26293,8 +26293,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -26384,8 +26384,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -26397,8 +26397,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -26410,8 +26410,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -26488,8 +26488,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -26618,8 +26618,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -26748,8 +26748,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -26761,8 +26761,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -26813,8 +26813,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -26826,8 +26826,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -27047,8 +27047,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -27567,8 +27567,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -27801,8 +27801,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -28009,8 +28009,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -28113,8 +28113,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -28867,8 +28867,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -28880,8 +28880,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -29400,8 +29400,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -29543,8 +29543,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -29920,8 +29920,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -29933,8 +29933,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -30427,8 +30427,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -30440,8 +30440,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -30453,8 +30453,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -30466,8 +30466,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -30479,8 +30479,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -30492,8 +30492,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -30700,8 +30700,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -31454,8 +31454,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -31467,8 +31467,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -31558,8 +31558,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -31766,8 +31766,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -31792,8 +31792,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -31805,8 +31805,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -31857,8 +31857,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -31870,8 +31870,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -31974,8 +31974,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -31987,8 +31987,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -32000,8 +32000,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -32013,8 +32013,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -32182,8 +32182,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -32195,8 +32195,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -32208,8 +32208,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -32221,8 +32221,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -32234,8 +32234,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -32247,8 +32247,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -32260,8 +32260,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -32273,8 +32273,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -32819,8 +32819,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -32897,8 +32897,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -33664,8 +33664,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -33677,8 +33677,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -33690,8 +33690,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -33703,8 +33703,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -33716,8 +33716,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -33729,8 +33729,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -33742,8 +33742,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -33755,8 +33755,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -33768,8 +33768,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -33781,8 +33781,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -33859,8 +33859,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -34119,8 +34119,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -34132,8 +34132,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -34418,8 +34418,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -34444,8 +34444,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -34730,8 +34730,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -34990,8 +34990,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -35705,8 +35705,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -35718,8 +35718,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -35770,8 +35770,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -35783,8 +35783,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -35913,8 +35913,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -36342,8 +36342,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -36472,8 +36472,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -36485,8 +36485,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -36511,8 +36511,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -36550,8 +36550,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -36563,8 +36563,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -36576,8 +36576,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -36589,8 +36589,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -36641,8 +36641,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -36654,8 +36654,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -36836,8 +36836,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -37213,8 +37213,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -37226,8 +37226,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -37239,8 +37239,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -37252,8 +37252,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -37395,8 +37395,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -38188,8 +38188,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -38201,8 +38201,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -38214,8 +38214,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -38227,8 +38227,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -39163,8 +39163,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -39176,8 +39176,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -39345,8 +39345,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -39358,8 +39358,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -39410,8 +39410,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -39423,8 +39423,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -39787,8 +39787,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -40125,8 +40125,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -40489,8 +40489,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -40502,8 +40502,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -40866,8 +40866,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -40918,8 +40918,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -40957,8 +40957,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -40970,8 +40970,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -41113,8 +41113,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -41126,8 +41126,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -41217,8 +41217,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -41243,8 +41243,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -41269,8 +41269,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -41347,8 +41347,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -41360,8 +41360,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -41412,8 +41412,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -41581,8 +41581,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -41945,8 +41945,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -41997,8 +41997,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -42010,8 +42010,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -42088,8 +42088,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -42179,8 +42179,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -42296,8 +42296,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -42400,8 +42400,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -42439,8 +42439,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -42452,8 +42452,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -42621,8 +42621,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -42634,8 +42634,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -42777,8 +42777,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -42790,8 +42790,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -43050,8 +43050,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -43063,8 +43063,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -43167,8 +43167,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -43180,8 +43180,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -43492,8 +43492,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -43635,8 +43635,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -43895,8 +43895,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -43908,8 +43908,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -44103,8 +44103,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -44168,8 +44168,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -44194,8 +44194,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -44298,8 +44298,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -44454,8 +44454,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -44688,8 +44688,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -44701,8 +44701,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -44714,8 +44714,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -45104,8 +45104,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -45455,8 +45455,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -45468,8 +45468,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -45481,8 +45481,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -45585,8 +45585,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -47470,8 +47470,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -47639,8 +47639,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -47795,8 +47795,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -48133,8 +48133,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -48718,8 +48718,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -49355,8 +49355,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -49979,8 +49979,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -50109,8 +50109,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -50122,8 +50122,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -50525,8 +50525,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -50980,8 +50980,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -51019,8 +51019,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -51032,8 +51032,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -51045,8 +51045,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -51084,8 +51084,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -51201,8 +51201,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -51214,8 +51214,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -51227,8 +51227,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -51318,8 +51318,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -51643,8 +51643,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -52423,8 +52423,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -52579,8 +52579,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -52748,8 +52748,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -52878,8 +52878,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -53190,8 +53190,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -53476,8 +53476,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -53840,8 +53840,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -53892,8 +53892,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -54022,8 +54022,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -54113,8 +54113,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -54282,8 +54282,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Boolean",
         "Additive": false
       }
@@ -54362,8 +54362,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -54375,8 +54375,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -54388,8 +54388,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -54401,8 +54401,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -54414,8 +54414,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -54427,8 +54427,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -54440,8 +54440,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -54453,8 +54453,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -54466,8 +54466,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -54505,8 +54505,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -54518,8 +54518,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -54531,8 +54531,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -54544,8 +54544,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -54570,8 +54570,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -54583,8 +54583,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -54622,8 +54622,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -54635,8 +54635,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -54648,8 +54648,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -54661,8 +54661,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -54674,8 +54674,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -54687,8 +54687,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -54700,8 +54700,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -54713,8 +54713,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -54726,8 +54726,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -54739,8 +54739,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -54752,8 +54752,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -54765,8 +54765,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -54778,8 +54778,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -54791,8 +54791,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -54817,8 +54817,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -54830,8 +54830,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -54843,8 +54843,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -54856,8 +54856,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -54869,8 +54869,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -54882,8 +54882,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -54895,8 +54895,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -54908,8 +54908,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -54921,8 +54921,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -54934,8 +54934,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -54947,8 +54947,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -55012,8 +55012,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -55025,8 +55025,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -55220,8 +55220,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -55233,8 +55233,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -55246,8 +55246,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -55272,8 +55272,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -55298,8 +55298,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -55311,8 +55311,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -55324,8 +55324,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -55350,8 +55350,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -55363,8 +55363,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -55376,8 +55376,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -55389,8 +55389,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -55402,8 +55402,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -55415,8 +55415,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -55428,8 +55428,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -55441,8 +55441,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -55454,8 +55454,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -55467,8 +55467,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -55480,8 +55480,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -55493,8 +55493,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -55519,8 +55519,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -55532,8 +55532,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -55558,8 +55558,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -55636,8 +55636,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -55649,8 +55649,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -55662,8 +55662,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -55714,8 +55714,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -55727,8 +55727,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -55766,8 +55766,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -55779,8 +55779,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -55792,8 +55792,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -55818,8 +55818,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -55844,8 +55844,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -55857,8 +55857,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -55870,8 +55870,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -55909,8 +55909,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -55922,8 +55922,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -55935,8 +55935,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -55961,8 +55961,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -55974,8 +55974,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -55987,8 +55987,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -56000,8 +56000,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -56013,8 +56013,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -56026,8 +56026,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -56039,8 +56039,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -56052,8 +56052,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -56065,8 +56065,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -56078,8 +56078,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -56091,8 +56091,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -56104,8 +56104,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -56117,8 +56117,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -56130,8 +56130,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -56156,8 +56156,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -56169,8 +56169,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -56182,8 +56182,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -56195,8 +56195,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -56221,8 +56221,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -56234,8 +56234,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -56247,8 +56247,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -56260,8 +56260,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -56273,8 +56273,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -56286,8 +56286,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -56390,8 +56390,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -56403,8 +56403,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -56416,8 +56416,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -56429,8 +56429,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -56442,8 +56442,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -56455,8 +56455,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -56468,8 +56468,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -56481,8 +56481,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -56507,8 +56507,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -56520,8 +56520,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -56533,8 +56533,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -56559,8 +56559,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -56572,8 +56572,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -56585,8 +56585,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -56598,8 +56598,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -56611,8 +56611,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -56624,8 +56624,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -56663,8 +56663,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -56676,8 +56676,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -56689,8 +56689,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -56702,8 +56702,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -56715,8 +56715,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -56728,8 +56728,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -56741,8 +56741,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -56754,8 +56754,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -56793,8 +56793,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -56806,8 +56806,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -56819,8 +56819,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -56832,8 +56832,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -56845,8 +56845,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -56858,8 +56858,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -56871,8 +56871,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -56884,8 +56884,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -56897,8 +56897,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -56910,8 +56910,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -56923,8 +56923,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -56936,8 +56936,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -56949,8 +56949,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -56962,8 +56962,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -57014,8 +57014,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -57027,8 +57027,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -57040,8 +57040,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -57053,8 +57053,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -57066,8 +57066,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -57079,8 +57079,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -57105,8 +57105,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -57118,8 +57118,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -57131,8 +57131,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -57144,8 +57144,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -57157,8 +57157,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -57170,8 +57170,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -57183,8 +57183,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -57222,8 +57222,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -57235,8 +57235,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -57261,8 +57261,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -57274,8 +57274,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -57300,8 +57300,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -57313,8 +57313,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -57326,8 +57326,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -57339,8 +57339,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -57352,8 +57352,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -57378,8 +57378,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -57391,8 +57391,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -57404,8 +57404,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -57417,8 +57417,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -57430,8 +57430,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -57443,8 +57443,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -57456,8 +57456,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -57469,8 +57469,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -57482,8 +57482,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -57495,8 +57495,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -57508,8 +57508,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -57521,8 +57521,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -57547,8 +57547,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -57560,8 +57560,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -57573,8 +57573,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -57586,8 +57586,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -57599,8 +57599,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -57768,8 +57768,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -57781,8 +57781,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -57885,8 +57885,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -57898,8 +57898,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -57911,8 +57911,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -57924,8 +57924,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -57937,8 +57937,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -57950,8 +57950,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -57963,8 +57963,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -57976,8 +57976,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -58197,8 +58197,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -58262,8 +58262,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -58275,8 +58275,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -58288,8 +58288,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -58301,8 +58301,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -58314,8 +58314,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -58327,8 +58327,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -58340,8 +58340,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -58379,8 +58379,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -58392,8 +58392,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -58405,8 +58405,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -58418,8 +58418,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -58431,8 +58431,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -58444,8 +58444,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -58457,8 +58457,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -58470,8 +58470,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -58483,8 +58483,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -58496,8 +58496,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -58509,8 +58509,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -58522,8 +58522,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -58548,8 +58548,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -58561,8 +58561,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -58574,8 +58574,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -58587,8 +58587,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -58600,8 +58600,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -58613,8 +58613,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -58626,8 +58626,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -58652,8 +58652,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -58665,8 +58665,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -58730,8 +58730,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -58743,8 +58743,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -58769,8 +58769,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -58782,8 +58782,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -58795,8 +58795,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -58821,8 +58821,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -58834,8 +58834,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -58847,8 +58847,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -58860,8 +58860,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -58873,8 +58873,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -58886,8 +58886,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -58899,8 +58899,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -58912,8 +58912,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -58925,8 +58925,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -58938,8 +58938,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -58951,8 +58951,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -58977,8 +58977,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -58990,8 +58990,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -59003,8 +59003,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -59016,8 +59016,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -59029,8 +59029,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -59042,8 +59042,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -59055,8 +59055,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -59068,8 +59068,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -59081,8 +59081,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -59094,8 +59094,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -59133,8 +59133,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -59146,8 +59146,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -59159,8 +59159,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -59198,8 +59198,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -59211,8 +59211,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -59224,8 +59224,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -59237,8 +59237,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -59250,8 +59250,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -59276,8 +59276,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -59289,8 +59289,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -59302,8 +59302,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -59315,8 +59315,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -59354,8 +59354,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -59367,8 +59367,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -59393,8 +59393,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -59406,8 +59406,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -59419,8 +59419,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -59432,8 +59432,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -59445,8 +59445,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -59458,8 +59458,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -59471,8 +59471,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -59510,8 +59510,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -59523,8 +59523,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -59536,8 +59536,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -59549,8 +59549,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -59562,8 +59562,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -59575,8 +59575,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -59588,8 +59588,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -59601,8 +59601,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -59627,8 +59627,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -59640,8 +59640,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -59666,8 +59666,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -59679,8 +59679,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -59692,8 +59692,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -59705,8 +59705,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -59744,8 +59744,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -59757,8 +59757,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -59770,8 +59770,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -59783,8 +59783,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -59796,8 +59796,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -59809,8 +59809,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -59978,8 +59978,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -59991,8 +59991,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -60004,8 +60004,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -60017,8 +60017,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -60030,8 +60030,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -60043,8 +60043,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -60056,8 +60056,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -60095,8 +60095,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -60147,8 +60147,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -60160,8 +60160,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -60173,8 +60173,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -60186,8 +60186,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -60199,8 +60199,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -60212,8 +60212,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -60225,8 +60225,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -60238,8 +60238,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -60251,8 +60251,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -60277,8 +60277,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -60290,8 +60290,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -60303,8 +60303,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -60316,8 +60316,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -60329,8 +60329,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -60342,8 +60342,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -60355,8 +60355,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -60368,8 +60368,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }
@@ -60381,8 +60381,8 @@
       },
       "Value": {
         "Sync": true,
-        "SyncType": "Server",
-        "IgnoreSceneHost": false,
+        "SyncType": "Player",
+        "IgnoreSceneHost": true,
         "VarType": "System.Int32",
         "Additive": false
       }

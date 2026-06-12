@@ -1798,10 +1798,12 @@ internal abstract class ServerManager : IServerManager {
                 return;
             }
 
+            // Geo rocks are currency pickups: stored per-player so every player can break
+            // and collect their own, matching the per-player pickup policy in save-data.json
             varProps = new SaveDataMapping.VarProperties {
                 Sync = true,
-                SyncType = SaveDataMapping.SyncType.Server,
-                IgnoreSceneHost = false
+                SyncType = SaveDataMapping.SyncType.Player,
+                IgnoreSceneHost = true
             };
         } else if (SaveDataMapping.Instance.PlayerDataIndices.TryGetValue(packet.SaveDataIndex, out pdVarName)) {
             Logger.Debug($"  Found PlayerData: {pdVarName}");
