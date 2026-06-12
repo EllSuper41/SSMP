@@ -110,6 +110,34 @@ internal static class EntityFsmActions {
     private static ILHook? _spawnBloodTimeNopHook;
 
     /// <summary>
+    /// ILHook for SpawnObjectFromGlobalPoolDelay.SpawnObject (entity spawn intercept).
+    /// </summary>
+    private static ILHook? _spawnPoolDelayHook;
+
+    /// <summary>
+    /// Private 'timer' field of <see cref="SpawnObjectFromGlobalPoolDelay"/>, holding the randomly rolled
+    /// delay after OnEnter ran. Read on the host so clients wait the exact same delay instead of re-rolling.
+    /// </summary>
+    private static readonly FieldInfo SpawnPoolDelayTimerField = typeof(SpawnObjectFromGlobalPoolDelay).GetField(
+        "timer", BindingFlags.NonPublic | BindingFlags.Instance
+    )!;
+
+    /// <summary>
+    /// ILHook for SpawnObjectFromGlobalPoolOverTime.OnUpdate (entity spawn intercept).
+    /// </summary>
+    private static ILHook? _spawnPoolOverTimeHook;
+
+    /// <summary>
+    /// ILHook for SpawnObjectFromGlobalPoolOverTimeV2.OnUpdate (entity spawn intercept).
+    /// </summary>
+    private static ILHook? _spawnPoolOverTimeV2Hook;
+
+    /// <summary>
+    /// ILHook for FlingObjectsFromGlobalPoolVelTime.OnUpdate (entity spawn intercept).
+    /// </summary>
+    private static ILHook? _flingPoolVelTimeUpdateHook;
+
+    /// <summary>
     /// Static constructor that initializes the set and dictionaries by checking all methods in the class.
     /// </summary>
     /// <exception cref="Exception"></exception>
@@ -185,6 +213,38 @@ internal static class EntityFsmActions {
                 BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance
             )!,
             EmitNop
+        );
+
+        // Intercept the deferred (timer-driven) pool spawn actions at their actual spawn call so spawned
+        // registry entities go through the EntitySpawn path at the moment they appear (same pattern as
+        // FlingObjectsFromGlobalPoolTime above)
+        _spawnPoolDelayHook = new ILHook(
+            typeof(SpawnObjectFromGlobalPoolDelay).GetMethod(
+                "SpawnObject",
+                BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance
+            )!,
+            EmitEntitySpawnInterceptAfterSpawnCall<SpawnObjectFromGlobalPoolDelay>
+        );
+        _spawnPoolOverTimeHook = new ILHook(
+            typeof(SpawnObjectFromGlobalPoolOverTime).GetMethod(
+                "OnUpdate",
+                BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance
+            )!,
+            EmitEntitySpawnInterceptAfterSpawnCall<SpawnObjectFromGlobalPoolOverTime>
+        );
+        _spawnPoolOverTimeV2Hook = new ILHook(
+            typeof(SpawnObjectFromGlobalPoolOverTimeV2).GetMethod(
+                "OnUpdate",
+                BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance
+            )!,
+            EmitEntitySpawnInterceptAfterSpawnCall<SpawnObjectFromGlobalPoolOverTimeV2>
+        );
+        _flingPoolVelTimeUpdateHook = new ILHook(
+            typeof(FlingObjectsFromGlobalPoolVelTime).GetMethod(
+                "OnUpdate",
+                BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance
+            )!,
+            EmitEntitySpawnInterceptAfterSpawnCall<FlingObjectsFromGlobalPoolVelTime>
         );
         return;
 
@@ -445,6 +505,37 @@ internal static class EntityFsmActions {
             );
         } catch (Exception e) {
             //Logger.Error($"Could not change FlingObjectsFromGlobalPoolTime#OnUpdate IL:\n{e}");
+        }
+    }
+
+    /// <summary>
+    /// Generic IL edit: after the first <see cref="ObjectPoolExtensions"/>.Spawn call in the method, fire
+    /// <see cref="EntitySpawnEvent"/> with the spawned object so registry entities spawned by timer-driven
+    /// actions are registered and networked at the moment they actually appear. The call site is inside the
+    /// loop for actions that spawn multiple objects, so the intercept fires once per spawned object.
+    /// </summary>
+    private static void EmitEntitySpawnInterceptAfterSpawnCall<TAction>(ILContext il) where TAction : FsmStateAction {
+        try {
+            var c = new ILCursor(il);
+
+            c.GotoNext(i => i.MatchCall(typeof(ObjectPoolExtensions), "Spawn"));
+            c.Index++;
+
+            c.Emit(OpCodes.Ldarg_0);
+            c.EmitDelegate<Func<GameObject, TAction, GameObject>>((gameObject, action) => {
+                    EntitySpawnEvent?.Invoke(
+                        new EntitySpawnDetails {
+                            Type = EntitySpawnType.FsmAction,
+                            Action = action,
+                            GameObject = gameObject
+                        }
+                    );
+
+                    return gameObject;
+                }
+            );
+        } catch (Exception) {
+            //Logger.Error($"Could not change {typeof(TAction)} IL for entity spawn intercept:\n{e}");
         }
     }
 
@@ -3179,6 +3270,277 @@ internal static class EntityFsmActions {
                     rigidBody.velocity = new Vector2(x, y);
                 }
             }
+        }
+    }
+
+    #endregion
+
+    #region SpawnObjectFromGlobalPoolDelay
+
+    private static bool GetNetworkDataFromAction(EntityNetworkData data, SpawnObjectFromGlobalPoolDelay action) {
+        // OnEnter (which ran before this callback) only rolled the random delay; the spawn itself happens later
+        // in OnUpdate. Entity spawns are caught at that moment by the IL hook on SpawnObject. Here we network
+        // the rolled delay so the client replays the spawn at the same relative time as the host.
+        data.Packet.Write((float) SpawnPoolDelayTimerField.GetValue(action));
+        return true;
+    }
+
+    private static void ApplyNetworkDataFromAction(EntityNetworkData data, SpawnObjectFromGlobalPoolDelay action) {
+        // Transient spawn, nothing meaningful to replay on the null-data init path
+        if (data == null) {
+            return;
+        }
+
+        var delay = data.Packet.ReadFloat();
+
+        var coroutine = MonoBehaviourUtil.Instance.StartCoroutine(Behaviour());
+
+        new ActionInState {
+            Fsm = action.Fsm,
+            StateName = action.State.Name,
+            Coroutine = coroutine
+        }.Register();
+
+        IEnumerator Behaviour() {
+            yield return new WaitForSeconds(delay);
+
+            if (action.gameObject.Value == null) {
+                yield break;
+            }
+
+            var position = Vector3.zero;
+            var euler = Vector3.zero;
+
+            var spawnPoint = action.spawnPoint.Value;
+            if (spawnPoint != null) {
+                position = spawnPoint.transform.position;
+                if (!action.position.IsNone) {
+                    position += action.position.Value;
+                }
+
+                euler = !action.rotation.IsNone ? action.rotation.Value : spawnPoint.transform.eulerAngles;
+            } else {
+                if (!action.position.IsNone) {
+                    position = action.position.Value;
+                }
+
+                if (!action.rotation.IsNone) {
+                    euler = action.rotation.Value;
+                }
+            }
+
+            var spawnedObject = action.gameObject.Value.Spawn();
+            spawnedObject.transform.position = position;
+            spawnedObject.transform.eulerAngles = euler;
+            action.storeObject.Value = spawnedObject;
+        }
+    }
+
+    #endregion
+
+    #region SpawnObjectFromGlobalPoolOverTime
+
+    private static bool GetNetworkDataFromAction(EntityNetworkData data, SpawnObjectFromGlobalPoolOverTime action) {
+        return true;
+    }
+
+    private static void ApplyNetworkDataFromAction(EntityNetworkData data, SpawnObjectFromGlobalPoolOverTime action) {
+        if (data == null) {
+            return;
+        }
+
+        var coroutine = MonoBehaviourUtil.Instance.StartCoroutine(Behaviour());
+
+        new ActionInState {
+            Fsm = action.Fsm,
+            StateName = action.State.Name,
+            Coroutine = coroutine
+        }.Register();
+
+        IEnumerator Behaviour() {
+            while (true) {
+                yield return new WaitForSeconds(action.frequency.Value);
+
+                if (action.gameObject.Value == null) {
+                    continue;
+                }
+
+                var position = Vector3.zero;
+                var euler = Vector3.up;
+
+                var spawnPoint = action.spawnPoint.Value;
+                if (spawnPoint != null) {
+                    position = spawnPoint.transform.position;
+                    if (!action.position.IsNone) {
+                        position += action.position.Value;
+                    }
+
+                    euler = !action.rotation.IsNone ? action.rotation.Value : spawnPoint.transform.eulerAngles;
+                } else {
+                    if (!action.position.IsNone) {
+                        position = action.position.Value;
+                    }
+
+                    if (!action.rotation.IsNone) {
+                        euler = action.rotation.Value;
+                    }
+                }
+
+                action.gameObject.Value.Spawn(position, Quaternion.Euler(euler));
+            }
+            // ReSharper disable once IteratorNeverReturns
+        }
+    }
+
+    #endregion
+
+    #region SpawnObjectFromGlobalPoolOverTimeV2
+
+    private static bool GetNetworkDataFromAction(EntityNetworkData data, SpawnObjectFromGlobalPoolOverTimeV2 action) {
+        return true;
+    }
+
+    private static void ApplyNetworkDataFromAction(EntityNetworkData data, SpawnObjectFromGlobalPoolOverTimeV2 action) {
+        if (data == null) {
+            return;
+        }
+
+        var coroutine = MonoBehaviourUtil.Instance.StartCoroutine(Behaviour());
+
+        new ActionInState {
+            Fsm = action.Fsm,
+            StateName = action.State.Name,
+            Coroutine = coroutine
+        }.Register();
+
+        IEnumerator Behaviour() {
+            while (true) {
+                yield return new WaitForSeconds(action.frequency.Value);
+
+                if (action.gameObject.Value == null) {
+                    continue;
+                }
+
+                var position = Vector3.zero;
+                var euler = Vector3.up;
+
+                var spawnPoint = action.spawnPoint.Value;
+                if (spawnPoint != null) {
+                    position = spawnPoint.transform.position;
+                    if (!action.position.IsNone) {
+                        position += action.position.Value;
+                    }
+
+                    euler = !action.rotation.IsNone ? action.rotation.Value : spawnPoint.transform.eulerAngles;
+                } else {
+                    if (!action.position.IsNone) {
+                        position = action.position.Value;
+                    }
+
+                    if (!action.rotation.IsNone) {
+                        euler = action.rotation.Value;
+                    }
+                }
+
+                var spawnedObject = action.gameObject.Value.Spawn(position, Quaternion.Euler(euler));
+
+                if (action.originVariationX != null) {
+                    spawnedObject.transform.Translate(
+                        Random.Range(-action.originVariationX.Value, action.originVariationX.Value), 0f, 0f,
+                        Space.World
+                    );
+                }
+
+                if (action.originVariationY != null) {
+                    spawnedObject.transform.Translate(
+                        0f, Random.Range(-action.originVariationY.Value, action.originVariationY.Value), 0f,
+                        Space.World
+                    );
+                }
+
+                if (action.scaleMin != null && action.scaleMax != null) {
+                    var scale = Random.Range(action.scaleMin.Value, action.scaleMax.Value);
+                    if (Mathf.Abs(scale - 1f) > 0.001f) {
+                        spawnedObject.transform.localScale = new Vector3(scale, scale, scale);
+                    }
+                }
+            }
+            // ReSharper disable once IteratorNeverReturns
+        }
+    }
+
+    #endregion
+
+    #region FlingObjectsFromGlobalPoolVelTime
+
+    private static bool GetNetworkDataFromAction(EntityNetworkData data, FlingObjectsFromGlobalPoolVelTime action) {
+        return true;
+    }
+
+    private static void ApplyNetworkDataFromAction(EntityNetworkData data, FlingObjectsFromGlobalPoolVelTime action) {
+        if (data == null) {
+            return;
+        }
+
+        var coroutine = MonoBehaviourUtil.Instance.StartCoroutine(Behaviour());
+
+        new ActionInState {
+            Fsm = action.Fsm,
+            StateName = action.State.Name,
+            Coroutine = coroutine
+        }.Register();
+
+        IEnumerator Behaviour() {
+            if (action.startDelay.Value > 0f) {
+                yield return new WaitForSeconds(action.startDelay.Value);
+            }
+
+            while (true) {
+                yield return new WaitForSeconds(action.frequency.Value);
+
+                if (action.gameObject.Value == null) {
+                    continue;
+                }
+
+                var position = Vector3.zero;
+
+                var spawnPoint = action.spawnPoint.Value;
+                if (spawnPoint != null) {
+                    position = spawnPoint.transform.position;
+                    if (!action.position.IsNone) {
+                        position += action.position.Value;
+                    }
+                } else if (!action.position.IsNone) {
+                    position = action.position.Value;
+                }
+
+                var numSpawns = Random.Range(action.spawnMin.Value, action.spawnMax.Value + 1);
+                for (var i = 0; i < numSpawns; i++) {
+                    var spawnedObject = action.gameObject.Value.Spawn(position, Quaternion.Euler(Vector3.zero));
+
+                    var spawnedPosition = spawnedObject.transform.position;
+                    if (action.originVariationX != null) {
+                        spawnedPosition.x += Random.Range(-action.originVariationX.Value, action.originVariationX.Value);
+                    }
+
+                    if (action.originVariationY != null) {
+                        spawnedPosition.y += Random.Range(-action.originVariationY.Value, action.originVariationY.Value);
+                    }
+
+                    spawnedObject.transform.position = spawnedPosition;
+
+                    var rigidbody = spawnedObject.GetComponent<Rigidbody2D>();
+                    if (rigidbody == null) {
+                        continue;
+                    }
+
+                    rigidbody.velocity = new Vector2(
+                        Random.Range(action.speedMinX.Value, action.speedMaxX.Value),
+                        Random.Range(action.speedMinY.Value, action.speedMaxY.Value)
+                    );
+                }
+            }
+            // ReSharper disable once IteratorNeverReturns
         }
     }
 
