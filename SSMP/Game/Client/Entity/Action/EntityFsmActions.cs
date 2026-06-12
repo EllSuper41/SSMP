@@ -736,6 +736,114 @@ internal static class EntityFsmActions {
 
     #endregion
 
+    #region FlingObjects
+
+    private static bool GetNetworkDataFromAction(EntityNetworkData data, FlingObjects action) {
+        return GetFlingObjectsNetworkData(data, action.containerObject.Value);
+    }
+
+    private static void ApplyNetworkDataFromAction(EntityNetworkData data, FlingObjects action) {
+        ApplyFlingObjectsNetworkData(data, action.containerObject.Value, false);
+    }
+
+    #endregion
+
+    #region FlingObjectsV2
+
+    private static bool GetNetworkDataFromAction(EntityNetworkData data, FlingObjectsV2 action) {
+        return GetFlingObjectsNetworkData(data, action.containerObject.Value);
+    }
+
+    private static void ApplyNetworkDataFromAction(EntityNetworkData data, FlingObjectsV2 action) {
+        ApplyFlingObjectsNetworkData(data, action.containerObject.Value, action.unsetKinematic);
+    }
+
+    #endregion
+
+    /// <summary>
+    /// Shared capture for FlingObjects/FlingObjectsV2: the actions fling every child of a container object with a
+    /// random speed/angle (and optionally a random position offset). The hooks run orig() before this callback, so
+    /// the resolved random velocities and positions are already applied to the children - we read them back and
+    /// network the results so clients reproduce the identical fling instead of re-rolling the randoms.
+    /// </summary>
+    private static bool GetFlingObjectsNetworkData(EntityNetworkData data, GameObject container) {
+        if (container == null) {
+            return false;
+        }
+
+        if (IsObjectInRegistry(container)) {
+            return false;
+        }
+
+        var childCount = (byte) Mathf.Min(container.transform.childCount, byte.MaxValue);
+        data.Packet.Write(childCount);
+
+        for (var i = 0; i < childCount; i++) {
+            var child = container.transform.GetChild(i).gameObject;
+            var rigidbody = child.GetComponent<Rigidbody2D>();
+            if (rigidbody == null) {
+                data.Packet.Write(false);
+                continue;
+            }
+
+            data.Packet.Write(true);
+
+            var velocity = rigidbody.velocity;
+            data.Packet.Write(velocity.x);
+            data.Packet.Write(velocity.y);
+
+            var position = child.transform.position;
+            data.Packet.Write(position.x);
+            data.Packet.Write(position.y);
+            data.Packet.Write(position.z);
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// Shared apply for FlingObjects/FlingObjectsV2: re-applies the networked per-child velocities and positions
+    /// to the same container children on this client.
+    /// </summary>
+    private static void ApplyFlingObjectsNetworkData(EntityNetworkData data, GameObject container, bool unsetKinematic) {
+        // One-shot impulse, nothing meaningful to do on the null-data init path
+        if (data == null) {
+            return;
+        }
+
+        var childCount = data.Packet.ReadByte();
+        var transform = container == null ? null : container.transform;
+
+        for (var i = 0; i < childCount; i++) {
+            var hasRigidbody = data.Packet.ReadBool();
+            if (!hasRigidbody) {
+                continue;
+            }
+
+            var velocity = new Vector2(data.Packet.ReadFloat(), data.Packet.ReadFloat());
+            var position = new Vector3(data.Packet.ReadFloat(), data.Packet.ReadFloat(), data.Packet.ReadFloat());
+
+            // Keep reading the packet even if the local container is missing or shorter than the host's
+            if (transform == null || i >= transform.childCount) {
+                continue;
+            }
+
+            var child = transform.GetChild(i).gameObject;
+            child.transform.position = position;
+
+            var rigidbody = child.GetComponent<Rigidbody2D>();
+            if (rigidbody == null) {
+                continue;
+            }
+
+            if (unsetKinematic && rigidbody.isKinematic) {
+                rigidbody.isKinematic = false;
+            }
+
+            rigidbody.velocity = velocity;
+        }
+    }
+
     #region FlingObjectsFromGlobalPoolVel
 
     private static bool GetNetworkDataFromAction(EntityNetworkData data, FlingObjectsFromGlobalPoolVel action) {

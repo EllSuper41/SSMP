@@ -3287,5 +3287,30 @@
       "Shield Collider",
       "Stun"
     ]
+  },
+  {
+    "base_object_name": "Dustroach Caged",
+    "type": "DustroachCaged",
+    "parent_name": null,
+    "components": [
+      "Rotation"
+    ],
+    "internal_name": "Dustroach Caged",
+    "fsm_names": [
+      "Control",
+      "harpoon hack"
+    ]
+  },
+  {
+    "base_object_name": "Grove Pilgrim Fly",
+    "type": "GrovePilgrimFly",
+    "parent_name": null,
+    "components": [
+      "Rotation"
+    ],
+    "internal_name": "Grove Pilgrim Fly",
+    "fsm_names": [
+      "Control"
+    ]
   }
 ]

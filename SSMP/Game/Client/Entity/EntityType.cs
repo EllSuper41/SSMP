@@ -244,5 +244,7 @@ internal enum EntityType {
     LostLace,
     AspidHatchling,
     SongAutomatonTiny,
-    MapperSparNPC
+    MapperSparNPC,
+    DustroachCaged,
+    GrovePilgrimFly
 }
