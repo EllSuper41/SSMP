@@ -12,8 +12,11 @@ namespace SSMP.Game.Client;
 /// Handles pause-related behavior while connected to a server.
 /// </summary>
 /// <remarks>
-/// Known quirk: because multiplayer pause keeps world time running, Hornet can preserve some pre-pause physics
-/// momentum instead of freezing instantly like vanilla pause. Do not fix unless it becomes gameplay-impacting.
+/// Multiplayer pause keeps world time running so every other player and entity keeps simulating. Vanilla pause
+/// relies on <c>Time.timeScale == 0</c> to halt Hornet, so with time restored her rigidbody would keep
+/// integrating its retained velocity + gravity and drift/"fly off" while the menu is open. To prevent that we
+/// freeze ONLY the local hero's rigidbody for the duration of the pause (see <see cref="FreezeLocalHero"/>) and
+/// restore its velocity + constraints on unpause, leaving all other players and entities running normally.
 /// </remarks>
 internal sealed class PauseManager {
     /// <summary>
@@ -32,6 +35,21 @@ internal sealed class PauseManager {
     /// Whether the vanilla pause menu is currently open while connected to a server.
     /// </summary>
     public static bool IsMultiplayerPauseMenuOpen { get; private set; }
+
+    /// <summary>
+    /// Whether the local hero's rigidbody is currently frozen for a multiplayer pause.
+    /// </summary>
+    private static bool _isHeroFrozen;
+
+    /// <summary>
+    /// The local hero's velocity captured when the pause began; restored on unpause.
+    /// </summary>
+    private static Vector2 _frozenHeroVelocity;
+
+    /// <summary>
+    /// The local hero's rigidbody constraints captured when the pause began; restored on unpause.
+    /// </summary>
+    private static RigidbodyConstraints2D _frozenHeroConstraints;
 
     /// <summary>
     /// The net client used to determine whether multiplayer pause handling should be active.
@@ -140,6 +158,9 @@ internal sealed class PauseManager {
 
         if (IsMultiplayerPauseMenuOpen) {
             SetTimeScale(1f);
+            FreezeLocalHero();
+        } else {
+            UnfreezeLocalHero();
         }
     }
 
@@ -230,6 +251,7 @@ internal sealed class PauseManager {
         if (UIManager.instance != null && UIManager.instance.uiState == UIState.PAUSED) {
             IsMultiplayerPauseMenuOpen = true;
             SetTimeScale(1f);
+            FreezeLocalHero();
         }
     }
 
@@ -239,6 +261,8 @@ internal sealed class PauseManager {
     /// </summary>
     private static void ImmediateUnpauseIfPaused() {
         IsMultiplayerPauseMenuOpen = false;
+
+        UnfreezeLocalHero();
 
         if (UIManager.instance == null || UIManager.instance.uiState != UIState.PAUSED) {
             SetTimeScale(1f);
@@ -263,6 +287,59 @@ internal sealed class PauseManager {
         gameManager.inputHandler.AllowPause();
 
         SetTimeScale(1f);
+    }
+
+    /// <summary>
+    /// Freezes the local hero's rigidbody so it stays put while a multiplayer pause menu is open, caching its
+    /// velocity and constraints to restore on unpause. No-op if already frozen or the hero is unavailable.
+    /// </summary>
+    private static void FreezeLocalHero() {
+        if (_isHeroFrozen) {
+            return;
+        }
+
+        var hero = HeroController.instance;
+        if (hero == null) {
+            return;
+        }
+
+        var rigidbody = hero.GetComponent<Rigidbody2D>();
+        if (rigidbody == null) {
+            return;
+        }
+
+        _frozenHeroVelocity = rigidbody.linearVelocity;
+        _frozenHeroConstraints = rigidbody.constraints;
+        _isHeroFrozen = true;
+
+        rigidbody.linearVelocity = Vector2.zero;
+        rigidbody.constraints = RigidbodyConstraints2D.FreezeAll;
+    }
+
+    /// <summary>
+    /// Restores the local hero's rigidbody after a multiplayer pause, re-applying the velocity and constraints
+    /// captured by <see cref="FreezeLocalHero"/> so motion resumes exactly as it would after a vanilla unpause.
+    /// No-op if the hero was not frozen.
+    /// </summary>
+    private static void UnfreezeLocalHero() {
+        if (!_isHeroFrozen) {
+            return;
+        }
+
+        _isHeroFrozen = false;
+
+        var hero = HeroController.instance;
+        if (hero == null) {
+            return;
+        }
+
+        var rigidbody = hero.GetComponent<Rigidbody2D>();
+        if (rigidbody == null) {
+            return;
+        }
+
+        rigidbody.constraints = _frozenHeroConstraints;
+        rigidbody.linearVelocity = _frozenHeroVelocity;
     }
 
     /// <summary>
