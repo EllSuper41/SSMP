@@ -678,6 +678,64 @@ internal static class EntityFsmActions {
 
     #endregion
 
+    #region FlingObject
+
+    private static bool GetNetworkDataFromAction(EntityNetworkData data, FlingObject action) {
+        // FlingObject does not spawn anything: it resolves an EXISTING object and sets its
+        // Rigidbody2D velocity from a random speed/angle. The FsmActionHooks invoke orig() before
+        // this callback, so by now the action has already resolved the random velocity onto the
+        // rigidbody - we just read it back and network the resulting vector (like FireAtTarget),
+        // so every client reproduces the identical fling without re-rolling the random.
+        var gameObject = action.Fsm.GetOwnerDefaultTarget(action.flungObject);
+        if (gameObject == null) {
+            return false;
+        }
+
+        // If the flung object is itself a managed entity, its motion already rides its own
+        // position/velocity sync - networking the fling too would double-apply it.
+        if (IsObjectInRegistry(gameObject)) {
+            return false;
+        }
+
+        var rigidbody = gameObject.GetComponent<Rigidbody2D>();
+        if (rigidbody == null) {
+            return false;
+        }
+
+        var velocity = rigidbody.velocity;
+        data.Packet.Write(velocity.x);
+        data.Packet.Write(velocity.y);
+
+        return true;
+    }
+
+    private static void ApplyNetworkDataFromAction(EntityNetworkData data, FlingObject action) {
+        // No init path: FlingObject is a one-shot impulse, not a setup action, so a null data
+        // (EntityInitializer) has nothing meaningful to apply.
+        if (data == null) {
+            return;
+        }
+
+        var velocity = new Vector2(
+            data.Packet.ReadFloat(),
+            data.Packet.ReadFloat()
+        );
+
+        var gameObject = action.Fsm.GetOwnerDefaultTarget(action.flungObject);
+        if (gameObject == null) {
+            return;
+        }
+
+        var rigidbody = gameObject.GetComponent<Rigidbody2D>();
+        if (rigidbody == null) {
+            return;
+        }
+
+        rigidbody.velocity = velocity;
+    }
+
+    #endregion
+
     #region FlingObjectsFromGlobalPoolVel
 
     private static bool GetNetworkDataFromAction(EntityNetworkData data, FlingObjectsFromGlobalPoolVel action) {
