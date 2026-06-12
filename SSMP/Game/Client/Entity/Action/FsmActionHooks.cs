@@ -25,9 +25,15 @@ internal static class FsmActionHooks {
     // ReSharper disable once CollectionNeverQueried.Local
     private static readonly List<Hook> Hooks;
 
+    /// <summary>
+    /// Set of methods that already have a hook, so shared (base) OnEnter methods are only hooked once.
+    /// </summary>
+    private static readonly HashSet<System.Reflection.MethodInfo> HookedMethods;
+
     static FsmActionHooks() {
         TypeEvents = new Dictionary<Type, FsmActionHook>();
         Hooks = new List<Hook>();
+        HookedMethods = new HashSet<System.Reflection.MethodInfo>();
     }
 
     /// <summary>
@@ -56,12 +62,17 @@ internal static class FsmActionHooks {
         if (!TypeEvents.TryGetValue(type, out var fsmActionHook)) {
             fsmActionHook = new FsmActionHook();
 
+            // Action types that do not override OnEnter (e.g. SpawnObjectFromGlobalPoolOverTimeV2) resolve to
+            // the FsmStateAction base method here. Hook a given method only once: stacking one hook per
+            // registered type on the same shared base method would chain redundant detours.
             var onEnterMethodInfo = type.GetMethod("OnEnter");
 
-            Hooks.Add(new Hook(
-                onEnterMethodInfo,
-                OnActionEntered
-            ));
+            if (onEnterMethodInfo != null && HookedMethods.Add(onEnterMethodInfo)) {
+                Hooks.Add(new Hook(
+                    onEnterMethodInfo,
+                    OnActionEntered
+                ));
+            }
 
             TypeEvents.Add(type, fsmActionHook);
         }
@@ -76,9 +87,10 @@ internal static class FsmActionHooks {
     /// <param name="self">The instance on which it was called.</param>
     private static void OnActionEntered(Action<FsmStateAction> orig, FsmStateAction self) {
         orig(self);
-        
+
+        // A miss here is expected when the hook target is the shared FsmStateAction.OnEnter base method:
+        // every action type without its own OnEnter override passes through it, not just registered types
         if (!TypeEvents.TryGetValue(self.GetType(), out var fsmActionHook)) {
-            Logger.Warn("Hook was fired but no associated hook class was found");
             return;
         }
 

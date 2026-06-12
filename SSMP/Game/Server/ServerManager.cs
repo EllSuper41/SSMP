@@ -1177,10 +1177,13 @@ internal abstract class ServerManager : IServerManager {
             );
         }
 
+        // Handle the scene leave (scene host transfer, notifying others) BEFORE removing the player from the
+        // mapping: HandlePlayerLeaveScene looks the player up and early-returns if they are already gone, which
+        // silently skipped host transfer on disconnect
+        HandlePlayerLeaveScene(id, true, timeout);
+
         // Now remove the client from the player data mapping
         _playerData.TryRemove(id, out _);
-
-        HandlePlayerLeaveScene(id, true, timeout);
 
         try {
             PlayerDisconnectEvent?.Invoke(playerData);
