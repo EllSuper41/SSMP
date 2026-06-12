@@ -8,6 +8,7 @@ using MonoMod.RuntimeDetour;
 using SSMP.Util;
 using UnityEngine;
 using Logger = SSMP.Logging.Logger;
+using SyncLog = SSMP.Logging.SyncLog;
 
 namespace SSMP.Game.Client;
 
@@ -27,9 +28,26 @@ internal partial class GamePatcher {
     private const float TargetSwitchDistanceBias = 4f;
 
     /// <summary>
+    /// How long (in unscaled seconds) an enemy stays aggro-locked on the player that last damaged it.
+    /// While locked, proximity-based acquisition cannot switch the approved target away from the attacker.
+    /// </summary>
+    private const float AggroLockSeconds = 5f;
+
+    /// <summary>
     /// Approved multiplayer target per enemy owner instance ID.
     /// </summary>
     private static readonly Dictionary<int, GameObject> EnemyApprovedTargets = new();
+
+    /// <summary>
+    /// Maps enemy owner instance IDs to the unscaled time until which their approved target is aggro-locked
+    /// to the player that last damaged them (see <see cref="AggroLockSeconds"/>).
+    /// </summary>
+    private static readonly Dictionary<int, float> EnemyAggroLockUntil = new();
+
+    /// <summary>
+    /// Hook for aggroing enemies onto the player whose attack last damaged them.
+    /// </summary>
+    private Hook? _aggroTakeDamageHook;
 
     /// <summary>
     /// Cached resolved enemy target owner per GameObject instance ID to avoid deep transform parent lookups.
@@ -473,6 +491,15 @@ internal partial class GamePatcher {
 
         RegisterTargetedFsmActionEnterHooks();
 
+        // Aggro-on-hit: TakeDamage only runs for hits that actually connect (Hit() filters
+        // invincibility/evasion before calling it), for both the local player's hits and the
+        // visual replicas of remote players' attacks - so the attacker is resolvable locally
+        // on the scene host without extra networking
+        _aggroTakeDamageHook = new Hook(
+            typeof(HealthManager).GetMethod("TakeDamage", InstanceNonPublicFlags)!,
+            OnHealthManagerTakeDamage
+        );
+
         MonoBehaviourUtil.Instance.OnUpdateEvent += OnUpdateRetargetEnemyTransforms;
         UnityEngine.SceneManagement.SceneManager.activeSceneChanged += OnActiveSceneChanged;
     }
@@ -487,6 +514,9 @@ internal partial class GamePatcher {
         _walkerUpdateWaitingForConditionsHook?.Dispose();
         _walkerUpdateWaitingForConditionsHook = null;
 
+        _aggroTakeDamageHook?.Dispose();
+        _aggroTakeDamageHook = null;
+
         DisposeTargetedFsmActionEnterHooks();
 
         if (MonoBehaviourUtil.Instance != null) {
@@ -495,6 +525,50 @@ internal partial class GamePatcher {
 
         UnityEngine.SceneManagement.SceneManager.activeSceneChanged -= OnActiveSceneChanged;
         ClearTargetCaches();
+    }
+
+    /// <summary>
+    /// Detour for <c>HealthManager.TakeDamage</c>: aggroes the enemy onto the player whose attack
+    /// just damaged it, for the lock duration of <see cref="AggroLockSeconds"/>. Works for the local
+    /// player's hits and for remote players' attack replicas alike, because both run the local hit
+    /// pipeline and carry their owner in <c>HitInstance.Source</c>.
+    /// </summary>
+    /// <param name="orig">The original method.</param>
+    /// <param name="self">The health manager taking damage.</param>
+    /// <param name="hitInstance">The hit that connected.</param>
+    private static void OnHealthManagerTakeDamage(
+        Action<HealthManager, HitInstance> orig,
+        HealthManager self,
+        HitInstance hitInstance
+    ) {
+        orig(self, hitInstance);
+
+        var attackerRoot = PlayerTargetRegistry.GetTrackedPlayerRoot(hitInstance.Source);
+        if (attackerRoot == null) {
+            // Hit did not come from a (tracked) player - environmental damage, enemy infighting etc.
+            return;
+        }
+
+        var owner = GetEnemyTargetOwner(self.gameObject);
+        if (owner == null) {
+            return;
+        }
+
+        var ownerId = owner.GetInstanceID();
+        var previousTarget = EnemyApprovedTargets.TryGetValue(ownerId, out var existing) ? existing : null;
+
+        EnemyApprovedTargets[ownerId] = attackerRoot;
+        EnemyAggroLockUntil[ownerId] = Time.unscaledTime + AggroLockSeconds;
+
+        if (previousTarget != attackerRoot) {
+            SyncLog.Log(SyncLog.Entity,
+                $"aggro -> last attacker | enemy={owner.name} attacker={attackerRoot.name} " +
+                $"lock={AggroLockSeconds}s");
+
+            // Push the new target into the enemy's active FSM actions and cached component fields
+            // right away, so the very next attack/face/chase decision uses the attacker
+            ForceImmediateRetarget();
+        }
     }
 
     private static void OnActiveSceneChanged(
@@ -506,6 +580,7 @@ internal partial class GamePatcher {
 
     private static void ClearTargetCaches() {
         EnemyApprovedTargets.Clear();
+        EnemyAggroLockUntil.Clear();
         TargetOwnerCache.Clear();
     }
 
@@ -985,6 +1060,13 @@ internal partial class GamePatcher {
         GameObject candidateTarget
     ) {
         if (approvedTarget == candidateTarget) {
+            return false;
+        }
+
+        // While aggro-locked to the player that last damaged this enemy, proximity acquisition
+        // may not steal the target away from the attacker
+        if (EnemyAggroLockUntil.TryGetValue(owner.GetInstanceID(), out var lockUntil) &&
+            Time.unscaledTime < lockUntil) {
             return false;
         }
 
