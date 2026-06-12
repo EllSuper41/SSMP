@@ -486,6 +486,26 @@ internal class Entity {
             //addedComponentsString += " DamageHero";
         }
 
+        var hostRecoil = Object.Host.GetComponent<Recoil>();
+        var clientRecoil = Object.Client.GetComponent<Recoil>();
+        if (hostRecoil != null && clientRecoil != null) {
+            //Logger.Info($"Adding Knockback component to entity: {Object.Host.name}");
+
+            var recoil = new HostClientPair<Recoil> {
+                Host = hostRecoil,
+                Client = clientRecoil
+            };
+
+            _components[EntityComponentType.Knockback] = new KnockbackComponent(
+                _netClient,
+                Id,
+                Object,
+                recoil
+            );
+
+            //addedComponentsString += " Knockback";
+        }
+
         var hostMeshRenderer = Object.Host.GetComponent<MeshRenderer>();
         var clientMeshRenderer = Object.Client.GetComponent<MeshRenderer>();
         if (hostMeshRenderer != null && clientMeshRenderer != null) {

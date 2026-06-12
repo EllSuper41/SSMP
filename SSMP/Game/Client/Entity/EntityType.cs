@@ -241,5 +241,8 @@ internal enum EntityType {
     Phantom,
     Lace,
     GrandMotherSilk,
-    LostLace
+    LostLace,
+    AspidHatchling,
+    SongAutomatonTiny,
+    MapperSparNPC
 }
