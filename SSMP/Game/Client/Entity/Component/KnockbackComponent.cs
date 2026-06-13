@@ -96,6 +96,17 @@ internal class KnockbackComponent : EntityComponent {
             return;
         }
 
+        // Only network if the recoil ACTUALLY took effect. RecoilByDirection early-returns, leaving
+        // state == Ready (IsRecoiling == false), when recoil is blocked for this direction
+        // (IsLeft/Right/Up/DownBlocked) or otherwise suppressed. Those block flags are driven by the
+        // enemy's FSM, which is DISABLED on puppets, so blindly replaying a suppressed recoil would jerk
+        // the puppet around while the authoritative enemy stands firm — exactly the case for recoil-immune
+        // bosses during their attacks. IsRecoiling (state == Recoiling || Frozen) is the authoritative
+        // "it actually recoiled / froze in place" signal.
+        if (!self.IsRecoiling) {
+            return;
+        }
+
         var data = new EntityNetworkData {
             Type = EntityComponentType.Knockback
         };
