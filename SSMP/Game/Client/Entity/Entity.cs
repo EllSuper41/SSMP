@@ -943,7 +943,11 @@ internal class Entity {
     /// Initializes the entity when the client user is the scene host.
     /// </summary>
     public void InitializeHost(uint sceneHostEpoch = 0) {
-        Object.Host.SetActive(_originalIsActive);
+        // Preserve an enemy the game already activated. When a client enters a scene first, there is a delay
+        // (waiting for the server's AlreadyInScene) before the scene role is known; during it the game can
+        // activate lazily-spawned enemies directly (not via the hooked ActivateGameObject action), leaving
+        // _originalIsActive stale-false. Forcing SetActive(false) here then killed those enemies for everyone.
+        Object.Host.SetActive(_originalIsActive || Object.Host.activeSelf);
 
         // Also update the last active variable to account for this potential change
         // Otherwise we might trigger the update sending of activity twice
