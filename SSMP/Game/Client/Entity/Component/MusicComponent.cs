@@ -68,12 +68,22 @@ internal class MusicComponent : EntityComponent {
     /// Static constructor responsible for loading data from the JSON and registering static hooks.
     /// </summary>
     static MusicComponent() {
-        var dataPair = FileUtil.LoadObjectFromEmbeddedJson<
-            (List<MusicCueData>, List<AudioMixerSnapshotData>)
-        >(MusicDataFilePath);
+        try {
+            var dataPair = FileUtil.LoadObjectFromEmbeddedJson<
+                (List<MusicCueData>, List<AudioMixerSnapshotData>)
+            >(MusicDataFilePath);
 
-        MusicCueDataList = dataPair.Item1;
-        SnapshotDataList = dataPair.Item2;
+            MusicCueDataList = dataPair.Item1 ?? new List<MusicCueData>();
+            SnapshotDataList = dataPair.Item2 ?? new List<AudioMixerSnapshotData>();
+        } catch (Exception e) {
+            // A music-data load/parse failure must NEVER break connecting: this static constructor runs from
+            // EntityManager.RegisterHooks during OnClientConnect, and an exception here becomes a
+            // TypeInitializationException that aborts the whole connect and times the client out. Degrade boss
+            // music sync to off instead.
+            Logger.Error($"Failed to load music data; boss music sync disabled: {e}");
+            MusicCueDataList = new List<MusicCueData>();
+            SnapshotDataList = new List<AudioMixerSnapshotData>();
+        }
 
         byte index = 1;
         foreach (var data in MusicCueDataList) {
@@ -427,7 +437,8 @@ internal class MusicComponent : EntityComponent {
         Nosk,
         TheHollowKnight,
         Greenpath,
-        Waterways
+        Waterways,
+        MusicCue
     }
 
     /// <summary>
@@ -438,6 +449,7 @@ internal class MusicComponent : EntityComponent {
         Silent,
         None,
         Off,
-        Normal
+        Normal,
+        AudioMixerSnapshot
     }
 }
