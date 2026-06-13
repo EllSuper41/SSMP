@@ -195,18 +195,12 @@ internal class SaveManager {
     private void ResetLastPlayerData() {
         var pd = PlayerData.instance;
 
-        var pdConstructor = typeof(PlayerData).GetConstructor(
-            BindingFlags.NonPublic | BindingFlags.CreateInstance | BindingFlags.Instance,
-            null,
-            [],
-            null
-        );
-        if (pdConstructor == null) {
-            Logger.Error("Could not find protected constructor of PlayerData");
-            return;
-        }
-
-        _lastPlayerData = (PlayerData) pdConstructor.Invoke([]);
+        // Allocate a blank PlayerData WITHOUT running any constructor: Silksong's PlayerData() is public and
+        // has side effects (SetupNewPlayerData), and the old NonPublic-ctor lookup found nothing on this game
+        // so _lastPlayerData stayed null -> the compound/additive diff (HashSets + quest progress) threw an NRE
+        // every frame. GetUninitializedObject gives a clean snapshot object that we then fill with synced fields.
+        _lastPlayerData = (PlayerData) System.Runtime.Serialization.FormatterServices
+            .GetUninitializedObject(typeof(PlayerData));
 
         foreach (var field in _playerDataSimpleSyncFields) {
             var value = field.GetValue(pd);
@@ -583,6 +577,11 @@ internal class SaveManager {
     /// Called every unity update. Used to check for changes in non-primitive variables in the PlayerData.
     /// </summary>
     private void OnUpdateCompounds() {
+        // The compound diff needs the last-values snapshot; if it isn't ready yet, skip rather than NRE per frame.
+        if (_lastPlayerData == null) {
+            return;
+        }
+
         void CheckUpdates<TVar, TCheck>(
             List<string?> variableNames,
             Dictionary<string?, TCheck> checkDict,
