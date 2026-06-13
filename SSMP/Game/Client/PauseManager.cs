@@ -69,6 +69,14 @@ internal sealed class PauseManager {
     private Hook? _heroControllerPauseHook;
 
     /// <summary>
+    /// Hook for <c>HeroController.UnPause</c>.
+    /// This is the authoritative, synchronous unpause signal (called from the pause coroutine and from
+    /// immediate-unpause paths), unlike <c>UIManager.TogglePauseGame</c> which only starts a coroutine and
+    /// leaves <c>uiState</c> stale on return. It is where the local hero must be unfrozen.
+    /// </summary>
+    private Hook? _heroControllerUnPauseHook;
+
+    /// <summary>
     /// Hook for <c>TransitionPoint.OnTriggerEnter2D</c>.
     /// </summary>
     private Hook? _transitionPointOnTriggerEnter2DHook;
@@ -100,6 +108,11 @@ internal sealed class PauseManager {
             HeroControllerOnPause
         );
 
+        _heroControllerUnPauseHook = new Hook(
+            typeof(HeroController).GetMethod("UnPause", InstanceMemberFlags)!,
+            HeroControllerOnUnPause
+        );
+
         _transitionPointOnTriggerEnter2DHook = new Hook(
             typeof(TransitionPoint).GetMethod("OnTriggerEnter2D", InstanceMemberFlags)!,
             TransitionPointOnTriggerEnter2D
@@ -122,6 +135,13 @@ internal sealed class PauseManager {
 
         _heroControllerPauseHook?.Dispose();
         _heroControllerPauseHook = null;
+
+        _heroControllerUnPauseHook?.Dispose();
+        _heroControllerUnPauseHook = null;
+
+        // Safety: never leave the hero frozen if we tear down while paused (e.g. disconnect with the
+        // pause menu open) — the unpause hook may never fire after the hooks are gone
+        UnfreezeLocalHero();
 
         _transitionPointOnTriggerEnter2DHook?.Dispose();
         _transitionPointOnTriggerEnter2DHook = null;
@@ -254,6 +274,21 @@ internal sealed class PauseManager {
             SetTimeScale(1f);
             FreezeLocalHero();
         }
+    }
+
+    /// <summary>
+    /// Detour for <c>HeroController.UnPause</c>.
+    /// The authoritative point at which the local hero resumes — unfreeze the rigidbody here, since the
+    /// <c>UIManager.TogglePauseGame</c> hook cannot detect the close (its <c>orig()</c> only starts the
+    /// pause coroutine and returns before <c>uiState</c> flips back to PLAYING).
+    /// </summary>
+    /// <param name="orig">The original vanilla method.</param>
+    /// <param name="self">The hero controller instance.</param>
+    private void HeroControllerOnUnPause(OrigPause orig, HeroController self) {
+        orig(self);
+
+        IsMultiplayerPauseMenuOpen = false;
+        UnfreezeLocalHero();
     }
 
     /// <summary>
