@@ -86,7 +86,7 @@ internal class ModSettings : IModSettings {
             field = value;
             ChangedEvent?.Invoke(nameof(FullSynchronisation));
         }
-    }
+    } = true;
 
     /// <summary>
     /// The last used server settings in a hosted server.

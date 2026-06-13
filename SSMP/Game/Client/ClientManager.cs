@@ -269,8 +269,17 @@ internal class ClientManager : IClientManager {
 
         _addonManager.LoadAddons();
 
-        // Check if there is a valid authentication key and if not, generate a new one
-        if (!AuthUtil.IsValidAuthKey(_modSettings.AuthKey)) {
+        // Per-instance auth key override for running two instances on one machine (they share modsettings.json,
+        // so without this they share one AuthKey and the server treats them as the same player, replacing the
+        // session). SSMP_AUTHKEY = use an explicit valid key; SSMP_FRESH_AUTHKEY = generate a unique key for this
+        // launch. Both are in-memory only (the AuthKey setter does not persist), so they don't touch the shared file.
+        var envAuthKey = System.Environment.GetEnvironmentVariable("SSMP_AUTHKEY");
+        if (!string.IsNullOrEmpty(envAuthKey) && AuthUtil.IsValidAuthKey(envAuthKey)) {
+            _modSettings.AuthKey = envAuthKey;
+        } else if (!string.IsNullOrEmpty(System.Environment.GetEnvironmentVariable("SSMP_FRESH_AUTHKEY"))) {
+            _modSettings.AuthKey = AuthUtil.GenerateAuthKey();
+        } else if (!AuthUtil.IsValidAuthKey(_modSettings.AuthKey)) {
+            // Check if there is a valid authentication key and if not, generate a new one
             _modSettings.AuthKey = AuthUtil.GenerateAuthKey();
         }
 

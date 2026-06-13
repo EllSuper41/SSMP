@@ -67,8 +67,11 @@ internal class ModServerManager : ServerManager {
         AddonManager.LoadAddons();
 
         // Register handlers for UI events
+        // Force full synchronisation on: this mod is built around a shared world (world/quest/entity
+        // sync), there is no UI to toggle it, and without it connecting clients are wrongly prompted to
+        // pick their own save slot instead of loading the host's world.
         _uiManager.RequestServerStartHostEvent += (_, port, _, transportType, _) =>
-            OnRequestServerStartHost(port, _modSettings.FullSynchronisation, transportType);
+            OnRequestServerStartHost(port, fullSynchronisation: true, transportType);
         _uiManager.RequestServerStopHostEvent += Stop;
         PlayerConnectEvent += _ => UpdateMatchmakingRemotePlayerCount();
         PlayerDisconnectEvent += _ => UpdateMatchmakingRemotePlayerCount();
