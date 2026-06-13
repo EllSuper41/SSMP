@@ -164,4 +164,28 @@ internal abstract class DamageAnimationEffect : AnimationEffect {
 
         healthManager.hp = hpBeforeHit;
     }
+
+    /// <summary>
+    /// Whether a remote player's attack replica is currently applying its (PvE-damage-rolled-back) hit to the
+    /// given enemy object's <see cref="HealthManager"/>. While true, any <see cref="Recoil.RecoilByDirection"/>
+    /// on that enemy is being driven by the replica rather than by a real local hit, and must be suppressed: the
+    /// replica's recoil duplicates — and, under Silksong's inverted facing-scale convention
+    /// (FaceRight =&gt; localScale.x = -1), 180°-inverts — the authoritative recoil the attacking player already
+    /// networked, so the enemy recoils toward the attacker on every screen.
+    /// <see cref="Game.Client.Entity.Component.KnockbackComponent"/> uses this to drop those replica-driven
+    /// recoils, leaving only the networked, world-space-correct recoil.
+    /// </summary>
+    /// <param name="enemyObject">The live enemy object (host enemy or puppet) whose recoil is being evaluated.</param>
+    /// <returns>True if a remote visual-only hit is in progress on this enemy, false otherwise.</returns>
+    internal static bool IsApplyingRemoteVisualHitTo(GameObject? enemyObject) {
+        // Fast path: the bracket dictionary is only non-empty between StoreHp and RestoreHp of a replica hit,
+        // so almost every recoil (real local hits, networked recoil replay) short-circuits here without a
+        // GetComponent lookup.
+        if (RemoteVisualHitHpBefore.Count == 0 || enemyObject == null) {
+            return false;
+        }
+
+        var healthManager = enemyObject.GetComponent<HealthManager>();
+        return healthManager != null && RemoteVisualHitHpBefore.ContainsKey(healthManager.GetInstanceID());
+    }
 }
