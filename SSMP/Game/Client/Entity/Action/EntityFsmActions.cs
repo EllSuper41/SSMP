@@ -3278,6 +3278,12 @@ internal static class EntityFsmActions {
     #region SpawnObjectFromGlobalPoolDelay
 
     private static bool GetNetworkDataFromAction(EntityNetworkData data, SpawnObjectFromGlobalPoolDelay action) {
+        // If the prefab spawns a registered entity it is networked via the EntitySpawn path (managed puppet);
+        // replaying a cosmetic copy on the client too would double-spawn it
+        if (action.gameObject?.Value != null && IsObjectInRegistry(action.gameObject.Value)) {
+            return false;
+        }
+
         // OnEnter (which ran before this callback) only rolled the random delay; the spawn itself happens later
         // in OnUpdate. Entity spawns are caught at that moment by the IL hook on SpawnObject. Here we network
         // the rolled delay so the client replays the spawn at the same relative time as the host.
@@ -3341,6 +3347,11 @@ internal static class EntityFsmActions {
     #region SpawnObjectFromGlobalPoolOverTime
 
     private static bool GetNetworkDataFromAction(EntityNetworkData data, SpawnObjectFromGlobalPoolOverTime action) {
+        // Registered entities go through the EntitySpawn path; don't also replay a cosmetic copy (double-spawn)
+        if (action.gameObject?.Value != null && IsObjectInRegistry(action.gameObject.Value)) {
+            return false;
+        }
+
         return true;
     }
 
@@ -3360,6 +3371,12 @@ internal static class EntityFsmActions {
         IEnumerator Behaviour() {
             while (true) {
                 yield return new WaitForSeconds(action.frequency.Value);
+
+                // Terminate (not just skip) when the client entity that owns this FSM is destroyed, so the
+                // coroutine does not loop forever after the puppet despawns; per-state cleanup is separate
+                if (action.Fsm == null || action.Fsm.GameObject == null) {
+                    yield break;
+                }
 
                 if (action.gameObject.Value == null) {
                     continue;
@@ -3397,6 +3414,11 @@ internal static class EntityFsmActions {
     #region SpawnObjectFromGlobalPoolOverTimeV2
 
     private static bool GetNetworkDataFromAction(EntityNetworkData data, SpawnObjectFromGlobalPoolOverTimeV2 action) {
+        // Registered entities go through the EntitySpawn path; don't also replay a cosmetic copy (double-spawn)
+        if (action.gameObject?.Value != null && IsObjectInRegistry(action.gameObject.Value)) {
+            return false;
+        }
+
         return true;
     }
 
@@ -3416,6 +3438,12 @@ internal static class EntityFsmActions {
         IEnumerator Behaviour() {
             while (true) {
                 yield return new WaitForSeconds(action.frequency.Value);
+
+                // Terminate (not just skip) when the client entity that owns this FSM is destroyed, so the
+                // coroutine does not loop forever after the puppet despawns; per-state cleanup is separate
+                if (action.Fsm == null || action.Fsm.GameObject == null) {
+                    yield break;
+                }
 
                 if (action.gameObject.Value == null) {
                     continue;
@@ -3474,6 +3502,11 @@ internal static class EntityFsmActions {
     #region FlingObjectsFromGlobalPoolVelTime
 
     private static bool GetNetworkDataFromAction(EntityNetworkData data, FlingObjectsFromGlobalPoolVelTime action) {
+        // Registered entities go through the EntitySpawn path; don't also replay a cosmetic copy (double-spawn)
+        if (action.gameObject?.Value != null && IsObjectInRegistry(action.gameObject.Value)) {
+            return false;
+        }
+
         return true;
     }
 
@@ -3497,6 +3530,12 @@ internal static class EntityFsmActions {
 
             while (true) {
                 yield return new WaitForSeconds(action.frequency.Value);
+
+                // Terminate (not just skip) when the client entity that owns this FSM is destroyed, so the
+                // coroutine does not loop forever after the puppet despawns; per-state cleanup is separate
+                if (action.Fsm == null || action.Fsm.GameObject == null) {
+                    yield break;
+                }
 
                 if (action.gameObject.Value == null) {
                     continue;

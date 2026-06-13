@@ -116,13 +116,14 @@ internal abstract class DamageAnimationEffect : AnimationEffect {
 
         // Resolve the owning player root while the effect is still parented under the player object
         // (it may detach later, e.g. projectiles) and tag every damager with it, so enemy aggro can
-        // attribute hits from this effect to the attacking player even after the effect detaches
+        // attribute hits from this effect to the attacking player even after the effect detaches.
+        // Uses a dedicated AttackOwnerComponent so it cannot be clobbered by EffectOwnerComponent.
         var ownerRoot = Game.Client.PlayerTargetRegistry.GetTrackedPlayerRoot(target);
 
         foreach (var damageEnemies in damageEnemiesComponents) {
             if (ownerRoot != null) {
-                var ownerTag = damageEnemies.gameObject.AddComponentIfNotPresent<EffectOwnerComponent>();
-                ownerTag.Owner = ownerRoot;
+                var ownerTag = damageEnemies.gameObject.AddComponentIfNotPresent<AttackOwnerComponent>();
+                ownerTag.PlayerRoot = ownerRoot;
             }
             damageEnemies.doesNotTink = true;
             damageEnemies.doesNotTinkThroughWalls = true;

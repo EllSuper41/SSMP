@@ -555,16 +555,20 @@ internal partial class GamePatcher {
         HealthManager self,
         HitInstance hitInstance
     ) {
+        // Resolve the enemy owner BEFORE orig(), while the enemy is guaranteed alive: a lethal hit can
+        // destroy self.gameObject inside orig(), after which touching it throws MissingReferenceException
+        var owner = GetEnemyTargetOwner(self.gameObject);
+
         orig(self, hitInstance);
+
+        // Unity's overloaded == treats a destroyed object as null, so this also catches a lethal hit
+        if (owner == null) {
+            return;
+        }
 
         var attackerRoot = ResolveAttackerPlayerRoot(hitInstance.Source);
         if (attackerRoot == null) {
             // Hit did not come from a (tracked) player - environmental damage, enemy infighting etc.
-            return;
-        }
-
-        var owner = GetEnemyTargetOwner(self.gameObject);
-        if (owner == null) {
             return;
         }
 
@@ -602,8 +606,8 @@ internal partial class GamePatcher {
             return root;
         }
 
-        var ownerTag = source.GetComponentInParent<SSMP.Util.EffectOwnerComponent>();
-        return ownerTag == null ? null : PlayerTargetRegistry.GetTrackedPlayerRoot(ownerTag.Owner);
+        var ownerTag = source.GetComponentInParent<SSMP.Util.AttackOwnerComponent>();
+        return ownerTag == null ? null : PlayerTargetRegistry.GetTrackedPlayerRoot(ownerTag.PlayerRoot);
     }
 
     private static void OnActiveSceneChanged(
