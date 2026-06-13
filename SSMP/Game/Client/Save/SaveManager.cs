@@ -209,7 +209,10 @@ internal class SaveManager {
 
         foreach (var field in _playerDataCompoundSyncFields) {
             var value = field.GetValue(pd);
-            field.SetValue(_lastPlayerData, GetCompoundCopy(value));
+            // PlayerData.instance can still have null compound fields here when hosting/joining from the main
+            // menu before a save is loaded. Snapshot null as-is rather than crashing OnConnect in
+            // GetCompoundCopy; the value is picked up by the normal change diff once it becomes non-null in-game.
+            field.SetValue(_lastPlayerData, value == null ? null : GetCompoundCopy(value));
         }
     }
 

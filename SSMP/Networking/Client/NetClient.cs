@@ -295,10 +295,23 @@ internal class NetClient : INetClient {
             }
 
             ThreadUtil.RunActionOnMainThread(() => {
-                    try {
-                        ConnectEvent?.Invoke(serverInfo);
-                    } catch (Exception e) {
-                        Logger.Error($"Error in ConnectEvent: {e}");
+                    // Invoke each subscriber independently. A multicast delegate stops at the first handler that
+                    // throws, which previously let one failing subscriber (e.g. the save-snapshot init) skip later
+                    // critical ones such as ClientManager's packet-handler registration — leaving the session
+                    // without a PlayerConnect handler. Isolating handlers keeps one bad one from breaking connect.
+                    var connectEvent = ConnectEvent;
+                    if (connectEvent == null) {
+                        return;
+                    }
+
+                    foreach (var handler in connectEvent.GetInvocationList()) {
+                        try {
+                            ((Action<ServerInfo>) handler).Invoke(serverInfo);
+                        } catch (Exception e) {
+                            Logger.Error(
+                                $"Error in ConnectEvent handler " +
+                                $"({handler.Method?.DeclaringType?.Name}.{handler.Method?.Name}): {e}");
+                        }
                     }
                 }
             );
