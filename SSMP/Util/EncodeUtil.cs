@@ -115,6 +115,8 @@ public static class EncodeUtil {
                     case "HashSet<string>":
                     case "System.Collections.Generic.List`1[SSMP.Math.Vector3]":
                     case "System.Byte[]":
+                    case "CollectableItemsData":
+                    case "EnemyJournalKillData":
                         return [0, 0]; // 0 length ushort
                     case "System.Collections.Generic.List`1[System.Int32]":
                         return [0]; // 0 length byte
@@ -230,6 +232,42 @@ public static class EncodeUtil {
             }
             case MapZone mapZone:
                 return [(byte) mapZone];
+            case CollectableItemsData collectablesValue: {
+                // Wire only per-item Amount. Format: ushort count, then per entry: encoded name + int32 amount.
+                var entries = collectablesValue.Enumerate().ToList();
+                if (entries.Count > ushort.MaxValue) {
+                    throw new ArgumentOutOfRangeException(
+                        $"Could not encode collectables count: {entries.Count}"
+                    );
+                }
+
+                IEnumerable<byte> byteArray = BitConverter.GetBytes((ushort) entries.Count);
+
+                foreach (var entry in entries) {
+                    byteArray = byteArray.Concat(EncodeString(entry.Key))
+                                         .Concat(BitConverter.GetBytes(entry.Value.Amount));
+                }
+
+                return byteArray.ToArray();
+            }
+            case EnemyJournalKillData killDataValue: {
+                // Wire only per-enemy Kills. Format: ushort count, then per entry: encoded name + int32 kills.
+                var entries = killDataValue.Dictionary?.ToList() ?? [];
+                if (entries.Count > ushort.MaxValue) {
+                    throw new ArgumentOutOfRangeException(
+                        $"Could not encode enemy journal kill data count: {entries.Count}"
+                    );
+                }
+
+                IEnumerable<byte> byteArray = BitConverter.GetBytes((ushort) entries.Count);
+
+                foreach (var entry in entries) {
+                    byteArray = byteArray.Concat(EncodeString(entry.Key))
+                                         .Concat(BitConverter.GetBytes(entry.Value.Kills));
+                }
+
+                return byteArray.ToArray();
+            }
             case List<int> { Count: > byte.MaxValue } intListValue:
                 throw new ArgumentOutOfRangeException($"Could not encode int list length: {intListValue.Count}");
             case List<int> intListValue: {
@@ -537,6 +575,66 @@ public static class EncodeUtil {
                 );
             case "SSMP.Serialization.MapZone":
                 return (MapZone) encodedValue[0];
+            case "CollectableItemsData": {
+                var length = BitConverter.ToUInt16(encodedValue, 0);
+
+                var collectables = new CollectableItemsData();
+                var offset = 2;
+                for (var i = 0; i < length; i++) {
+                    var index = BitConverter.ToUInt16(encodedValue, offset);
+                    string? itemName;
+                    if (index == ushort.MaxValue) {
+                        var strLen = BitConverter.ToUInt16(encodedValue, offset + 2);
+                        itemName = System.Text.Encoding.UTF8.GetString(encodedValue, offset + 4, strLen);
+                        offset += 4 + strLen;
+                    } else {
+                        if (!TryGetStringName(index, out itemName)) {
+                            throw new ArgumentException(
+                                $"Could not decode collectable name from save update: {index}"
+                            );
+                        }
+
+                        offset += 2;
+                    }
+
+                    var amount = BitConverter.ToInt32(encodedValue, offset);
+                    offset += 4;
+
+                    collectables.SetData(itemName, new CollectableItemsData.Data { Amount = amount });
+                }
+
+                return collectables;
+            }
+            case "EnemyJournalKillData": {
+                var length = BitConverter.ToUInt16(encodedValue, 0);
+
+                var killData = new EnemyJournalKillData();
+                var offset = 2;
+                for (var i = 0; i < length; i++) {
+                    var index = BitConverter.ToUInt16(encodedValue, offset);
+                    string? recordName;
+                    if (index == ushort.MaxValue) {
+                        var strLen = BitConverter.ToUInt16(encodedValue, offset + 2);
+                        recordName = System.Text.Encoding.UTF8.GetString(encodedValue, offset + 4, strLen);
+                        offset += 4 + strLen;
+                    } else {
+                        if (!TryGetStringName(index, out recordName)) {
+                            throw new ArgumentException(
+                                $"Could not decode enemy journal record name from save update: {index}"
+                            );
+                        }
+
+                        offset += 2;
+                    }
+
+                    var kills = BitConverter.ToInt32(encodedValue, offset);
+                    offset += 4;
+
+                    killData.RecordKillData(recordName, new EnemyJournalKillData.KillData { Kills = kills });
+                }
+
+                return killData;
+            }
             case "System.Collections.Generic.List`1[System.Int32]": {
                 var length = encodedValue[0];
 

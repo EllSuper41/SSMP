@@ -99,6 +99,15 @@ internal class SaveManager {
     ];
 
     /// <summary>
+    /// List of named-int collection variables in PlayerData. These are per-key int maps (enemy kill counts and
+    /// collectable amounts) that are shared additively via a per-key SUM on the server.
+    /// </summary>
+    private static readonly List<string?> NamedIntVariables = [
+        "Collectables",
+        "EnemyJournalKillData"
+    ];
+
+    /// <summary>
     /// Whether the player is hosting the server, which means that player specific save data is not networked
     /// to the server.
     /// </summary>
@@ -137,7 +146,8 @@ internal class SaveManager {
                                 SaveDataMapping.BossStatueCompletionVariables.Contains(fieldName) ||
                                 SaveDataMapping.VectorListVariables.Contains(fieldName) ||
                                 SaveDataMapping.IntListVariables.Contains(fieldName) ||
-                                HashSetVariables.Contains(fieldName);
+                                HashSetVariables.Contains(fieldName) ||
+                                NamedIntVariables.Contains(fieldName);
 
             if (compoundField) {
                 _playerDataCompoundSyncFields.Add(field);
@@ -729,6 +739,59 @@ internal class SaveManager {
                 return EncodeSaveDataValue(null, deltaList);
             }
         );
+
+        // Enemy journal kill counts. Per-key SUM on the server; Kills never decrease so all deltas are positive.
+        CheckUpdates<EnemyJournalKillData, int>(
+            [NamedIntVariables[1]],
+            _listHashes,
+            killData => GetNamedIntMapHashCode(GetKillDataMap(killData)),
+            (hash1, hash2) => hash1 != hash2,
+            (currentValue, lastValue) => {
+                var currentMap = GetKillDataMap(currentValue as EnemyJournalKillData);
+                var lastMap = GetKillDataMap(lastValue as EnemyJournalKillData);
+
+                // Delta carries only the positive increase per key.
+                var delta = new EnemyJournalKillData();
+                foreach (var pair in currentMap) {
+                    lastMap.TryGetValue(pair.Key, out var lastKills);
+                    var diff = pair.Value - lastKills;
+                    if (diff > 0) {
+                        delta.RecordKillData(pair.Key, new EnemyJournalKillData.KillData { Kills = diff });
+                    }
+                }
+
+                Logger.Debug($"EnemyJournalKillData var updated, delta entries: {delta.Dictionary?.Count ?? 0}");
+
+                return EncodeSaveDataValue(null, delta);
+            }
+        );
+
+        // Collectable amounts. Per-key SUM on the server. Outbound is POSITIVE-ONLY: local turn-in consumption
+        // (a decrease) is never shared, but the snapshot still advances so future increases delta correctly.
+        CheckUpdates<CollectableItemsData, int>(
+            [NamedIntVariables[0]],
+            _listHashes,
+            collectables => GetNamedIntMapHashCode(GetCollectablesMap(collectables)),
+            (hash1, hash2) => hash1 != hash2,
+            (currentValue, lastValue) => {
+                var currentMap = GetCollectablesMap(currentValue as CollectableItemsData);
+                var lastMap = GetCollectablesMap(lastValue as CollectableItemsData);
+
+                // Delta carries only positive per-item Amount increases (skip negatives = local turn-in consume).
+                var delta = new CollectableItemsData();
+                foreach (var pair in currentMap) {
+                    lastMap.TryGetValue(pair.Key, out var lastAmount);
+                    var diff = pair.Value - lastAmount;
+                    if (diff > 0) {
+                        delta.SetData(pair.Key, new CollectableItemsData.Data { Amount = diff });
+                    }
+                }
+
+                Logger.Debug($"Collectables var updated, positive delta entries: {delta.Enumerate().Count()}");
+
+                return EncodeSaveDataValue(null, delta);
+            }
+        );
     }
 
     /// <summary>
@@ -909,6 +972,66 @@ internal class SaveManager {
                     _listHashes[name] = GetListHashCode(listRepresentation);
                     _lastPlayerData?.SetVariable(name, (HashSet<string>) GetCompoundCopy(decodedHashSet));
                     pd.SetVariable(name, decodedHashSet);
+                    break;
+                }
+                case EnemyJournalKillData decodedKillData: {
+                    // INCREASE-ONLY apply: for each incoming key, raise Kills to max(current, incoming). Never
+                    // decrease, never absolute-set (save-corruption safety). Only Kills is wired; HasBeenSeen stays.
+                    var live = pd.GetVariable<EnemyJournalKillData>(name);
+                    if (live == null) {
+                        break;
+                    }
+
+                    var killsRaised = false;
+                    if (decodedKillData.Dictionary != null) {
+                        foreach (var entry in decodedKillData.Dictionary) {
+                            var currentKill = live.GetKillData(entry.Key);
+                            if (entry.Value.Kills > currentKill.Kills) {
+                                currentKill.Kills = entry.Value.Kills;
+                                live.RecordKillData(entry.Key, currentKill);
+                                killsRaised = true;
+                            }
+                        }
+                    }
+
+                    // Bust the quest manager's accepted/active-set caches so a quest that became completable
+                    // from the remote-driven progress reflects it without waiting for a scene transition.
+                    if (killsRaised) {
+                        QuestManager.IncrementVersion();
+                    }
+
+                    // Pre-seed the hash from the POST-merge live value so OnUpdateCompounds does not echo.
+                    _listHashes[name] = GetNamedIntMapHashCode(GetKillDataMap(live));
+                    _lastPlayerData?.SetVariable(name, (EnemyJournalKillData) GetCompoundCopy(live));
+                    break;
+                }
+                case CollectableItemsData decodedCollectables: {
+                    // INCREASE-ONLY apply: for each incoming key, raise Amount to max(current, incoming). Never
+                    // decrease, never absolute-set. Only Amount is wired; IsSeenMask/AmountWhileHidden stay per-player.
+                    var live = pd.GetVariable<CollectableItemsData>(name);
+                    if (live == null) {
+                        break;
+                    }
+
+                    var amountRaised = false;
+                    foreach (var entry in decodedCollectables.Enumerate()) {
+                        var currentData = live.GetData(entry.Key);
+                        if (entry.Value.Amount > currentData.Amount) {
+                            currentData.Amount = entry.Value.Amount;
+                            live.SetData(entry.Key, currentData);
+                            amountRaised = true;
+                        }
+                    }
+
+                    // Bust the quest manager's accepted/active-set caches so a quest that became completable
+                    // from the remote-driven progress reflects it without waiting for a scene transition.
+                    if (amountRaised) {
+                        QuestManager.IncrementVersion();
+                    }
+
+                    // Pre-seed the hash from the POST-merge live value so OnUpdateCompounds does not echo.
+                    _listHashes[name] = GetNamedIntMapHashCode(GetCollectablesMap(live));
+                    _lastPlayerData?.SetVariable(name, (CollectableItemsData) GetCompoundCopy(live));
                     break;
                 }
                 default: {
@@ -1193,6 +1316,53 @@ internal class SaveManager {
     }
 
     /// <summary>
+    /// Get a snapshot of the per-item Amount values in a <see cref="CollectableItemsData"/> as a name-to-int map.
+    /// </summary>
+    private static Dictionary<string, int> GetCollectablesMap(CollectableItemsData? collectables) {
+        var map = new Dictionary<string, int>();
+        if (collectables == null) {
+            return map;
+        }
+
+        foreach (var entry in collectables.Enumerate()) {
+            map[entry.Key] = entry.Value.Amount;
+        }
+
+        return map;
+    }
+
+    /// <summary>
+    /// Get a snapshot of the per-enemy Kills values in an <see cref="EnemyJournalKillData"/> as a name-to-int map.
+    /// </summary>
+    private static Dictionary<string, int> GetKillDataMap(EnemyJournalKillData? killData) {
+        var map = new Dictionary<string, int>();
+        if (killData?.Dictionary == null) {
+            return map;
+        }
+
+        foreach (var entry in killData.Dictionary) {
+            map[entry.Key] = entry.Value.Kills;
+        }
+
+        return map;
+    }
+
+    /// <summary>
+    /// Get a hash code for a named-int map that changes when any key is added or any value changes. Unlike
+    /// <see cref="GetListHashCode{T}"/> this incorporates both the key and the int value of each entry so that an
+    /// increment to an existing key (e.g. kills 3 -> 4) is detected.
+    /// </summary>
+    private static int GetNamedIntMapHashCode(Dictionary<string, int> map) {
+        if (map.Count == 0) {
+            return 0;
+        }
+
+        return map
+               .Select(pair => (pair.Key?.GetHashCode() ?? 0) * 397 ^ pair.Value)
+               .Aggregate((total, nextCode) => total ^ nextCode);
+    }
+
+    /// <summary>
     /// Get a copy of the given object for compound objects in the PlayerData, such as string lists, integer lists,
     /// completion for boss sequences or boss doors, etc.
     /// </summary>
@@ -1237,6 +1407,24 @@ internal class SaveManager {
                 };
             case HashSet<string> hashSetStringValue:
                 return new HashSet<string>(hashSetStringValue);
+            case CollectableItemsData collectablesValue: {
+                var copy = new CollectableItemsData();
+                foreach (var entry in collectablesValue.Enumerate()) {
+                    copy.SetData(entry.Key, entry.Value);
+                }
+
+                return copy;
+            }
+            case EnemyJournalKillData killDataValue: {
+                var copy = new EnemyJournalKillData();
+                if (killDataValue.Dictionary != null) {
+                    foreach (var entry in killDataValue.Dictionary) {
+                        copy.RecordKillData(entry.Key, entry.Value);
+                    }
+                }
+
+                return copy;
+            }
             default:
                 throw new ArgumentException($"Cannot get copy of value with type: {value.GetType()}");
         }

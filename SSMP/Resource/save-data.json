@@ -757,10 +757,11 @@
       "Additive": false
     },
     "Collectables": {
-      "Sync": false,
-      "SyncType": "Player",
+      "Sync": true,
+      "SyncType": "Server",
       "IgnoreSceneHost": true,
-      "VarType": "CollectableItemsData"
+      "VarType": "CollectableItemsData",
+      "Additive": true
     },
     "CollectedCommonSpine": {
       "Sync": true,
@@ -1133,10 +1134,11 @@
       "Additive": false
     },
     "EnemyJournalKillData": {
-      "Sync": false,
-      "SyncType": "Player",
+      "Sync": true,
+      "SyncType": "Server",
       "IgnoreSceneHost": true,
-      "VarType": "EnemyJournalKillData"
+      "VarType": "EnemyJournalKillData",
+      "Additive": true
     },
     "EnteredMazeRestScene": {
       "Sync": true,

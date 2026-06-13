@@ -1917,6 +1917,28 @@ internal abstract class ServerManager : IServerManager {
                         }
 
                         decodedNewValue = decodedCurrentSet;
+                    } else if (decodedCurrentValue is EnemyJournalKillData decodedCurrentKillData &&
+                               decodedDeltaValue is EnemyJournalKillData decodedDeltaKillData) {
+                        // Per-key SUM: add each delta's Kills onto the current Kills for that enemy.
+                        if (decodedDeltaKillData.Dictionary != null) {
+                            foreach (var entry in decodedDeltaKillData.Dictionary) {
+                                var current = decodedCurrentKillData.GetKillData(entry.Key);
+                                current.Kills += entry.Value.Kills;
+                                decodedCurrentKillData.RecordKillData(entry.Key, current);
+                            }
+                        }
+
+                        decodedNewValue = decodedCurrentKillData;
+                    } else if (decodedCurrentValue is CollectableItemsData decodedCurrentCollectables &&
+                               decodedDeltaValue is CollectableItemsData decodedDeltaCollectables) {
+                        // Per-key SUM: add each delta's Amount onto the current Amount for that collectable.
+                        foreach (var entry in decodedDeltaCollectables.Enumerate()) {
+                            var current = decodedCurrentCollectables.GetData(entry.Key);
+                            current.Amount += entry.Value.Amount;
+                            decodedCurrentCollectables.SetData(entry.Key, current);
+                        }
+
+                        decodedNewValue = decodedCurrentCollectables;
                     } else {
                         Logger.Debug($"  Type of decoded values did not match: {decodedCurrentValue.GetType()}");
                         return;
