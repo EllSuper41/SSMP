@@ -88,19 +88,20 @@ internal class KnockbackComponent : EntityComponent {
         // player already networked. Worse, the replica's direction is computed from the remote-player puppet's
         // scale, and under Silksong's inverted facing convention (FaceRight => localScale.x = -1) that sign
         // disagrees with the live attacker, so the duplicate comes out 180° inverted — the enemy recoils TOWARD
-        // the attacker on every screen. Drop it entirely: skip the apply (do not call orig) AND never network
-        // it. The correct recoil for this enemy arrives over the network and is applied in Update(). This runs
-        // before orig() so the spurious positional recoil is never applied. The check reuses the exact per-enemy
-        // bracket that FixDamageEnemies uses to roll back the replica's damage, so it inherits its correctness.
+        // the attacker on every screen. Drop it entirely: skip the apply (do not call orig) AND never network it.
+        // The correct recoil for this enemy arrives over the network and is applied in Update(). This runs before
+        // orig() so the spurious positional recoil is never applied. ConsumeRemoteVisualHitRecoil returns true only
+        // for a replica strike in the CURRENT fixed-update cycle and consumes the one-shot marker, so it cannot
+        // misfire on the enemy's own real recoils in a later cycle.
         // Never suppress a recoil we are replaying from the network: that one is the authoritative,
-        // world-space-correct recoil and must always be applied (it is also timed outside any replica's
-        // StoreHp/RestoreHp bracket, so this guard is belt-and-suspenders for the invariant).
+        // world-space-correct recoil and must always be applied (it is also timed outside any replica's strike
+        // cycle, so this guard is belt-and-suspenders for the invariant).
         if (isOurs && !_isApplyingReceivedRecoil) {
             var enemyObject = self == _recoil.Host ? GameObject.Host : GameObject.Client;
-            if (DamageAnimationEffect.IsApplyingRemoteVisualHitTo(enemyObject)) {
+            if (DamageAnimationEffect.ConsumeRemoteVisualHitRecoil(enemyObject)) {
                 SyncLog.Log(SyncLog.Knockback,
-                    $"suppress replica recoil | entity={EntityName()} dir={attackDirection} " +
-                    "(remote attack visual; authoritative recoil arrives over network)");
+                    $"drop replica recoil | entity={EntityName()} dir={attackDirection} " +
+                    "(remote player's attack visual; authoritative recoil handled separately)");
                 return;
             }
         }

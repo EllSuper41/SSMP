@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using SSMP.Internals;
 using SSMP.Util;
 using UnityEngine;
 using UnityEngine.Events;
+using Logger = SSMP.Logging.Logger;
 
 namespace SSMP.Animation;
 
@@ -26,6 +28,25 @@ internal abstract class DamageAnimationEffect : AnimationEffect {
     /// replicas to directly apply PvE damage.
     /// </summary>
     private static readonly Dictionary<int, int> RemoteVisualHitHpBefore = new();
+
+    /// <summary>
+    /// Enemy <see cref="HealthManager"/> instance id -> the <c>CustomPlayerLoop.FixedUpdateCycle</c> in which a
+    /// remote attack's visual replica is striking it. <see cref="ConsumeRemoteVisualHitRecoil"/> uses it to drop
+    /// the recoil that strike produces — a duplicate of, and (under Silksong's flipped facing-scale convention)
+    /// 180°-inverted copy of, the authoritative recoil the attacking player already networked.
+    /// <para>
+    /// Crucially this is a CYCLE STAMP, not a membership flag. The bracket that feeds it
+    /// (StoreHp via WillDamageEnemyOptions / RestoreHp via DamagedEnemyHealthManager) is NOT balanced: StoreHp
+    /// fires for every damaging replica hit, but RestoreHp only fires when the hit response is DamageEnemy — a
+    /// replica landing on an invincible / blocking / i-framed / dead enemy stores a key that is never removed.
+    /// A plain membership flag would then suppress that enemy's OWN real recoils forever. Because the marker is
+    /// stamped with the fixed-update cycle and consumed one-shot, such an orphaned key is honored only within its
+    /// own (already-finished) cycle and is ignored / purged the instant the cycle advances, so it can never
+    /// permanently suppress a real recoil. Memory-wise an orphaned key is no worse than the pre-existing
+    /// <see cref="RemoteVisualHitHpBefore"/> leak for the same blocked-hit case.
+    /// </para>
+    /// </summary>
+    private static readonly Dictionary<int, int> RemoteVisualHitRecoilCycle = new();
 
     /// <summary>
     /// Cached delegate to store enemy HP before applying remote visual-only damage.
@@ -140,6 +161,43 @@ internal abstract class DamageAnimationEffect : AnimationEffect {
 
             damageEnemies.DamagedEnemyHealthManager -= DamagedEnemyHealthManagerDelegate;
             damageEnemies.DamagedEnemyHealthManager += DamagedEnemyHealthManagerDelegate;
+
+            NeuterReplicaLagHits(damageEnemies);
+        }
+    }
+
+    /// <summary>
+    /// Field handle for <c>DamageEnemies.lagHitOptions</c> (private). Null if the field is absent (game update).
+    /// </summary>
+    private static readonly FieldInfo? LagHitOptionsField =
+        typeof(DamageEnemies).GetField("lagHitOptions", BindingFlags.NonPublic | BindingFlags.Instance);
+
+    /// <summary>
+    /// Field handle for <c>DamageEnemies.lagHitOptionsProfile</c> (private). Null if the field is absent.
+    /// </summary>
+    private static readonly FieldInfo? LagHitOptionsProfileField =
+        typeof(DamageEnemies).GetField("lagHitOptionsProfile", BindingFlags.NonPublic | BindingFlags.Instance);
+
+    /// <summary>
+    /// Disables lag-hits on a remote attack replica's damager. A lag-hit profile with HitCount &gt; 0 spawns a
+    /// coroutine (HealthManager.DoLagHits) that re-hits the enemy on LATER fixed-update cycles by calling
+    /// HealthManager.Hit directly — bypassing DamageEnemies entirely. Those re-hits would run recoil outside the
+    /// single-cycle window the recoil suppression marker covers (and deal real HP damage), re-introducing the
+    /// inverted-recoil bug. Replicas are visual-only, so they never need lag-hits: we point the damager at a fresh
+    /// empty <see cref="LagHitOptions"/> (HitCount 0 -> <c>ShouldDoLagHits()</c> false -> DoLagHits early-returns)
+    /// and clear any shared profile reference WITHOUT mutating the profile itself.
+    /// </summary>
+    /// <param name="damageEnemies">The replica damager to neuter.</param>
+    private static void NeuterReplicaLagHits(DamageEnemies damageEnemies) {
+        try {
+            // Clear the profile first so the LagHits getter falls back to lagHitOptions (never mutate the shared
+            // ScriptableObject profile — it is referenced by the real prefab too).
+            LagHitOptionsProfileField?.SetValue(damageEnemies, null);
+            // A fresh instance defaults HitCount to 0; this also guarantees LagHits is never null (DoLagHits calls
+            // ShouldDoLagHits() on it unconditionally).
+            LagHitOptionsField?.SetValue(damageEnemies, new LagHitOptions());
+        } catch (Exception e) {
+            Logger.Warn($"Could not neuter replica lag-hits: {e.Message}");
         }
     }
 
@@ -149,7 +207,13 @@ internal abstract class DamageAnimationEffect : AnimationEffect {
     /// <param name="healthManager">The health manager that is about to be damaged.</param>
     /// <param name="hitInstance">The hit instance that is about to be applied.</param>
     private static void StoreHpBeforeRemoteVisualHit(HealthManager healthManager, HitInstance hitInstance) {
-        RemoteVisualHitHpBefore[healthManager.GetInstanceID()] = healthManager.hp;
+        var id = healthManager.GetInstanceID();
+        RemoteVisualHitHpBefore[id] = healthManager.hp;
+        // Stamp this enemy as struck by a remote attack replica in the current fixed-update cycle. The replica's
+        // recoil (if it produces one) runs later in the SAME cycle: DamageEnemies.LateFixedUpdate calls
+        // EvaluateDamage (which fires this StoreHp) and then ProcessDamageBuffer (which applies the hit, and the
+        // recoil inside HealthManager.TakeDamage) without yielding, so the cycle value matches at the recoil.
+        RemoteVisualHitRecoilCycle[id] = CustomPlayerLoop.FixedUpdateCycle;
     }
 
     /// <summary>
@@ -158,6 +222,9 @@ internal abstract class DamageAnimationEffect : AnimationEffect {
     /// <param name="healthManager">The health manager that was damaged by the remote visual-only hit.</param>
     private static void RestoreHpAfterRemoteVisualHit(HealthManager healthManager) {
         var instanceId = healthManager.GetInstanceID();
+        // Clear the recoil marker for the balanced (damaging) case. Blocked/invincible/dead hits never reach here,
+        // but their orphaned markers are rendered harmless by the per-cycle stamp in ConsumeRemoteVisualHitRecoil.
+        RemoteVisualHitRecoilCycle.Remove(instanceId);
         if (!RemoteVisualHitHpBefore.Remove(instanceId, out var hpBeforeHit)) {
             return;
         }
@@ -166,26 +233,43 @@ internal abstract class DamageAnimationEffect : AnimationEffect {
     }
 
     /// <summary>
-    /// Whether a remote player's attack replica is currently applying its (PvE-damage-rolled-back) hit to the
-    /// given enemy object's <see cref="HealthManager"/>. While true, any <see cref="Recoil.RecoilByDirection"/>
-    /// on that enemy is being driven by the replica rather than by a real local hit, and must be suppressed: the
-    /// replica's recoil duplicates — and, under Silksong's inverted facing-scale convention
-    /// (FaceRight =&gt; localScale.x = -1), 180°-inverts — the authoritative recoil the attacking player already
-    /// networked, so the enemy recoils toward the attacker on every screen.
-    /// <see cref="Game.Client.Entity.Component.KnockbackComponent"/> uses this to drop those replica-driven
-    /// recoils, leaving only the networked, world-space-correct recoil.
+    /// Returns true — and consumes the marker — iff the recoil about to run on <paramref name="enemyObject"/> is
+    /// being driven by a remote player's attack VISUAL replica striking it in the CURRENT fixed-update cycle. Such
+    /// a recoil duplicates — and, under Silksong's inverted facing-scale convention (FaceRight =&gt; localScale.x =
+    /// -1), 180°-inverts — the authoritative recoil the attacking player already networked, so it would make the
+    /// enemy recoil toward the attacker on every screen. <see cref="Game.Client.Entity.Component.KnockbackComponent"/>
+    /// uses this to drop those replica-driven recoils, leaving only the networked, world-space-correct recoil.
+    /// <para>
+    /// The marker is stamped with the fixed-update cycle (see <see cref="RemoteVisualHitRecoilCycle"/>) and removed
+    /// on lookup, so it is one-shot and cannot leak into the enemy's own later recoils: a marker orphaned by a
+    /// blocked / invincible / dead-target replica hit lives in an earlier cycle and is rejected (and purged) here.
+    /// </para>
     /// </summary>
     /// <param name="enemyObject">The live enemy object (host enemy or puppet) whose recoil is being evaluated.</param>
-    /// <returns>True if a remote visual-only hit is in progress on this enemy, false otherwise.</returns>
-    internal static bool IsApplyingRemoteVisualHitTo(GameObject? enemyObject) {
-        // Fast path: the bracket dictionary is only non-empty between StoreHp and RestoreHp of a replica hit,
-        // so almost every recoil (real local hits, networked recoil replay) short-circuits here without a
-        // GetComponent lookup.
-        if (RemoteVisualHitHpBefore.Count == 0 || enemyObject == null) {
+    /// <returns>True if this recoil is a current-cycle remote visual-only replica hit and must be dropped.</returns>
+    internal static bool ConsumeRemoteVisualHitRecoil(GameObject? enemyObject) {
+        // Fast path: the marker map is empty except during a replica's strike, so almost every recoil (real local
+        // hits, networked recoil replay) short-circuits here without a GetComponent lookup.
+        if (RemoteVisualHitRecoilCycle.Count == 0 || enemyObject == null) {
             return false;
         }
 
         var healthManager = enemyObject.GetComponent<HealthManager>();
-        return healthManager != null && RemoteVisualHitHpBefore.ContainsKey(healthManager.GetInstanceID());
+        if (healthManager == null) {
+            return false;
+        }
+
+        var id = healthManager.GetInstanceID();
+        if (!RemoteVisualHitRecoilCycle.TryGetValue(id, out var cycle)) {
+            return false;
+        }
+
+        // One-shot: remove regardless of the cycle check, so a stale marker self-purges and a real recoil later in
+        // the same cycle is never affected by a marker we have already accounted for.
+        RemoteVisualHitRecoilCycle.Remove(id);
+
+        // Honor the marker only if it was stamped in the CURRENT cycle. An orphaned marker (from a blocked / None
+        // replica hit that produced no recoil) belongs to an already-finished cycle and is dropped here harmlessly.
+        return cycle == CustomPlayerLoop.FixedUpdateCycle;
     }
 }
