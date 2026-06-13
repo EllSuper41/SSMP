@@ -3210,6 +3210,12 @@ internal static class EntityFsmActions {
     #region FlingObjectsFromGlobalPoolTime
 
     private static bool GetNetworkDataFromAction(EntityNetworkData data, FlingObjectsFromGlobalPoolTime action) {
+        // Registered entities go through the EntitySpawn path; don't also replay a cosmetic copy (double-spawn).
+        // Same gate as the other timer-driven pool spawns.
+        if (action.gameObject?.Value != null && IsObjectInRegistry(action.gameObject.Value)) {
+            return false;
+        }
+
         return true;
     }
 
@@ -3225,6 +3231,12 @@ internal static class EntityFsmActions {
         IEnumerator Behaviour() {
             while (true) {
                 yield return new WaitForSeconds(action.frequency.Value);
+
+                // Terminate when the client entity that owns this FSM is destroyed, so the coroutine does
+                // not loop forever after the puppet despawns (same guard as the sibling timed spawns)
+                if (action.Fsm == null || action.Fsm.GameObject == null) {
+                    yield break;
+                }
 
                 if (action.gameObject.Value == null) {
                     break;

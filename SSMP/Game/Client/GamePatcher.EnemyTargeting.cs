@@ -592,7 +592,7 @@ internal partial class GamePatcher {
     /// <summary>
     /// Resolves the player root that owns an attack source object. Parented attacks (nail slashes)
     /// resolve through the transform hierarchy; detached attacks (projectiles, silk skills) resolve
-    /// through the <see cref="SSMP.Util.EffectOwnerComponent"/> tag applied when the effect was created.
+    /// through the <see cref="SSMP.Util.AttackOwnerComponent"/> tag applied when the effect was created.
     /// </summary>
     /// <param name="source">The damager object from the hit instance.</param>
     /// <returns>The tracked player root, or null if the hit is not attributable to a player.</returns>
