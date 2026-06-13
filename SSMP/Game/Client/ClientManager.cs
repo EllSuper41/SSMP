@@ -67,6 +67,12 @@ internal class ClientManager : IClientManager {
     private readonly ModSettings _modSettings;
 
     /// <summary>
+    /// Exclusive lock held for the process lifetime to detect whether this is the first SSMP instance using
+    /// this config folder on the machine (so a second local instance can be given a distinct auth key).
+    /// </summary>
+    private static System.IO.FileStream? _instanceLock;
+
+    /// <summary>
     /// The player manager instance.
     /// </summary>
     private readonly PlayerManager _playerManager;
@@ -276,11 +282,33 @@ internal class ClientManager : IClientManager {
         var envAuthKey = System.Environment.GetEnvironmentVariable("SSMP_AUTHKEY");
         if (!string.IsNullOrEmpty(envAuthKey) && AuthUtil.IsValidAuthKey(envAuthKey)) {
             _modSettings.AuthKey = envAuthKey;
-        } else if (!string.IsNullOrEmpty(System.Environment.GetEnvironmentVariable("SSMP_FRESH_AUTHKEY"))) {
-            _modSettings.AuthKey = AuthUtil.GenerateAuthKey();
-        } else if (!AuthUtil.IsValidAuthKey(_modSettings.AuthKey)) {
-            // Check if there is a valid authentication key and if not, generate a new one
-            _modSettings.AuthKey = AuthUtil.GenerateAuthKey();
+            Logger.Info("Using auth key from SSMP_AUTHKEY environment variable");
+        } else {
+            // Detect a second instance on this machine. Two instances share modsettings.json and thus one
+            // AuthKey; the server dedupes sessions by AuthKey and would drop one of them. The FIRST instance
+            // holds an exclusive lock file and keeps its saved key; a SECOND instance fails to take the lock
+            // and gets a distinct in-memory key (the AuthKey setter does not persist, so the shared file is
+            // untouched). SSMP_FRESH_AUTHKEY forces fresh regardless.
+            var fresh = !string.IsNullOrEmpty(System.Environment.GetEnvironmentVariable("SSMP_FRESH_AUTHKEY"));
+            if (!fresh) {
+                try {
+                    var lockPath = System.IO.Path.Combine(FileUtil.GetConfigPath(), "ssmp_instance.lock");
+                    _instanceLock = new System.IO.FileStream(
+                        lockPath, System.IO.FileMode.OpenOrCreate, System.IO.FileAccess.ReadWrite,
+                        System.IO.FileShare.None
+                    );
+                } catch {
+                    // Another instance already holds the lock -> we are a secondary local instance
+                    fresh = true;
+                }
+            }
+
+            if (fresh) {
+                _modSettings.AuthKey = AuthUtil.GenerateAuthKey();
+                Logger.Info("Secondary/fresh SSMP instance detected — using a per-instance auth key this session");
+            } else if (!AuthUtil.IsValidAuthKey(_modSettings.AuthKey)) {
+                _modSettings.AuthKey = AuthUtil.GenerateAuthKey();
+            }
         }
 
         // Then authorize the key on the locally hosted server
