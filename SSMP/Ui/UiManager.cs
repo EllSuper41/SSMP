@@ -544,6 +544,11 @@ internal class UiManager : IUiManager {
     public void EnterGameFromMultiplayerMenu(bool newGame) {
         IH.StopUIInput();
         _connectGroup.SetActive(false);
+        // Also hide the menu background panel + glowing notch. These are parented to the root UI object
+        // (not to _connectGroup), so SetActive(false) above does NOT hide them. The host enters via
+        // GoToSaveMenu -> HideMultiplayerMenu (which hides them), but the client enters here, so without
+        // this the dark menu panel stays on screen in-game as a large black square.
+        _connectInterface.SetMenuActive(false);
         PlayMenuTransitionAudio();
 
         Logger.Debug($"Entering game from MP menu for {(newGame ? "new" : "continued")} game");

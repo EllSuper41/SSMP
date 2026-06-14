@@ -72,9 +72,14 @@ internal class ModServerManager : ServerManager {
         // pick their own save slot instead of loading the host's world.
         _uiManager.RequestServerStartHostEvent += (_, port, _, transportType, _) =>
             OnRequestServerStartHost(port, fullSynchronisation: true, transportType);
-        _uiManager.RequestServerStopHostEvent += Stop;
+        _uiManager.RequestServerStopHostEvent += OnRequestServerStopHost;
         PlayerConnectEvent += _ => UpdateMatchmakingRemotePlayerCount();
-        PlayerDisconnectEvent += _ => UpdateMatchmakingRemotePlayerCount();
+        PlayerDisconnectEvent += _ => {
+            // Persist immediately while this player's accumulated ServerSaveData is still intact (it is kept on
+            // disconnect, only the live mapping is removed), so a host restart never forgets a player who left.
+            PersistRemotePlayersToDisk(GetActiveSaveSlot());
+            UpdateMatchmakingRemotePlayerCount();
+        };
         ServerShutdownEvent += () => UpdateMatchmakingRemotePlayerCount(0);
 
         EventHooks.GameManagerSaveGame += OnGameSave;
@@ -187,9 +192,42 @@ internal class ModServerManager : ServerManager {
             return;
         }
 
-        try {
-            Logging.Logger.Info($"Intercepted native save for slot {saveSlot}. Saving remote players' save data...");
+        Logging.Logger.Info($"Intercepted native save for slot {saveSlot}. Saving remote players' save data...");
+        PersistRemotePlayersToDisk(saveSlot);
+    }
 
+    /// <summary>
+    /// Called when the UI requests the host to stop. Persists remote players to disk BEFORE tearing the server
+    /// down (ServerSaveData is still intact at this point) so the host's save reliably holds both players, then
+    /// stops the server.
+    /// </summary>
+    private void OnRequestServerStopHost() {
+        PersistRemotePlayersToDisk(GetActiveSaveSlot());
+        Stop();
+    }
+
+    /// <summary>
+    /// The save slot to persist remote-player data under. Mirrors the slot used by the load path
+    /// (<see cref="OnRequestServerStartHost"/>) so a re-host reliably finds the file.
+    /// </summary>
+    private static int GetActiveSaveSlot() {
+        var gm = global::GameManager.instance;
+        return gm != null ? gm.profileID : -1;
+    }
+
+    /// <summary>
+    /// Serializes remote players' save data to disk for the given save slot. Called on the host's native save,
+    /// on every player disconnect, and on host stop — so a host restart restores BOTH players' full progress,
+    /// not only whatever happened to be captured at the last bench save. A write that would contain no remote
+    /// player data is skipped, so a stray/early call can never clobber an existing good save with an empty one.
+    /// </summary>
+    /// <param name="saveSlot">The save slot index to write under.</param>
+    private void PersistRemotePlayersToDisk(int saveSlot) {
+        if (!FullSynchronisation || saveSlot < 0) {
+            return;
+        }
+
+        try {
             // Create a copy of ServerSaveData for serialization
             var modSaveFile = ModSaveFile.FromServerSaveData(ServerSaveData);
 
@@ -197,6 +235,13 @@ internal class ModServerManager : ServerManager {
             var hostAuthKey = _modSettings.AuthKey;
             if (hostAuthKey != null) {
                 modSaveFile.PlayerSaveData.Remove(hostAuthKey);
+            }
+
+            // Never overwrite a good file with an empty one (e.g. a player who connected and dropped before
+            // sending any save data). Nothing to persist -> leave the existing file untouched.
+            if (modSaveFile.PlayerSaveData.Count == 0) {
+                Logging.Logger.Info("No remote player save data to persist, leaving existing file untouched");
+                return;
             }
 
             var configPath = FileUtil.GetConfigPath();
@@ -208,7 +253,8 @@ internal class ModServerManager : ServerManager {
             var json = JsonConvert.SerializeObject(modSaveFile, Formatting.Indented);
             File.WriteAllText(modSavePath, json);
 
-            Logging.Logger.Info($"Remote players' save data successfully written to {modSavePath}");
+            Logging.Logger.Info(
+                $"Remote players' save data written to {modSavePath} ({modSaveFile.PlayerSaveData.Count} player(s))");
         } catch (Exception e) {
             Logging.Logger.Error($"Could not save remote players' save data to disk: {e}");
         }
