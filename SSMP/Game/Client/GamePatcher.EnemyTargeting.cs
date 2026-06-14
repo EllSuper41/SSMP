@@ -818,8 +818,36 @@ internal partial class GamePatcher {
 
         _nextEnemyRetargetTime = Time.unscaledTime + EnemyRetargetIntervalSeconds;
 
+        BootstrapProximityAcquisition();
         UpdateCachedTargetField<WalkerV2>(WalkerV2HeroField);
         UpdateCachedTargetField<ScuttlerControl>(ScuttlerControlHeroField);
+    }
+
+    /// <summary>
+    /// Actively polls each scene-host-simulated enemy's acquiring <see cref="AlertRange"/>s so idle enemies whose
+    /// FSM does not poll <c>IsHeroInRange</c> itself — and whose vanilla wake is driven by the LOCAL hero's trigger,
+    /// which a remote puppet never fires — still acquire a nearby tracked player by proximity. Calling
+    /// <c>IsHeroInRange()</c> runs <see cref="OnAlertRangeIsHeroInRange"/>, which approves the nearest in-range
+    /// visible player (guarded by <see cref="CanAcquireMultiplayerTarget"/> and the aggro-lock). On puppet machines
+    /// the host object and its ranges are inactive, so this is a no-op there.
+    /// </summary>
+    private static void BootstrapProximityAcquisition() {
+        if (_entityManagerInstance == null) {
+            return;
+        }
+
+        foreach (var entity in _entityManagerInstance.ActiveEntities) {
+            var hostObject = entity?.Object.Host;
+            if (hostObject == null || !hostObject.activeInHierarchy) {
+                continue;
+            }
+
+            foreach (var alertRange in hostObject.GetComponentsInChildren<AlertRange>()) {
+                if (alertRange != null && alertRange.isActiveAndEnabled && CanAcquireMultiplayerTarget(alertRange)) {
+                    alertRange.IsHeroInRange();
+                }
+            }
+        }
     }
 
     /// <summary>

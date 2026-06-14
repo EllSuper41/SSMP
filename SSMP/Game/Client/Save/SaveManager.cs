@@ -1091,14 +1091,16 @@ internal class SaveManager {
                 }
             }
 
-
-            // sceneData.SaveMyState(new GeoRockData {
-            //     id = itemData.Id,
-            //     sceneName = itemData.SceneName,
-            //     activated = value
-            // });
-
-            _saveChanges.ApplyPersistentValueSaveChange(itemData);
+            // Persist into SceneData so the change survives even when this player is NOT in the affected scene
+            // (e.g. a wall/door/lever broken by another player in a different room). The live-object loop above
+            // only matches when we are already in that scene; without writing SceneData the broken state would be
+            // lost and the object would be intact again when this player later walks in. Mirrors how the game's own
+            // PersistentBoolItem.SaveValue persists (SceneData.instance.PersistentBools.SetValue).
+            SceneData.instance.PersistentBools.SetValue(new PersistentItemData<bool> {
+                SceneName = itemData.SceneName,
+                ID = itemData.Id,
+                Value = value
+            });
         } else if (SaveDataMapping.PersistentIntIndices.TryGetValue(index, out itemData)) {
             if (CheckPlayerSpecificHosting(SaveDataMapping.PersistentIntVarProperties, itemData)) {
                 return;
@@ -1122,13 +1124,13 @@ internal class SaveManager {
                 }
             }
 
-            // sceneData.SaveMyState(new PersistentIntData {
-            //     id = itemData.Id,
-            //     sceneName = itemData.SceneName,
-            //     value = value
-            // });
-
-            _saveChanges.ApplyPersistentValueSaveChange(itemData);
+            // Persist into SceneData so the change survives when this player is not currently in the scene
+            // (see the persistent-bool branch above for the full rationale).
+            SceneData.instance.PersistentInts.SetValue(new PersistentItemData<int> {
+                SceneName = itemData.SceneName,
+                ID = itemData.Id,
+                Value = value
+            });
         }
 
         // Do the checks for whether the player is hosting and the received save data is player specific and should

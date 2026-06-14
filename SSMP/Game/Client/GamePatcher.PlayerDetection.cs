@@ -184,6 +184,20 @@ internal partial class GamePatcher {
     /// </summary>
     /// <param name="self">The detector being updated.</param>
     private static void OnLineOfSightDetectorUpdate(LineOfSightDetector self) {
+        // Drive proximity acquisition the way vanilla LineOfSightDetector.Update did: poll each alert range's
+        // IsHeroInRange(), which runs our OnAlertRangeIsHeroInRange hook and approves a tracked player that is
+        // inside the range and visible. This replacement method had removed that poll, leaving the only
+        // acquisition path (ApproveEnemyTarget, called solely from OnAlertRangeIsHeroInRange) with nothing to
+        // call it — so idle LOS enemies never aggroed a remote player by proximity, only when hit. The acquisition
+        // guards (CanAcquireMultiplayerTarget, aggro-lock, line-of-sight) all stay inside the hook.
+        if (LineOfSightDetectorAlertRangesField?.GetValue(self) is AlertRange[] alertRanges) {
+            foreach (var alertRange in alertRanges) {
+                if (alertRange != null && alertRange.isActiveAndEnabled) {
+                    alertRange.IsHeroInRange();
+                }
+            }
+        }
+
         var target = GetNearestVisiblePlayer(self);
         var canSeeHero = false;
 

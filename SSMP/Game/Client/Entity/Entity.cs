@@ -660,15 +660,19 @@ internal class Entity {
         if (_isControlled) {
             if (hostObjectActive) {
                 if (!_isSceneHostDetermined) {
-                    //Logger.Info(
-                    //    $"Entity '{Object.Host.name}' host object became active, but scene host is not determined yet, re-disabling for now"
-                    //);
+                    // Scene role not known yet (this client entered the scene first). The game activated this
+                    // enemy directly (not via the hooked ActivateGameObject action). Do NOT tear it down:
+                    // SetActive(false) here every frame permanently kills its movement coroutines and leaves its
+                    // FSM dormant (e.g. WalkerV2.walkRoutine is stopped+nulled in OnDisable and never restarts,
+                    // FSMActivator stays stuck, a PlayMaker FSM resumes dormant) — so once we are confirmed as the
+                    // scene host the enemy just stands there. Leave it running and only record that it should be
+                    // active; InitializeHost's SetActive(true) is then a no-op that keeps the live AI, and if we
+                    // turn out to be a puppet the branch below disables it once the role is determined.
                     _originalIsActive = true;
                 } else {
                     //Logger.Info($"Entity '{Object.Host.name}' host object became active, re-disabling");
+                    Object.Host.SetActive(false);
                 }
-
-                Object.Host.SetActive(false);
             }
 
             if (Object.Client != null &&
@@ -978,6 +982,18 @@ internal class Entity {
     /// </summary>
     public void InitializeClient(uint sceneHostEpoch = 0) {
         _isSceneHostDetermined = true;
+
+        // We are a puppet for this entity, so the host object must be inactive (the real enemy is simulated by the
+        // scene host). Disable it immediately instead of waiting for the OnUpdate re-disable branch a frame later:
+        // during the role-unknown window we now LEAVE a game-activated host object running (so its AI is not torn
+        // down if we turn out to be the scene host), so on the puppet path it must be shut off right here.
+        // Otherwise the live, non-owned enemy keeps its collider/DamageHero/Recoil/HealthManager active for the
+        // whole window plus the main-thread lag — it could contact-damage the local player, and a local kill would
+        // destroy the real enemy and broadcast a Death packet from a non-owner. InitializeClient runs on the
+        // network receive thread, so the lag before OnUpdate (main thread) would otherwise be real.
+        if (Object.Host != null) {
+            Object.Host.SetActive(false);
+        }
 
         // Deregister the hook for updating the active value of the host object
         _activateGameObjectHook?.Dispose();
