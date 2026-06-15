@@ -1337,38 +1337,71 @@ internal class SaveManager {
             fieldInfo => fieldInfo.GetValue(pd)
         );
 
-        // AddToSaveData(
-        //     sd.geoRocks,
-        //     geoRock => new PersistentItemKey {
-        //         Id = geoRock.id,
-        //         SceneName = geoRock.sceneName
-        //     },
-        //     SaveDataMapping.GeoRockBools,
-        //     SaveDataMapping.GeoRockIndices,
-        //     geoRock => geoRock.hitsLeft
-        // );
+        // Seed the host's PRE-EXISTING world geometry (broken walls, opened gates, drained levers, etc.) into the
+        // GlobalSaveData so a connecting client receives the host's authoritative world baseline — not just the live
+        // session deltas. We enumerate the loaded save's SceneData persistent bool/int collections directly (these
+        // are the live Silksong API; the old HK1 'sd.persistentBoolItems' list no longer exists). Geo rocks are
+        // SyncType.Player and are deliberately NOT seeded here.
         //
-        // AddToSaveData(
-        //     sd.persistentBoolItems,
-        //     boolData => new PersistentItemKey {
-        //         Id = boolData.id,
-        //         SceneName = boolData.sceneName
-        //     },
-        //     SaveDataMapping.PersistentBoolVarProperties,
-        //     SaveDataMapping.PersistentBoolIndices,
-        //     boolData => boolData.activated
-        // );
-        //
-        // AddToSaveData(
-        //     sd.persistentIntItems,
-        //     intData => new PersistentItemKey {
-        //         Id = intData.id,
-        //         SceneName = intData.sceneName
-        //     },
-        //     SaveDataMapping.PersistentIntVarProperties,
-        //     SaveDataMapping.PersistentIntIndices,
-        //     intData => intData.value
-        // );
+        // ENCODING NOTE: the byte layout MUST be byte-identical to the live update path (OnUpdatePersistents /
+        // UpdateSaveWithData), otherwise the client decodes garbage. The live path bypasses EncodeSaveDataValue and
+        // writes a single raw byte for both bools and ints:
+        //   bool -> BitConverter.GetBytes(bool) == [0x01]/[0x00], decoded as encodedValue[0] == 1
+        //   int  -> [(byte) value], decoded as (int) encodedValue[0] with 255 remapped to -1
+        // We mirror that exactly below; do NOT route these through EncodeSaveDataValue.
+        if (server) {
+            var sceneData = SceneData.instance;
+
+            if (sceneData != null) {
+                foreach (var item in sceneData.PersistentBools.serializedList) {
+                    // Normalize the scene the same way the live key does (GameManager.GetBaseSceneName), so seeded
+                    // keys collide-merge with live keys instead of producing duplicate/missed entries.
+                    var key = new PersistentItemKey {
+                        Id = item.ID,
+                        SceneName = global::GameManager.GetBaseSceneName(item.SceneName)
+                    };
+
+                    if (!SaveDataMapping.PersistentBoolVarProperties.TryGetValue(key, out var varProps)) {
+                        continue;
+                    }
+
+                    // Only seed values that are synced AND are server (world) data.
+                    if (!varProps.Sync || varProps.SyncType != SaveDataMapping.SyncType.Server) {
+                        continue;
+                    }
+
+                    if (!SaveDataMapping.PersistentBoolIndices.TryGetValue(key, out var index)) {
+                        continue;
+                    }
+
+                    // Raw single byte, byte-identical to the live send path (BitConverter.GetBytes(bool)).
+                    saveData[index] = new[] { (byte) (item.Value ? 1 : 0) };
+                }
+
+                foreach (var item in sceneData.PersistentInts.serializedList) {
+                    var key = new PersistentItemKey {
+                        Id = item.ID,
+                        SceneName = global::GameManager.GetBaseSceneName(item.SceneName)
+                    };
+
+                    if (!SaveDataMapping.PersistentIntVarProperties.TryGetValue(key, out var varProps)) {
+                        continue;
+                    }
+
+                    if (!varProps.Sync || varProps.SyncType != SaveDataMapping.SyncType.Server) {
+                        continue;
+                    }
+
+                    if (!SaveDataMapping.PersistentIntIndices.TryGetValue(key, out var index)) {
+                        continue;
+                    }
+
+                    // Raw single byte, byte-identical to the live send path ([(byte) value]). Values 0..254 map to
+                    // themselves; -1 encodes as (byte)(-1) == 255, which the receiver remaps back to -1.
+                    saveData[index] = new[] { (byte) item.Value };
+                }
+            }
+        }
 
         return saveData;
     }

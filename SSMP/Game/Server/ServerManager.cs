@@ -1206,10 +1206,10 @@ internal abstract class ServerManager : IServerManager {
 
         if (ServerSaveData.IsSteelSoul()) {
             // We are running a Steel Soul save file, so we wipe the player-specific data for the player
-            ServerSaveData.PlayerSaveData.Remove(playerData.AuthKey);
+            ServerSaveData.RemovePlayer(playerData.AuthKey);
             // Also forget that we have ever seen this player, so NewForPlayer (now derived from SeenPlayers)
             // becomes true again on reconnect and the dead player is correctly restarted via RunStartNewGame.
-            ServerSaveData.SeenPlayers.Remove(playerData.AuthKey);
+            ServerSaveData.RemoveSeen(playerData.AuthKey);
 
             Logger.Info("  Wiped player save data (Steel Soul)");
         }
@@ -1227,8 +1227,6 @@ internal abstract class ServerManager : IServerManager {
                 var epoch = GetNextSceneHostEpoch(sceneName);
                 var newHostPair = scenePlayers[0];
                 newHostPair.Value.IsSceneHost = true;
-                playerData.IsSceneHost = false;
-                playerData.LastHostedScene = sceneName;
 
                 Logger.Info(
                     $"Player {id} ({playerData.Username}) died. Host transferred to {newHostPair.Key} ({newHostPair.Value.Username}) in scene {sceneName} (epoch {epoch})"
@@ -1239,7 +1237,20 @@ internal abstract class ServerManager : IServerManager {
                     var isNewHost = (pair.Key == newHostPair.Key);
                     updateManager?.SetSceneHostTransfer(sceneName, epoch, demote: !isNewHost);
                 }
+
+                // Also demote the dying-but-still-connected player so its EntityManager stops simulating and
+                // broadcasting the boss during the multi-second death animation (otherwise it fights the new host).
+                // Harmless if the dying client already changed scenes: OnSceneHostTransfer ignores it via its
+                // current-scene name guard.
+                _netServer.GetUpdateManagerForClient(id)?.SetSceneHostTransfer(sceneName, epoch, demote: true);
             }
+        }
+
+        if (FullSynchronisation) {
+            // Reset the dying player's scene-host flag unconditionally (mirrors HandlePlayerLeaveScene). This
+            // covers the empty-scene case where there was no surviving player to promote: without this the dead
+            // player would remain flagged scene host, denying host to a later entrant.
+            playerData.IsSceneHost = false;
         }
 
         SendDataInSameScene(
@@ -1559,7 +1570,7 @@ internal abstract class ServerManager : IServerManager {
             // current save so that a returning player (whose deltas may be momentarily missing) is treated as a
             // reconnect rather than a first-join. Even a zero-delta session counts as seen and survives to disk via
             // the always-write persist path.
-            ServerSaveData.SeenPlayers.Add(clientInfo.AuthKey);
+            ServerSaveData.AddSeen(clientInfo.AuthKey);
 
             // Obtain the save data for the connecting client and add it to the server info
             serverInfo.CurrentSave = ServerSaveData.GetCurrentSaveData(clientInfo.AuthKey);
@@ -1869,95 +1880,116 @@ internal abstract class ServerManager : IServerManager {
         if (varProps.SyncType == SaveDataMapping.SyncType.Player) {
             Logger.Debug("  SyncType is Player");
 
-            if (!ServerSaveData.PlayerSaveData.TryGetValue(playerData.AuthKey, out var playerSaveData)) {
-                Logger.Debug("  No PlayerSaveData for player yet, creating one");
-                playerSaveData = new Dictionary<ushort, byte[]>();
-                ServerSaveData.PlayerSaveData[playerData.AuthKey] = playerSaveData;
-            }
-
-            playerSaveData[packet.SaveDataIndex] = packet.Value;
+            ServerSaveData.SetPlayerValue(playerData.AuthKey, packet.SaveDataIndex, packet.Value);
 
             SyncLog.Log(SyncLog.Server,
                 $"store PER-PLAYER | from={id}({playerData.Username}) index={packet.SaveDataIndex} (no broadcast)");
         } else if (varProps.SyncType == SaveDataMapping.SyncType.Server) {
-            if (varProps.Additive) {
-                if (pdVarName == null) {
-                    Logger.Debug("  Cannot decode value, name for variable is null");
+            if (varProps.Additive && pdVarName == null) {
+                Logger.Debug("  Cannot decode value, name for variable is null");
+                return;
+            }
+
+            // Run the read-modify-write as ONE atomic operation under the save lock. The merge delegate receives the
+            // CURRENT stored bytes (or null if absent), runs the existing additive logic, and returns the new bytes
+            // to store (or null to ABORT the store entirely, mirroring the original type-mismatch early-return). The
+            // delegate touches only local decoded objects + EncodeUtil — it never re-enters a locking ServerSaveData
+            // method, so the non-reentrant lock is safe. We capture the stored value to broadcast AFTER the lock is
+            // released (the broadcast loop below is OUTSIDE the lock).
+            byte[]? storedValue;
+
+            if (!varProps.Additive) {
+                // Non-additive Server field: store the value as-is.
+                storedValue = packet.Value;
+                ServerSaveData.SetGlobalValue(packet.SaveDataIndex, storedValue);
+            } else {
+                var decodedDeltaValue = EncodeUtil.DecodeSaveDataValue(pdVarName!, packet.Value);
+
+                storedValue = ServerSaveData.WriteGlobal(packet.SaveDataIndex, currentValue => {
+                    object? decodedCurrentValue = null;
+                    var newBytes = packet.Value;
+
+                    if (currentValue == null) {
+                        Logger.Debug($"No current value is stored in the global save data for: {pdVarName}");
+
+                        if (varProps.InitialValue != null) {
+                            Logger.Debug($"  Taking initial value: {varProps.InitialValue}");
+                            decodedCurrentValue = varProps.InitialValue;
+                        } else {
+                            Logger.Debug("  No initial value defined, using delta as absolute");
+                            newBytes = EncodeUtil.EncodeSaveDataValue(decodedDeltaValue, pdVarName!);
+                        }
+                    } else {
+                        decodedCurrentValue = EncodeUtil.DecodeSaveDataValue(pdVarName!, currentValue);
+                    }
+
+                    if (decodedCurrentValue != null) {
+                        object? decodedNewValue;
+
+                        if (decodedCurrentValue is int decodedCurrentInt && decodedDeltaValue is int decodedDeltaInt) {
+                            decodedNewValue = decodedCurrentInt + decodedDeltaInt;
+                        } else if (decodedCurrentValue is List<string> decodedCurrentStringList &&
+                                   decodedDeltaValue is IEnumerable<string> decodedDeltaStringEnum) {
+                            // Loop over the delta list and add only non-duplicates
+                            foreach (var str in decodedDeltaStringEnum) {
+                                if (!decodedCurrentStringList.Contains(str)) {
+                                    decodedCurrentStringList.Add(str);
+                                }
+                            }
+
+                            decodedNewValue = decodedCurrentStringList;
+                        } else if (decodedCurrentValue is HashSet<string> decodedCurrentSet &&
+                                   decodedDeltaValue is IEnumerable<string> decodedDeltaEnum) {
+                            // Loop over the delta list and add to the HashSet
+                            foreach (var str in decodedDeltaEnum) {
+                                decodedCurrentSet.Add(str);
+                            }
+
+                            decodedNewValue = decodedCurrentSet;
+                        } else if (decodedCurrentValue is EnemyJournalKillData decodedCurrentKillData &&
+                                   decodedDeltaValue is EnemyJournalKillData decodedDeltaKillData) {
+                            // Per-key SUM: add each delta's Kills onto the current Kills for that enemy.
+                            if (decodedDeltaKillData.Dictionary != null) {
+                                foreach (var entry in decodedDeltaKillData.Dictionary) {
+                                    var current = decodedCurrentKillData.GetKillData(entry.Key);
+                                    current.Kills += entry.Value.Kills;
+                                    decodedCurrentKillData.RecordKillData(entry.Key, current);
+                                }
+                            }
+
+                            decodedNewValue = decodedCurrentKillData;
+                        } else if (decodedCurrentValue is CollectableItemsData decodedCurrentCollectables &&
+                                   decodedDeltaValue is CollectableItemsData decodedDeltaCollectables) {
+                            // Per-key SUM: add each delta's Amount onto the current Amount for that collectable.
+                            foreach (var entry in decodedDeltaCollectables.Enumerate()) {
+                                var current = decodedCurrentCollectables.GetData(entry.Key);
+                                current.Amount += entry.Value.Amount;
+                                decodedCurrentCollectables.SetData(entry.Key, current);
+                            }
+
+                            decodedNewValue = decodedCurrentCollectables;
+                        } else {
+                            Logger.Debug($"  Type of decoded values did not match: {decodedCurrentValue.GetType()}");
+                            // Signal ABORT: returning null tells WriteGlobal to leave the stored value untouched,
+                            // mirroring the original "return" that stored/broadcast nothing on a type mismatch.
+                            return null;
+                        }
+
+                        newBytes = EncodeUtil.EncodeSaveDataValue(decodedNewValue, pdVarName!);
+                    }
+
+                    return newBytes;
+                });
+
+                // Type mismatch (or otherwise aborted): store nothing and broadcast nothing, as before.
+                if (storedValue == null) {
                     return;
-                }
-
-                object? decodedCurrentValue = null;
-                var decodedDeltaValue = EncodeUtil.DecodeSaveDataValue(pdVarName, packet.Value);
-
-                if (!ServerSaveData.GlobalSaveData.TryGetValue(packet.SaveDataIndex, out var currentValue)) {
-                    Logger.Debug($"No current value is stored in the global save data for: {pdVarName}");
-
-                    if (varProps.InitialValue != null) {
-                        Logger.Debug($"  Taking initial value: {varProps.InitialValue}");
-                        decodedCurrentValue = varProps.InitialValue;
-                    } else {
-                        Logger.Debug("  No initial value defined, using delta as absolute");
-                        packet.Value = EncodeUtil.EncodeSaveDataValue(decodedDeltaValue, pdVarName);
-                    }
-                } else {
-                    decodedCurrentValue = EncodeUtil.DecodeSaveDataValue(pdVarName, currentValue);
-                }
-
-                if (decodedCurrentValue != null) {
-                    object? decodedNewValue;
-
-                    if (decodedCurrentValue is int decodedCurrentInt && decodedDeltaValue is int decodedDeltaInt) {
-                        decodedNewValue = decodedCurrentInt + decodedDeltaInt;
-                    } else if (decodedCurrentValue is List<string> decodedCurrentStringList &&
-                               decodedDeltaValue is IEnumerable<string> decodedDeltaStringEnum) {
-                        // Loop over the delta list and add only non-duplicates
-                        foreach (var str in decodedDeltaStringEnum) {
-                            if (!decodedCurrentStringList.Contains(str)) {
-                                decodedCurrentStringList.Add(str);
-                            }
-                        }
-
-                        decodedNewValue = decodedCurrentStringList;
-                    } else if (decodedCurrentValue is HashSet<string> decodedCurrentSet &&
-                               decodedDeltaValue is IEnumerable<string> decodedDeltaEnum) {
-                        // Loop over the delta list and add to the HashSet
-                        foreach (var str in decodedDeltaEnum) {
-                            decodedCurrentSet.Add(str);
-                        }
-
-                        decodedNewValue = decodedCurrentSet;
-                    } else if (decodedCurrentValue is EnemyJournalKillData decodedCurrentKillData &&
-                               decodedDeltaValue is EnemyJournalKillData decodedDeltaKillData) {
-                        // Per-key SUM: add each delta's Kills onto the current Kills for that enemy.
-                        if (decodedDeltaKillData.Dictionary != null) {
-                            foreach (var entry in decodedDeltaKillData.Dictionary) {
-                                var current = decodedCurrentKillData.GetKillData(entry.Key);
-                                current.Kills += entry.Value.Kills;
-                                decodedCurrentKillData.RecordKillData(entry.Key, current);
-                            }
-                        }
-
-                        decodedNewValue = decodedCurrentKillData;
-                    } else if (decodedCurrentValue is CollectableItemsData decodedCurrentCollectables &&
-                               decodedDeltaValue is CollectableItemsData decodedDeltaCollectables) {
-                        // Per-key SUM: add each delta's Amount onto the current Amount for that collectable.
-                        foreach (var entry in decodedDeltaCollectables.Enumerate()) {
-                            var current = decodedCurrentCollectables.GetData(entry.Key);
-                            current.Amount += entry.Value.Amount;
-                            decodedCurrentCollectables.SetData(entry.Key, current);
-                        }
-
-                        decodedNewValue = decodedCurrentCollectables;
-                    } else {
-                        Logger.Debug($"  Type of decoded values did not match: {decodedCurrentValue.GetType()}");
-                        return;
-                    }
-
-                    packet.Value = EncodeUtil.EncodeSaveDataValue(decodedNewValue, pdVarName);
                 }
             }
 
-            ServerSaveData.GlobalSaveData[packet.SaveDataIndex] = packet.Value;
+            // Reflect the stored value back into the packet so the broadcast (below, OUTSIDE the lock) sends the
+            // merged/normalized value to peers.
+            packet.Value = storedValue;
 
             var broadcastCount = 0;
             foreach (var idPlayerDataPair in _playerData) {

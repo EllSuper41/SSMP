@@ -152,6 +152,7 @@ internal class EntityProcessor {
                 id,
                 foundEntry.Type,
                 gameObject,
+                roleDetermined: IsSceneHostDetermined,
                 types: componentTypes
             );
         } else {
@@ -179,7 +180,8 @@ internal class EntityProcessor {
                 foundEntry.Type,
                 gameObject,
                 clientObject,
-                componentTypes
+                roleDetermined: IsSceneHostDetermined,
+                types: componentTypes
             );
         }
 

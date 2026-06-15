@@ -359,6 +359,8 @@ internal class ClientManager : IClientManager {
 
         EventHooks.HeroControllerUpdate += OnHeroControllerUpdate;
 
+        EventHooks.HeroControllerDie += OnLocalPlayerDeath;
+
         CustomHooks.AfterEnterSceneHeroTransformed += OnEnterScene;
 
         EventHooks.ToolItemManagerSetEquippedCrest += OnSetEquippedCrest;
@@ -386,6 +388,8 @@ internal class ClientManager : IClientManager {
         CustomHooks.HeroControllerStartAction -= OnHeroControllerStart;
 
         EventHooks.HeroControllerUpdate -= OnHeroControllerUpdate;
+
+        EventHooks.HeroControllerDie -= OnLocalPlayerDeath;
 
         CustomHooks.AfterEnterSceneHeroTransformed -= OnEnterScene;
 
@@ -1237,6 +1241,36 @@ internal class ClientManager : IClientManager {
         if (!SceneUtil.IsNonGameplayScene(oldScene.name) && oldScene.name == _lastScene) {
             Logger.Debug("Left scene, sending to server");
             _netClient.UpdateManager.SetLeftScene(oldScene.name);
+        }
+    }
+
+    /// <summary>
+    /// Callback for when the local player dies. Wired to <see cref="EventHooks.HeroControllerDie"/>.
+    /// This is the sole producer of the PlayerDeath packet, which triggers the server to transfer
+    /// scene-host authority to a surviving player before the multi-second death animation begins.
+    /// </summary>
+    /// <param name="nonLethal">Whether this is a non-lethal death invocation of HeroController.Die.</param>
+    /// <param name="frostDeath">Whether the death is a frost death (cosmetic, unused here).</param>
+    private void OnLocalPlayerDeath(bool nonLethal, bool frostDeath) {
+        // HeroController.Die also fires for non-lethal deaths; only a lethal death should hand off the scene.
+        if (nonLethal) {
+            return;
+        }
+
+        // If we are not connected, there is nothing to send to.
+        if (!_netClient.IsConnected) {
+            return;
+        }
+
+        // Tell the server we died exactly once per lethal death. The server's OnPlayerDeath handler
+        // promotes a surviving same-scene player to scene host (and demotes us).
+        _netClient.UpdateManager.SetDeath();
+
+        // Immediately relinquish local entity ownership so the dying corpse stops simulating/broadcasting,
+        // without waiting for the server round-trip. The authoritative epoch arrives microseconds later via
+        // the server's demote SetSceneHostTransfer packet.
+        if (_fullSynchronisation) {
+            _entityManager.InitializeSceneClient(_entityManager.CurrentSceneHostEpoch);
         }
     }
 

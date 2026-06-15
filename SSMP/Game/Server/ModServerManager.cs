@@ -45,6 +45,15 @@ internal class ModServerManager : ServerManager {
     /// </summary>
     private readonly NetServer _netServer;
 
+    /// <summary>
+    /// The active save slot (profileID), captured on the MAIN thread at host-start (see
+    /// <see cref="OnRequestServerStartHost"/>). The off-thread disconnect/timeout persist paths read this cached
+    /// value via <see cref="GetActiveSaveSlot"/> instead of touching global::GameManager.instance off the main
+    /// thread (finding threadsafety-getsaveslot-unity-3). Initialized to -1 so that if host-start somehow never
+    /// captured it, the persist path early-returns on saveSlot &lt; 0 exactly as before (no behavior change).
+    /// </summary>
+    private int _cachedSaveSlot = -1;
+
     public ModServerManager(
         NetServer netServer,
         PacketManager packetManager,
@@ -95,13 +104,20 @@ internal class ModServerManager : ServerManager {
     /// <param name="fullSynchronisation">Whether full synchronisation is enabled.</param>
     /// <param name="transportType">The type of transport to use.</param>
     private void OnRequestServerStartHost(int port, bool fullSynchronisation, TransportType transportType) {
+        // Capture the active save slot on the MAIN thread (this UI handler runs on the Unity main thread). The
+        // off-thread disconnect/timeout persist paths read this cached int instead of touching
+        // global::GameManager.instance off the main thread (see finding threadsafety-getsaveslot-unity-3). We always
+        // capture it (even when fullSynchronisation is false) since it is a cheap main-thread read; GetActiveSaveSlot
+        // falls back to -1 if for some reason this was never set.
+        var profileId = global::GameManager.instance.profileID;
+        _cachedSaveSlot = profileId;
+
         if (fullSynchronisation) {
             // Get the global save data from the save manager, which obtains the global save data from the loaded
             // save file that the user selected
-            ServerSaveData.GlobalSaveData = SaveManager.GetCurrentSaveData(true);
+            ServerSaveData.SeedGlobal(SaveManager.GetCurrentSaveData(true));
 
-            // Load remote players' player-specific data from disk for the current profile ID
-            var profileId = global::GameManager.instance.profileID;
+            // Load remote players' player-specific data from disk for the current profile ID (captured above)
             var modSavePath = Path.Combine(FileUtil.GetConfigPath(), $"user{profileId}.modsav");
             if (File.Exists(modSavePath)) {
                 // Try the primary file first; on any read/deserialize failure fall back to the rolled-over backup
@@ -120,23 +136,48 @@ internal class ModServerManager : ServerManager {
                 }
 
                 if (modSaveFile != null) {
+                    // serverSave is a brand-new detached instance (no other thread touches it yet), so reading its
+                    // raw collections is safe; writes go through the live ServerSaveData's synchronized API. These
+                    // run on the main thread before Start()/the processing thread exists, so they do not actively
+                    // race, but routing them through the locked API keeps the raw fields untouchable.
                     var serverSave = modSaveFile.ToServerSaveData();
-                    ServerSaveData.PlayerSaveData = serverSave.PlayerSaveData;
-                    ServerSaveData.SeenPlayers = serverSave.SeenPlayers;
-                    if (serverSave.GlobalSaveData.Count > 0) {
-                        ServerSaveData.GlobalSaveData = serverSave.GlobalSaveData;
-                    }
+                    ServerSaveData.ReplacePlayerData(serverSave.RawPlayerSaveData);
+                    ServerSaveData.ReplaceSeen(serverSave.RawSeenPlayers);
+
+                    // Overlay the prior-session .modsav GlobalSaveData ON TOP of the seeded base (set above from
+                    // SceneData + PlayerData server fields) PER KEY, rather than replacing the whole dictionary. A
+                    // wholesale replace would wipe the seeded world geometry (the bug this fixes); a wholesale keep
+                    // would drop prior-session deltas. Per-key: modsav wins for non-Additive keys (persistent
+                    // bools/ints included); Additive PlayerData fields are merged (UNION/SUM) so neither source's
+                    // accumulated progress is lost. Seeded keys that modsav lacks survive untouched because we never
+                    // clear the base. Iterating an empty modsav dict is a no-op, so the seeded base survives intact.
+                    ServerSaveData.MergeGlobalFromModSave(
+                        serverSave.RawGlobalSaveData,
+                        // PlayerDataIndices.GetBySecond returns null for persistent bool/int indices (those live in
+                        // the Persistent* lookups), so only genuine Additive PlayerData fields enter the merge branch.
+                        index => {
+                            var name = SaveDataMapping.Instance.PlayerDataIndices.GetBySecond(index);
+                            if (name != null
+                                && SaveDataMapping.Instance.PlayerDataVarProperties.TryGetValue(name, out var vp)
+                                && vp.Additive) {
+                                return name;
+                            }
+
+                            return null;
+                        },
+                        MergeAdditive
+                    );
 
                     Logging.Logger.Info($"Loaded remote players' save data from: {modSavePath}");
                 } else {
-                    ServerSaveData.PlayerSaveData = new Dictionary<string, Dictionary<ushort, byte[]>>();
+                    ServerSaveData.ReplacePlayerData(new Dictionary<string, Dictionary<ushort, byte[]>>());
                     Logging.Logger.Error(
                         $"DEGRADED: could not read remote-player save (primary OR backup) at {modSavePath}; " +
                         "initialized EMPTY player save data. Remote players may be treated as new on this host run."
                     );
                 }
             } else {
-                ServerSaveData.PlayerSaveData = new Dictionary<string, Dictionary<ushort, byte[]>>();
+                ServerSaveData.ReplacePlayerData(new Dictionary<string, Dictionary<ushort, byte[]>>());
                 Logging.Logger.Info(
                     $"No remote player save file found at: {modSavePath}, initialized empty player save data."
                 );
@@ -144,7 +185,7 @@ internal class ModServerManager : ServerManager {
 
             // Lastly, we get the player save data from the save manager, which obtains the player save data from the
             // loaded save file that the user selected. We add this data to the server save as the local player
-            ServerSaveData.PlayerSaveData[_modSettings.AuthKey!] = SaveManager.GetCurrentSaveData(false);
+            ServerSaveData.SetPlayerData(_modSettings.AuthKey!, SaveManager.GetCurrentSaveData(false));
         }
 
         IEncryptedTransportServer transportServer = transportType switch {
@@ -156,6 +197,71 @@ internal class ModServerManager : ServerManager {
 
         Start(port, fullSynchronisation, transportServer);
         UpdateMatchmakingRemotePlayerCount();
+    }
+
+    /// <summary>
+    /// Merge an Additive server PlayerData field's prior-session (.modsav) value onto the seeded base value, mirroring
+    /// EXACTLY the authoritative server-side Additive merge in <see cref="ServerManager"/> (int SUM, List/HashSet of
+    /// string UNION, EnemyJournalKillData/CollectableItemsData per-key SUM). Both inputs are absolute accumulated
+    /// snapshots; SUM-merging double-counts the overlap, matching the existing server-side semantics (the apply path
+    /// is increase-only, so an inflated server total only ever raises a client's value, never lowers it). On any type
+    /// mismatch the modsav value wins (same fallback as the server merge's "type did not match" path).
+    /// </summary>
+    /// <param name="name">The PlayerData variable name (needed by EncodeUtil to decode/encode).</param>
+    /// <param name="baseBytes">The seeded base value's encoded bytes.</param>
+    /// <param name="modBytes">The prior-session (.modsav) value's encoded bytes.</param>
+    /// <returns>The merged value re-encoded to bytes.</returns>
+    private static byte[] MergeAdditive(string name, byte[] baseBytes, byte[] modBytes) {
+        var cur = EncodeUtil.DecodeSaveDataValue(name, baseBytes);
+        var add = EncodeUtil.DecodeSaveDataValue(name, modBytes);
+
+        object res;
+        switch (cur) {
+            case int ci when add is int ai:
+                res = ci + ai;
+                break;
+            case List<string> cl when add is IEnumerable<string> al:
+                foreach (var s in al) {
+                    if (!cl.Contains(s)) {
+                        cl.Add(s);
+                    }
+                }
+
+                res = cl;
+                break;
+            case HashSet<string> cs when add is IEnumerable<string> ah:
+                foreach (var s in ah) {
+                    cs.Add(s);
+                }
+
+                res = cs;
+                break;
+            case EnemyJournalKillData ck when add is EnemyJournalKillData ak:
+                if (ak.Dictionary != null) {
+                    foreach (var e in ak.Dictionary) {
+                        var d = ck.GetKillData(e.Key);
+                        d.Kills += e.Value.Kills;
+                        ck.RecordKillData(e.Key, d);
+                    }
+                }
+
+                res = ck;
+                break;
+            case CollectableItemsData cc when add is CollectableItemsData ac:
+                foreach (var e in ac.Enumerate()) {
+                    var d = cc.GetData(e.Key);
+                    d.Amount += e.Value.Amount;
+                    cc.SetData(e.Key, d);
+                }
+
+                res = cc;
+                break;
+            default:
+                // Unknown / mismatched types: modsav wins, mirroring the server merge's fallback.
+                return modBytes;
+        }
+
+        return EncodeUtil.EncodeSaveDataValue(res, name);
     }
 
     /// <summary>
@@ -224,11 +330,12 @@ internal class ModServerManager : ServerManager {
 
     /// <summary>
     /// The save slot to persist remote-player data under. Mirrors the slot used by the load path
-    /// (<see cref="OnRequestServerStartHost"/>) so a re-host reliably finds the file.
+    /// (<see cref="OnRequestServerStartHost"/>) so a re-host reliably finds the file. Returns the value captured on
+    /// the MAIN thread at host-start, so the off-thread disconnect/timeout persist paths never read
+    /// global::GameManager.instance off the main thread. Falls back to -1 (persist no-ops) if never captured.
     /// </summary>
-    private static int GetActiveSaveSlot() {
-        var gm = global::GameManager.instance;
-        return gm != null ? gm.profileID : -1;
+    private int GetActiveSaveSlot() {
+        return _cachedSaveSlot;
     }
 
     /// <summary>
@@ -262,8 +369,10 @@ internal class ModServerManager : ServerManager {
         }
 
         try {
-            // Create a copy of ServerSaveData for serialization
-            var modSaveFile = ModSaveFile.FromServerSaveData(ServerSaveData);
+            // Take a deep-enough snapshot of ServerSaveData UNDER ITS LOCK and build a detached ModSaveFile from it.
+            // The lock is held only for the in-memory copy; the JSON serialize + atomic write below run OUTSIDE the
+            // lock on the detached snapshot. The live ServerSaveData is never passed to FromServerSaveData.
+            var modSaveFile = ServerSaveData.SnapshotForPersist();
 
             // Filter out the host player's auth key to avoid duplicate/redundant data in the remote players' file.
             // SeenPlayers is meant to track REMOTE players only, so drop the host from both maps.

@@ -38,11 +38,33 @@ internal class EntityManager {
     // Buffered updates waiting on an entity that hasn't registered yet, or on scene-host determination.
     private readonly Queue<BaseEntityUpdate> _pendingUpdates;
 
+    /// <summary>
+    /// Entities locally minted by a host FSM spawn DURING the role-undetermined window (before the server's
+    /// AlreadyInScene reply resolves our scene role). Each entry pairs the registered entity with the EntityType of
+    /// its spawner if known (null when the spawner type cannot be resolved, e.g. EnemySpawnerComponent spawns that
+    /// carry no FsmAction). On role resolution this is reconciled: if we are the CLIENT (puppet), the entries are
+    /// destroyed/unregistered so the authoritative host copy is the only instance (no fragile position matching); if
+    /// we are the HOST, the entries with a known spawner type are (re)broadcast via SetEntitySpawn — closing the
+    /// pre-existing gap where an eventual host's window spawn was never networked. Touched only on the Unity main
+    /// thread (EntitySpawnEvent and the InitializeScene* paths both run on it), so it needs no synchronization.
+    /// </summary>
+    private readonly List<(Entity entity, EntityType? spawnerType)> _windowedSpawns = new();
+
     private Hook? _findGameObjectHook;
 
     // Both flags are set together in InitializeSceneHost / InitializeSceneClient.
     public bool IsSceneHost { get; private set; }
     private bool _sceneRoleDetermined;
+
+    // The last scene-host epoch applied via InitializeSceneHost / InitializeSceneClient / BecomeSceneHost.
+    private uint _sceneHostEpoch;
+
+    /// <summary>
+    /// The most recently applied scene-host epoch. Used so a client-side immediate
+    /// InitializeSceneClient (e.g. on local death) can pass the real current epoch instead of 0,
+    /// avoiding a same-frame HP update being dropped by epoch ordering.
+    /// </summary>
+    public uint CurrentSceneHostEpoch => _sceneHostEpoch;
 
     /// <summary>
     /// Gets all currently registered active entities.
@@ -106,8 +128,24 @@ internal class EntityManager {
         SyncLog.Log(SyncLog.Entity,
             $"scene role = HOST | epoch={sceneHostEpoch} entities={_entities.Count} (simulating + broadcasting)");
         IsSceneHost = true;
+        _sceneHostEpoch = sceneHostEpoch;
         foreach (var entity in _entities.Values) entity.InitializeHost(sceneHostEpoch);
         _sceneRoleDetermined = true;
+
+        // We are the scene host: any entity our FSM spawned during the role-undetermined window is a legitimate
+        // host-owned spawn that was deferred (never networked). Broadcast each one now so puppets receive it. Spawns
+        // whose spawner type could not be resolved (null) are skipped, preserving today's networking scope.
+        foreach (var (entity, spawnerType) in _windowedSpawns) {
+            if (!spawnerType.HasValue) continue;
+
+            SyncLog.Log(SyncLog.Entity,
+                $"send entitySpawn (windowed, role resolved HOST) | spawner={spawnerType.Value} " +
+                $"spawned={entity.Type} id={entity.Id}");
+            _netClient.UpdateManager.SetEntitySpawn(entity.Id, spawnerType.Value, entity.Type);
+        }
+
+        _windowedSpawns.Clear();
+
         DrainPendingUpdates();
     }
 
@@ -118,8 +156,24 @@ internal class EntityManager {
         SyncLog.Log(SyncLog.Entity,
             $"scene role = CLIENT | epoch={sceneHostEpoch} entities={_entities.Count} (puppets, receiving)");
         IsSceneHost = false;
+        _sceneHostEpoch = sceneHostEpoch;
         foreach (var entity in _entities.Values) entity.InitializeClient(sceneHostEpoch);
         _sceneRoleDetermined = true;
+
+        // We are a puppet: any entity our FSM spawned during the role-undetermined window is an ORPHAN — the real
+        // scene host independently spawned the same minion with its own authoritative ID and delivers it via the
+        // AlreadyInScene EntitySpawnList (or a later SetEntitySpawn). Destroy and unregister our local copy so the
+        // host's copy is the only instance, eliminating the duplicate by identity (no fragile spawner+position
+        // matching).
+        foreach (var (entity, _) in _windowedSpawns) {
+            SyncLog.Log(SyncLog.Entity,
+                $"destroy windowed orphan (role resolved CLIENT) | spawned={entity.Type} id={entity.Id}");
+            entity.Destroy();
+            _entities.Remove(entity.Id);
+        }
+
+        _windowedSpawns.Clear();
+
         DrainPendingUpdates();
     }
 
@@ -130,6 +184,7 @@ internal class EntityManager {
         SyncLog.Log(SyncLog.Entity,
             $"scene role = HOST (transferred) | epoch={sceneHostEpoch} entities={_entities.Count}");
         IsSceneHost = true;
+        _sceneHostEpoch = sceneHostEpoch;
         foreach (var entity in _entities.Values) entity.MakeHost(sceneHostEpoch);
 
         // Immediately refresh targeting fields for all active enemies
@@ -346,6 +401,31 @@ internal class EntityManager {
 
         if (!processor.Success) return false;
 
+        // Role-undetermined window: we cannot yet know whether this local FSM spawn belongs to us (we resolve to
+        // scene host) or to the real host (we resolve to puppet). DEFER the keep/destroy/network decision instead of
+        // dropping it. Keep the Process() result so the entity exists if we turn out to be host, but DO NOT broadcast
+        // SetEntitySpawn yet. Record it (with the spawner type if resolvable) so InitializeSceneHost/Client can
+        // reconcile by identity on resolution: a puppet destroys it (the host's authoritative copy wins), an eventual
+        // host broadcasts it (closing the gap where window spawns were never networked).
+        if (!_sceneRoleDetermined) {
+            var topLevelWindow = processor.Entities[0];
+
+            // Only FsmAction spawns carry an Action from which a spawner registry entry (and EntityType) can be
+            // resolved; EnemySpawnerComponent/SpawnJar spawns lack it, so they record a null spawner type and are
+            // skipped by the host rebroadcast (matching today's scope where only FsmAction spawns are networked).
+            EntityType? spawnerType = null;
+            if (details.Type == EntitySpawnType.FsmAction
+                && EntityRegistry.TryGetEntry(details.Action.Fsm.GameObject, out var windowEntry)) {
+                spawnerType = windowEntry.Type;
+            }
+
+            _windowedSpawns.Add((topLevelWindow, spawnerType));
+            SyncLog.Log(SyncLog.Entity,
+                $"spawn DEFERRED (role undetermined) | spawned={details.GameObject.name}({topLevelWindow.Type}) " +
+                $"id={topLevelWindow.Id} spawnerType={(spawnerType.HasValue ? spawnerType.Value.ToString() : "unknown")}");
+            return true;
+        }
+
         if (!IsSceneHost) {
             Logger.Warn("Game object was spawned while not scene host, this shouldn't happen");
             return false;
@@ -400,6 +480,9 @@ internal class EntityManager {
         foreach (var entity in _entities.Values) entity.Destroy();
         _entities.Clear();
         _pendingUpdates.Clear();
+        // Windowed spawns are entities in _entities (destroyed above); just drop the deferred-reconcile references so
+        // nothing leaks across scenes.
+        _windowedSpawns.Clear();
         MusicComponent.ClearInstance();
     }
 

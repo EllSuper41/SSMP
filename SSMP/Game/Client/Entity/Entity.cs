@@ -160,6 +160,7 @@ internal class Entity {
         EntityType type,
         GameObject hostObject,
         GameObject clientObject = null,
+        bool roleDetermined = true,
         params EntityComponentType[] types
     ) {
         _netClient = netClient;
@@ -168,6 +169,12 @@ internal class Entity {
         Type = type;
 
         _isControlled = true;
+
+        // Whether this entity's scene role is ALREADY known at construction. False only for entities found during the
+        // role-undetermined window (before the server's AlreadyInScene reply); true for networked/late-load spawns,
+        // which happen after resolution. Damage/death guards on the relevant components are armed only when this is
+        // false, so a post-resolution spawn is never neutralized (no regression to puppet contact damage / death).
+        var rolePending = !roleDetermined;
 
         if (clientObject == null) {
             Object = new HostClientPair<GameObject> {
@@ -285,7 +292,7 @@ internal class Entity {
         }
 
         _components = new Dictionary<EntityComponentType, EntityComponent>();
-        HandleComponents(types);
+        HandleComponents(types, rolePending);
 
         HandleEnemyDeathEffects();
 
@@ -396,7 +403,7 @@ internal class Entity {
     /// <summary>
     /// Check the host and client objects for components that are supported for networking.
     /// </summary>
-    private void HandleComponents(EntityComponentType[] types) {
+    private void HandleComponents(EntityComponentType[] types, bool rolePending) {
         //var addedComponentsString = $"Adding components to entity ({Object.Host.name}, {Id}):";
 
         var hostHealthManager = Object.Host.GetComponent<HealthManager>();
@@ -411,7 +418,8 @@ internal class Entity {
                 _netClient,
                 Id,
                 Object,
-                healthManager
+                healthManager,
+                rolePending
             );
             _components[EntityComponentType.Death] = hmComponent;
             _components[EntityComponentType.Health] = hmComponent;
@@ -480,7 +488,8 @@ internal class Entity {
                 _netClient,
                 Id,
                 Object,
-                damageHero
+                damageHero,
+                rolePending
             );
 
             //addedComponentsString += " DamageHero";

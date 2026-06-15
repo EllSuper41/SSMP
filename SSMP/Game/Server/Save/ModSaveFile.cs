@@ -39,44 +39,54 @@ internal class ModSaveFile {
     /// </summary>
     /// <returns>The converted ServerSaveData instance.</returns>
     public virtual ServerSaveData ToServerSaveData() {
-        // Create new instance of server save data, which we return at the end
-        var serverSaveData = new ServerSaveData {
-            GlobalSaveData = EncodeUtil.ConvertToServerSaveData(GlobalSaveData)
-        };
+        // Build the three collections locally, then hand them to the (synchronized) ServerSaveData via its bulk
+        // seed API. This runs at host-start on the main thread before the processing thread exists, so there is no
+        // active race, but the data is still funnelled through the locked API and never touches raw fields.
+        var globalSaveData = EncodeUtil.ConvertToServerSaveData(GlobalSaveData);
 
+        var playerSaveData = new Dictionary<string, Dictionary<ushort, byte[]>>();
         foreach (var authKey in PlayerSaveData.Keys) {
-            serverSaveData.PlayerSaveData[authKey] = EncodeUtil.ConvertToServerSaveData(PlayerSaveData[authKey]);
+            playerSaveData[authKey] = EncodeUtil.ConvertToServerSaveData(PlayerSaveData[authKey]);
         }
 
         // Back-compat: older save files have no "seenPlayers" field (SeenPlayers stays an empty list after
         // deserialization). To be safe always, seed the seen-players set from the union of any persisted seen
         // players and every auth key that already has stored player save data — so a player who has data on disk
         // is always treated as known, never thrown into a fresh start.
+        var seenPlayers = new HashSet<string>();
         if (SeenPlayers != null) {
             foreach (var authKey in SeenPlayers) {
-                serverSaveData.SeenPlayers.Add(authKey);
+                seenPlayers.Add(authKey);
             }
         }
 
         foreach (var authKey in PlayerSaveData.Keys) {
-            serverSaveData.SeenPlayers.Add(authKey);
+            seenPlayers.Add(authKey);
         }
+
+        var serverSaveData = new ServerSaveData();
+        serverSaveData.SeedGlobal(globalSaveData);
+        serverSaveData.ReplacePlayerData(playerSaveData);
+        serverSaveData.ReplaceSeen(seenPlayers);
 
         return serverSaveData;
     }
 
     /// <summary>
-    /// Get an instance of this class with the decoded data from the given ServerSaveData. 
+    /// Get an instance of this class with the decoded data from the given ServerSaveData.
     /// </summary>
-    /// <param name="serverSaveData">The encoded ServerSaveData.</param>
+    /// <param name="serverSaveData">The encoded ServerSaveData. This MUST be a DETACHED snapshot produced by
+    /// <see cref="ServerSaveData.SnapshotForPersist"/> — never the live instance, since this method reads the raw
+    /// collections directly (via the Unlocked accessors) without taking the save lock.</param>
     /// <returns>An instance of this class.</returns>
     public static ModSaveFile FromServerSaveData(ServerSaveData serverSaveData) {
-        // Create new instance of this class, which we return at the end
+        // Reads the raw collections directly: only ever invoked on a detached snapshot (see SnapshotForPersist),
+        // so no other thread touches these dictionaries and no lock is required here.
         var modSaveFile = new ModSaveFile {
-            GlobalSaveData = EncodeUtil.ConvertFromServerSaveData(serverSaveData.GlobalSaveData)
+            GlobalSaveData = EncodeUtil.ConvertFromServerSaveData(serverSaveData.RawGlobalSaveData)
         };
 
-        var playerSaveData = serverSaveData.PlayerSaveData;
+        var playerSaveData = serverSaveData.RawPlayerSaveData;
         foreach (var authKey in playerSaveData.Keys) {
             var saveData = EncodeUtil.ConvertFromServerSaveData(playerSaveData[authKey]);
             // Store the entries in the player save data dictionary of the instance
@@ -84,7 +94,7 @@ internal class ModSaveFile {
         }
 
         // Persist the set of seen players so reconnects are distinguishable from first-joins across host restarts.
-        modSaveFile.SeenPlayers = new List<string>(serverSaveData.SeenPlayers);
+        modSaveFile.SeenPlayers = new List<string>(serverSaveData.RawSeenPlayers);
 
         return modSaveFile;
     }

@@ -28,6 +28,25 @@ internal class HealthManagerComponent : EntityComponent {
     private bool _allowDeath;
 
     /// <summary>
+    /// Whether this entity's scene role is still undetermined (true from construction until the entity's
+    /// InitializeHost/InitializeClient runs on role resolution). During this window the host object may be left live
+    /// (so its AI is not torn down — see Entity.cs:660-676) with NO networked owner. We must NOT broadcast a Death
+    /// from a non-owner during it: if it fires and we then resolve to puppet, the real host owns and broadcasts that
+    /// enemy's death; if we resolve to host, a dropped broadcast would mean the puppet never dies (desync). So a
+    /// death during the window is DEFERRED here (recorded in <see cref="_pendingDeath"/>) and replayed/discarded on
+    /// resolution, rather than dropped. Set from the constructor's rolePending argument (true only for entities found
+    /// during the undetermined window; false for post-resolution/networked spawns); cleared on resolution in
+    /// InitializeHost/InitializeClient.
+    /// </summary>
+    private bool _rolePending;
+
+    /// <summary>
+    /// A host death that occurred during the role-undetermined window, deferred until the role resolves. Replayed
+    /// (real Die + Death broadcast) if we resolve to scene host, discarded if we resolve to puppet.
+    /// </summary>
+    private (float? attackDirection, AttackTypes attackType, bool ignoreEvasion)? _pendingDeath;
+
+    /// <summary>
     /// MonoMod hook for HealthManager.Die.
     /// </summary>
     private Hook? _healthManagerDieHook;
@@ -77,9 +96,11 @@ internal class HealthManagerComponent : EntityComponent {
         NetClient netClient,
         ushort entityId,
         HostClientPair<GameObject> gameObject,
-        HostClientPair<HealthManager> healthManager
+        HostClientPair<HealthManager> healthManager,
+        bool rolePending = false
     ) : base(netClient, entityId, gameObject) {
         _healthManager = healthManager;
+        _rolePending = rolePending;
 
         _lastInvincible = healthManager.Host.IsInvincible;
         _lastHp = healthManager.Host.hp;
@@ -142,6 +163,15 @@ internal class HealthManagerComponent : EntityComponent {
         }
 
         Logger.Info("HealthManager Die was called on host entity");
+
+        // Role-undetermined window: do NOT commit/broadcast a non-owner death. Defer it — InitializeHost replays it
+        // once (so the RESOLVED OWNER broadcasts, authority correct, nothing lost), InitializeClient discards it (the
+        // real scene host owns and will broadcast that enemy's death). We keep only the LATEST pending death.
+        if (_rolePending) {
+            Logger.Info("  Role undetermined; deferring host death until role resolves");
+            _pendingDeath = (attackDirection, attackType, ignoreEvasion);
+            return;
+        }
 
         orig(self, attackDirection, attackType, ignoreEvasion);
 
@@ -219,13 +249,35 @@ internal class HealthManagerComponent : EntityComponent {
 
     /// <inheritdoc />
     public override void InitializeHost(uint sceneHostEpoch) {
+        // Role resolved to HOST: the live host enemy is now ours. Stop deferring deaths.
+        _rolePending = false;
+
         ResetHealthOrderingForEpoch(sceneHostEpoch);
         var currentHp = GetCurrentHp();
         ApplyHp(currentHp, triggerHostDeath: false);
+
+        // Replay a death that occurred during the role-undetermined window, exactly once, as the resolved owner. We
+        // call Die on the host HealthManager directly: it re-enters HealthManagerOnDie's host branch with
+        // _rolePending now false, so it runs the real Die AND broadcasts the Death packet — authority correct,
+        // nothing lost. Safe regardless of the host GameObject's active state (SendData just enqueues).
+        if (_pendingDeath.HasValue) {
+            var pending = _pendingDeath.Value;
+            _pendingDeath = null;
+
+            if (_healthManager.Host != null) {
+                Logger.Info("  Replaying deferred host death on role resolution (HOST)");
+                _healthManager.Host.Die(pending.attackDirection, pending.attackType, pending.ignoreEvasion);
+            }
+        }
     }
 
     /// <inheritdoc />
     public override void InitializeClient(uint sceneHostEpoch) {
+        // Role resolved to CLIENT (puppet): the real scene host owns this enemy and will broadcast its death.
+        // Discard any deferred window death without broadcasting; the host object is disabled by Entity.InitializeClient.
+        _rolePending = false;
+        _pendingDeath = null;
+
         ResetHealthOrderingForEpoch(sceneHostEpoch);
         var currentHp = GetCurrentHp();
         ApplyHp(currentHp, triggerHostDeath: false);

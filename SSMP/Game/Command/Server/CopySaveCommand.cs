@@ -59,16 +59,15 @@ internal class CopySaveCommand : IServerCommand, ICommandWithDescription {
             return;
         }
 
-        if (!_serverSaveData.PlayerSaveData.TryGetValue(fromPlayer.AuthKey, out var sourceData)) {
+        if (!_serverSaveData.TryGetPlayerData(fromPlayer.AuthKey, out var toCopyData)) {
             commandSender.SendMessage(
                 $"No save data found for player '{fromUsername}'. Make sure they have connected and synced at least once."
             );
             return;
         }
 
-        var toCopyData = new Dictionary<ushort, byte[]>(sourceData);
-
-        _serverSaveData.PlayerSaveData[toPlayer.AuthKey] = toCopyData;
+        // TryGetPlayerData returns a fresh copy; SetPlayerData takes a defensive copy under the lock.
+        _serverSaveData.SetPlayerData(toPlayer.AuthKey, toCopyData);
 
         _serverManager.DisconnectPlayer(toPlayer.Id, DisconnectReason.SaveCopy);
 
