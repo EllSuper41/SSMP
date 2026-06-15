@@ -1207,6 +1207,9 @@ internal abstract class ServerManager : IServerManager {
         if (ServerSaveData.IsSteelSoul()) {
             // We are running a Steel Soul save file, so we wipe the player-specific data for the player
             ServerSaveData.PlayerSaveData.Remove(playerData.AuthKey);
+            // Also forget that we have ever seen this player, so NewForPlayer (now derived from SeenPlayers)
+            // becomes true again on reconnect and the dead player is correctly restarted via RunStartNewGame.
+            ServerSaveData.SeenPlayers.Remove(playerData.AuthKey);
 
             Logger.Info("  Wiped player save data (Steel Soul)");
         }
@@ -1552,6 +1555,12 @@ internal abstract class ServerManager : IServerManager {
         serverInfo.PlayerInfos = playerInfo;
 
         if (FullSynchronisation) {
+            // Record that we have established this remote player's identity. This must happen BEFORE computing the
+            // current save so that a returning player (whose deltas may be momentarily missing) is treated as a
+            // reconnect rather than a first-join. Even a zero-delta session counts as seen and survives to disk via
+            // the always-write persist path.
+            ServerSaveData.SeenPlayers.Add(clientInfo.AuthKey);
+
             // Obtain the save data for the connecting client and add it to the server info
             serverInfo.CurrentSave = ServerSaveData.GetCurrentSaveData(clientInfo.AuthKey);
         }

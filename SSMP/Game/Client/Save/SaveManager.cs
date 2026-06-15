@@ -89,6 +89,22 @@ internal class SaveManager {
     private PlayerData? _lastPlayerData;
 
     /// <summary>
+    /// Whether the connected server is running in full-synchronisation mode. Cached from the ServerInfo received on
+    /// connect so the per-frame update loop can gate the one-shot baseline snapshot flush on it.
+    /// </summary>
+    private bool _fullSynchronisation;
+
+    /// <summary>
+    /// Whether the one-shot complete baseline snapshot of all Sync:true SyncType=Player fields has been sent for the
+    /// current session. The per-frame delta path only sends fields that CHANGE during the session, so the host's
+    /// per-player record would otherwise be sparse and missing fields fall back to their InitialValue on rejoin
+    /// (e.g. respawnScene -> 'Tut_01', teleporting the client to the start). Flushing a full snapshot once, after the
+    /// client is settled in-world, makes the host's record complete. Reset on DeregisterHooks (disconnect/leave) so a
+    /// reconnect re-flushes a fresh complete snapshot.
+    /// </summary>
+    private bool _fullSnapshotSent;
+
+    /// <summary>
     /// List of HashSet variables in PlayerData.
     /// </summary>
     private static readonly List<string> HashSetVariables = [
@@ -177,6 +193,12 @@ internal class SaveManager {
         MonoBehaviourUtil.Instance.OnUpdateEvent -= OnUpdatePlayerData;
         MonoBehaviourUtil.Instance.OnUpdateEvent -= OnUpdatePersistents;
         MonoBehaviourUtil.Instance.OnUpdateEvent -= OnUpdateCompounds;
+
+        // Arm a fresh complete baseline snapshot for the next session. This hook is run on disconnect/leave
+        // (ClientManager.OnDisconnect -> DeregisterHooks), so a reconnect re-flushes a full snapshot rather than
+        // relying on the stale per-session flag.
+        _fullSnapshotSent = false;
+        _fullSynchronisation = false;
     }
 
     /// <summary>
@@ -184,6 +206,8 @@ internal class SaveManager {
     /// </summary>
     /// <param name="serverInfo">The server info received from the server.</param>
     private void OnConnect(ServerInfo serverInfo) {
+        _fullSynchronisation = serverInfo.FullSynchronisation;
+
         if (serverInfo.FullSynchronisation) {
             ResetLastPlayerData();
         }
@@ -234,6 +258,24 @@ internal class SaveManager {
             return;
         }
 
+        // One-shot complete baseline flush. The loop below only networks fields that CHANGE during the session, so
+        // any Sync:true SyncType=Player field that never changes is never sent and the host's per-player record stays
+        // sparse -> on rejoin the client adopts that sparse record and the holes fall back to InitialValue (e.g.
+        // respawnScene -> 'Tut_01', teleporting the client to the start of the game). Once we are actually in-play
+        // (GameState.PLAYING, NOT loading/cutscene/menu), connected to a full-sync server as a non-host client, and the
+        // adopted in-game save is live, force-send a COMPLETE snapshot of every synced Player field's CURRENT value so
+        // the host's record becomes complete. Gated by _fullSnapshotSent so it runs exactly once per session and cannot
+        // spam every frame. Placed AFTER the MAIN_MENU guard (and after adoption/load via SetSaveWithData) so it sends
+        // the real adopted in-game values, never menu/default values.
+        if (!_fullSnapshotSent
+            && !IsHostingServer
+            && _fullSynchronisation
+            && _netClient.IsConnected
+            && gm.GameState == GameState.PLAYING) {
+            FlushFullPlayerSnapshot();
+            _fullSnapshotSent = true;
+        }
+
         foreach (var field in _playerDataSimpleSyncFields) {
             var currentValue = field.GetValue(pd);
             var lastValue = field.GetValue(_lastPlayerData);
@@ -258,6 +300,34 @@ internal class SaveManager {
             } else {
                 CheckSendSaveUpdate(field.Name, () => EncodeSaveDataValue(field.Name, currentValue));
             }
+        }
+    }
+
+    /// <summary>
+    /// Force-send a COMPLETE snapshot of every Sync:true SyncType=Player simple field's CURRENT value, regardless of
+    /// whether it changed this session. Reuses the SAME synced-field set and the SAME low-level send path as the
+    /// per-frame delta loop (<see cref="CheckSendSaveUpdate"/> -> UpdateManager.SetSaveUpdate); it does NOT introduce a
+    /// new packet type. The per-frame loop's "value unchanged" early-return lives in its OWN body (the Equals check in
+    /// <see cref="OnUpdatePlayerData"/>), so calling CheckSendSaveUpdate directly here bypasses ONLY that guard while
+    /// still honoring everything CheckSendSaveUpdate enforces (not connected, permadeath, !Sync, scene-host gate, index
+    /// lookup). Deliberately passes NO deltaEncodeFunc so additive fields send their ABSOLUTE current value (a delta
+    /// here would be wrong/zero). Only simple Player fields are flushed; the compound fields keep their existing
+    /// per-frame additive delta handling in <see cref="OnUpdateCompounds"/>.
+    /// </summary>
+    private void FlushFullPlayerSnapshot() {
+        var pd = PlayerData.instance;
+
+        Logger.Info($"Flushing full player save snapshot ({_playerDataSimpleSyncFields.Count} fields)");
+
+        foreach (var field in _playerDataSimpleSyncFields) {
+            var currentValue = field.GetValue(pd);
+
+            // Keep the last-values snapshot in sync with what we just force-sent so the delta loop below does not
+            // immediately re-send the same value, mirroring how OnUpdatePlayerData advances _lastPlayerData.
+            field.SetValue(_lastPlayerData, currentValue);
+
+            // No delta func: send the absolute current value even for additive fields.
+            CheckSendSaveUpdate(field.Name, () => EncodeSaveDataValue(field.Name, currentValue));
         }
     }
 

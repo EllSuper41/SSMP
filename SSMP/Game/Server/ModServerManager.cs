@@ -104,20 +104,36 @@ internal class ModServerManager : ServerManager {
             var profileId = global::GameManager.instance.profileID;
             var modSavePath = Path.Combine(FileUtil.GetConfigPath(), $"user{profileId}.modsav");
             if (File.Exists(modSavePath)) {
-                try {
-                    var json = File.ReadAllText(modSavePath);
-                    var modSaveFile = JsonConvert.DeserializeObject<ModSaveFile>(json);
-                    if (modSaveFile != null) {
-                        var serverSave = modSaveFile.ToServerSaveData();
-                        ServerSaveData.PlayerSaveData = serverSave.PlayerSaveData;
-                        if (serverSave.GlobalSaveData.Count > 0) {
-                            ServerSaveData.GlobalSaveData = serverSave.GlobalSaveData;
-                        }
-
-                        Logging.Logger.Info($"Loaded remote players' save data from: {modSavePath}");
+                // Try the primary file first; on any read/deserialize failure fall back to the rolled-over backup
+                // (.bak) written by the atomic save path before giving up — a single corrupt write must never
+                // silently wipe ALL remote players.
+                var modSaveFile = TryLoadModSaveFile(modSavePath);
+                if (modSaveFile == null) {
+                    var backupPath = modSavePath + ".bak";
+                    if (File.Exists(backupPath)) {
+                        Logging.Logger.Error(
+                            $"PRIMARY remote-player save at {modSavePath} could not be read; " +
+                            $"attempting backup at {backupPath}"
+                        );
+                        modSaveFile = TryLoadModSaveFile(backupPath);
                     }
-                } catch (Exception e) {
-                    Logging.Logger.Error($"Could not load remote players' save data: {e}");
+                }
+
+                if (modSaveFile != null) {
+                    var serverSave = modSaveFile.ToServerSaveData();
+                    ServerSaveData.PlayerSaveData = serverSave.PlayerSaveData;
+                    ServerSaveData.SeenPlayers = serverSave.SeenPlayers;
+                    if (serverSave.GlobalSaveData.Count > 0) {
+                        ServerSaveData.GlobalSaveData = serverSave.GlobalSaveData;
+                    }
+
+                    Logging.Logger.Info($"Loaded remote players' save data from: {modSavePath}");
+                } else {
+                    ServerSaveData.PlayerSaveData = new Dictionary<string, Dictionary<ushort, byte[]>>();
+                    Logging.Logger.Error(
+                        $"DEGRADED: could not read remote-player save (primary OR backup) at {modSavePath}; " +
+                        "initialized EMPTY player save data. Remote players may be treated as new on this host run."
+                    );
                 }
             } else {
                 ServerSaveData.PlayerSaveData = new Dictionary<string, Dictionary<ushort, byte[]>>();
@@ -216,10 +232,28 @@ internal class ModServerManager : ServerManager {
     }
 
     /// <summary>
+    /// Attempts to read and deserialize a <see cref="ModSaveFile"/> from the given path. Returns null (and logs)
+    /// on any failure, so callers can fall back to a backup file without the corrupt read taking down the host.
+    /// </summary>
+    /// <param name="path">The path to read the mod save file from.</param>
+    /// <returns>The deserialized <see cref="ModSaveFile"/>, or null on failure.</returns>
+    private static ModSaveFile? TryLoadModSaveFile(string path) {
+        try {
+            var json = File.ReadAllText(path);
+            return JsonConvert.DeserializeObject<ModSaveFile>(json);
+        } catch (Exception e) {
+            Logging.Logger.Error($"Could not load remote players' save data from {path}: {e}");
+            return null;
+        }
+    }
+
+    /// <summary>
     /// Serializes remote players' save data to disk for the given save slot. Called on the host's native save,
     /// on every player disconnect, and on host stop — so a host restart restores BOTH players' full progress,
-    /// not only whatever happened to be captured at the last bench save. A write that would contain no remote
-    /// player data is skipped, so a stray/early call can never clobber an existing good save with an empty one.
+    /// not only whatever happened to be captured at the last bench save. World (GlobalSaveData) flags and the
+    /// seen-players set are ALWAYS written; if there is no remote per-player data this run, any existing per-player
+    /// entries already on disk are preserved rather than clobbered with an empty map. The write itself is atomic
+    /// (temp file + swap, previous-good rolled into .bak) so a partial write can never wipe a good save.
     /// </summary>
     /// <param name="saveSlot">The save slot index to write under.</param>
     private void PersistRemotePlayersToDisk(int saveSlot) {
@@ -231,17 +265,12 @@ internal class ModServerManager : ServerManager {
             // Create a copy of ServerSaveData for serialization
             var modSaveFile = ModSaveFile.FromServerSaveData(ServerSaveData);
 
-            // Filter out the host player's auth key to avoid duplicate/redundant data in the remote players' file
+            // Filter out the host player's auth key to avoid duplicate/redundant data in the remote players' file.
+            // SeenPlayers is meant to track REMOTE players only, so drop the host from both maps.
             var hostAuthKey = _modSettings.AuthKey;
             if (hostAuthKey != null) {
                 modSaveFile.PlayerSaveData.Remove(hostAuthKey);
-            }
-
-            // Never overwrite a good file with an empty one (e.g. a player who connected and dropped before
-            // sending any save data). Nothing to persist -> leave the existing file untouched.
-            if (modSaveFile.PlayerSaveData.Count == 0) {
-                Logging.Logger.Info("No remote player save data to persist, leaving existing file untouched");
-                return;
+                modSaveFile.SeenPlayers.Remove(hostAuthKey);
             }
 
             var configPath = FileUtil.GetConfigPath();
@@ -250,13 +279,76 @@ internal class ModServerManager : ServerManager {
             }
 
             var modSavePath = Path.Combine(configPath, $"user{saveSlot}.modsav");
+
+            // Never clobber good per-player data with an empty set (e.g. a player who connected and dropped before
+            // sending any save data). BUT we must still always persist GlobalSaveData — losing world flags is worse
+            // than re-writing the same per-player map. So when there is no remote per-player data to write, preserve
+            // whatever per-player entries (and seen players) already exist on disk and only refresh GlobalSaveData.
+            if (modSaveFile.PlayerSaveData.Count == 0) {
+                var existing = TryLoadModSaveFile(modSavePath);
+                if (existing != null) {
+                    // Keep the existing per-player data and union the seen-player sets; refresh world data only.
+                    modSaveFile.PlayerSaveData = existing.PlayerSaveData;
+                    if (existing.SeenPlayers != null) {
+                        foreach (var seen in existing.SeenPlayers) {
+                            if (seen != hostAuthKey && !modSaveFile.SeenPlayers.Contains(seen)) {
+                                modSaveFile.SeenPlayers.Add(seen);
+                            }
+                        }
+                    }
+
+                    Logging.Logger.Info(
+                        "No remote player save data to persist; preserving existing per-player data and " +
+                        "refreshing global save data only");
+                } else {
+                    Logging.Logger.Info(
+                        "No remote player save data to persist and no existing file; writing global save data only");
+                }
+            }
+
             var json = JsonConvert.SerializeObject(modSaveFile, Formatting.Indented);
-            File.WriteAllText(modSavePath, json);
+            WriteFileAtomic(modSavePath, json);
 
             Logging.Logger.Info(
                 $"Remote players' save data written to {modSavePath} ({modSaveFile.PlayerSaveData.Count} player(s))");
         } catch (Exception e) {
             Logging.Logger.Error($"Could not save remote players' save data to disk: {e}");
+        }
+    }
+
+    /// <summary>
+    /// Writes <paramref name="json"/> to <paramref name="path"/> atomically: the content is written to a temporary
+    /// file first, then swapped into place. On the same volume this is atomic and rolls the previous-good file into
+    /// a .bak, so a partial/interrupted write can never silently wipe an existing good save. The existing good file
+    /// is only ever removed AFTER the fully-written temp file is in hand.
+    /// </summary>
+    /// <param name="path">The destination path.</param>
+    /// <param name="json">The content to write.</param>
+    private static void WriteFileAtomic(string path, string json) {
+        var tmpPath = path + ".tmp";
+        var bakPath = path + ".bak";
+
+        // Write the full content to the temp file first. If this throws, the destination is left untouched.
+        File.WriteAllText(tmpPath, json);
+
+        if (File.Exists(path)) {
+            try {
+                // Atomic on the same volume: swaps tmp into place and rolls the previous-good file into .bak.
+                File.Replace(tmpPath, path, bakPath);
+            } catch (Exception e) {
+                // File.Replace can fail (e.g. cross-volume, transient lock). Fall back to delete+move, but only
+                // now that tmp is fully written — so we never delete the existing good file without a replacement.
+                // Promote the current good file to .bak FIRST so that if the move itself throws, the previous
+                // save is still recoverable (the load path falls back to .bak).
+                Logging.Logger.Warn(
+                    $"Atomic File.Replace failed for {path}, falling back to backup+move: {e.Message}");
+                try { File.Copy(path, bakPath, true); } catch { /* best-effort backup */ }
+                File.Delete(path);
+                File.Move(tmpPath, path);
+            }
+        } else {
+            // No existing file to protect; just move the temp file into place.
+            File.Move(tmpPath, path);
         }
     }
 }

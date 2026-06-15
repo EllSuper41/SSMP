@@ -32,6 +32,14 @@ internal class ServerSaveData {
     public Dictionary<string, Dictionary<ushort, byte[]>> PlayerSaveData { get; set; } = new();
 
     /// <summary>
+    /// Set of auth keys for players the server has seen at least once (established identity on connect). This is
+    /// kept SEPARATE from <see cref="PlayerSaveData"/> on purpose: it tracks "we know this player" independently of
+    /// whether we currently hold any save deltas for them, so a returning player whose deltas are momentarily
+    /// missing is correctly treated as a reconnect (not a first-join). Only remote players are tracked here.
+    /// </summary>
+    public HashSet<string> SeenPlayers { get; set; } = new();
+
+    /// <summary>
     /// Static constructor for initializing the indices for the Steel Soul variable.
     /// </summary>
     static ServerSaveData() {
@@ -51,9 +59,15 @@ internal class ServerSaveData {
 
         if (!PlayerSaveData.TryGetValue(authKey, out var playerSaveData)) {
             playerSaveData = new Dictionary<ushort, byte[]>();
-            currentSave.NewForPlayer = true;
+        }
 
-            Logger.Debug("No save data for player yet, marking in CurrentSave");
+        // Distinguish a reconnect from a first-join. A returning player we happen to hold no deltas for must NOT be
+        // pushed into a fresh start (RunStartNewGame); only a player we have never seen before is "new". Identity is
+        // recorded in SeenPlayers when the player first connects (see ServerManager), so even a zero-delta session
+        // counts as seen.
+        currentSave.NewForPlayer = !SeenPlayers.Contains(authKey);
+        if (currentSave.NewForPlayer) {
+            Logger.Debug("Player has not been seen before, marking as new in CurrentSave");
         }
 
         var saveData = new Dictionary<ushort, byte[]>(GlobalSaveData);

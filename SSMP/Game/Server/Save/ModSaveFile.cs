@@ -27,6 +27,14 @@ internal class ModSaveFile {
     public SaveData GlobalSaveData { get; set; } = new();
 
     /// <summary>
+    /// Auth keys for players the server has seen before. Persisted so a returning player is recognised as a
+    /// reconnect rather than a first-join across host restarts. May be null/absent in pre-existing (older) save
+    /// files; see <see cref="ToServerSaveData"/> for the back-compat seeding.
+    /// </summary>
+    [JsonProperty("seenPlayers")]
+    public List<string> SeenPlayers { get; set; } = new();
+
+    /// <summary>
     /// Convert this class to an encoded ServerSaveData.
     /// </summary>
     /// <returns>The converted ServerSaveData instance.</returns>
@@ -38,6 +46,20 @@ internal class ModSaveFile {
 
         foreach (var authKey in PlayerSaveData.Keys) {
             serverSaveData.PlayerSaveData[authKey] = EncodeUtil.ConvertToServerSaveData(PlayerSaveData[authKey]);
+        }
+
+        // Back-compat: older save files have no "seenPlayers" field (SeenPlayers stays an empty list after
+        // deserialization). To be safe always, seed the seen-players set from the union of any persisted seen
+        // players and every auth key that already has stored player save data — so a player who has data on disk
+        // is always treated as known, never thrown into a fresh start.
+        if (SeenPlayers != null) {
+            foreach (var authKey in SeenPlayers) {
+                serverSaveData.SeenPlayers.Add(authKey);
+            }
+        }
+
+        foreach (var authKey in PlayerSaveData.Keys) {
+            serverSaveData.SeenPlayers.Add(authKey);
         }
 
         return serverSaveData;
@@ -60,6 +82,9 @@ internal class ModSaveFile {
             // Store the entries in the player save data dictionary of the instance
             modSaveFile.PlayerSaveData[authKey] = saveData;
         }
+
+        // Persist the set of seen players so reconnects are distinguishable from first-joins across host restarts.
+        modSaveFile.SeenPlayers = new List<string>(serverSaveData.SeenPlayers);
 
         return modSaveFile;
     }
