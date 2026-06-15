@@ -322,10 +322,9 @@ internal class SaveManager {
 
             Logger.Debug($"PlayerData value changed from: {lastValue} to {currentValue}");
 
-            field.SetValue(_lastPlayerData, currentValue);
-
+            bool sent;
             if (field.FieldType == typeof(int)) {
-                CheckSendSaveUpdate(
+                sent = CheckSendSaveUpdate(
                     field.Name,
                     () => EncodeSaveDataValue(field.Name, currentValue),
                     () => {
@@ -334,7 +333,15 @@ internal class SaveManager {
                     }
                 );
             } else {
-                CheckSendSaveUpdate(field.Name, () => EncodeSaveDataValue(field.Name, currentValue));
+                sent = CheckSendSaveUpdate(field.Name, () => EncodeSaveDataValue(field.Name, currentValue));
+            }
+
+            // Advance the last-value cache ONLY if the update actually went out. If it was dropped (e.g. scene-host
+            // gated while we are not scene host), leaving the cache stale means the diff fires again next frame and
+            // re-sends once the gate opens, instead of silently losing the change. The additive delta closure reads
+            // the un-advanced lastValue, so a deferred send still carries the full cumulative delta.
+            if (sent) {
+                field.SetValue(_lastPlayerData, currentValue);
             }
         }
     }
@@ -358,12 +365,12 @@ internal class SaveManager {
         foreach (var field in _playerDataSimpleSyncFields) {
             var currentValue = field.GetValue(pd);
 
-            // Keep the last-values snapshot in sync with what we just force-sent so the delta loop below does not
-            // immediately re-send the same value, mirroring how OnUpdatePlayerData advances _lastPlayerData.
-            field.SetValue(_lastPlayerData, currentValue);
-
-            // No delta func: send the absolute current value even for additive fields.
-            CheckSendSaveUpdate(field.Name, () => EncodeSaveDataValue(field.Name, currentValue));
+            // No delta func: send the absolute current value even for additive fields. Advance the last-values
+            // snapshot only if it actually sent, so a dropped field is retried by the per-frame delta loop instead
+            // of being recorded as already-sent (mirrors OnUpdatePlayerData's advance-on-sent).
+            if (CheckSendSaveUpdate(field.Name, () => EncodeSaveDataValue(field.Name, currentValue))) {
+                field.SetValue(_lastPlayerData, currentValue);
+            }
         }
     }
 
@@ -511,31 +518,37 @@ internal class SaveManager {
     /// <param name="encodeFunc">Function to encode the value of the variable to a byte array.</param>
     /// <param name="deltaEncodeFunc">Function to encode the delta value of the variable of the type is applicable.
     /// </param>
-    private void CheckSendSaveUpdate(string name, Func<byte[]> encodeFunc, Func<byte[]>? deltaEncodeFunc = null) {
+    /// <returns>true if the update was actually queued for sending; false if it was dropped (not connected,
+    /// permadeath, not syncing, scene-host-gated, or missing index). Callers MUST advance their last-value/hash
+    /// cache ONLY when this returns true — otherwise a dropped change is recorded as 'already sent' and the diff
+    /// never fires again, so the change is lost until a fresh full snapshot (the cache-advance-on-drop bug).</returns>
+    private bool CheckSendSaveUpdate(string name, Func<byte[]> encodeFunc, Func<byte[]>? deltaEncodeFunc = null) {
         // If we are not connected or the 'permadeathMode' is 2, meaning we have broken/lost Steel Soul
         if (!_netClient.IsConnected || PlayerData.instance.GetInt("permadeathMode") == 2) {
-            return;
+            return false;
         }
 
         if (!SaveDataMapping.PlayerDataVarProperties.TryGetValue(name, out var varProps)) {
             Logger.Info($"Not in save data values, not sending save update ({name})");
-            return;
+            return false;
         }
 
         if (!varProps.Sync) {
             Logger.Info($"Value should not sync, not sending save update ({name})");
-            return;
+            return false;
         }
 
         // If we should do the scene host check and the player is not scene host, skip sending
         if (!varProps.IgnoreSceneHost && !_entityManager.IsSceneHost) {
-            Logger.Info($"Not scene host, but required, not sending save update ({name})");
-            return;
+            // Debug, not Info: now that a dropped change is retried every frame until the scene-host gate opens,
+            // this would otherwise spam the log every frame while a non-scene-host holds a changed gated field.
+            Logger.Debug($"Not scene host, but required, not sending save update ({name})");
+            return false;
         }
 
         if (!SaveDataMapping.PlayerDataIndices.TryGetValue(name, out var index)) {
             Logger.Info($"Cannot find save data index, not sending save update ({name})");
-            return;
+            return false;
         }
 
         Func<byte[]> toUseEncodeFunc;
@@ -553,6 +566,8 @@ internal class SaveManager {
             index,
             toUseEncodeFunc.Invoke()
         );
+
+        return true;
     }
 
     /// <summary>
@@ -573,12 +588,12 @@ internal class SaveManager {
                     continue;
                 }
 
-                persistentFsmData.LastIntValue = value;
-
                 var itemData = persistentFsmData.PersistentItemKey;
 
                 Logger.Info($"Value for {itemData} changed to: {value}");
 
+                // Transient drop: leave LastIntValue STALE so the change is re-detected and re-sent once reconnected.
+                // Advancing it here would record the change as 'already sent' and lose it (cache-advance-on-drop bug).
                 if (!_netClient.IsConnected) {
                     continue;
                 }
@@ -591,6 +606,7 @@ internal class SaveManager {
                         Logger.Info(
                             $"Cannot find geo rock save data index, not sending save update ({itemData.Id}, {itemData.SceneName})"
                         );
+                        persistentFsmData.LastIntValue = value;
                         continue;
                     }
 
@@ -601,22 +617,27 @@ internal class SaveManager {
                         index,
                         [(byte) value]
                     );
+                    persistentFsmData.LastIntValue = value;
                 } else if (
                     SaveDataMapping.PersistentIntVarProperties.TryGetValue(itemData, out var varProps) &&
                     varProps.Sync
                 ) {
                     // If we should do the scene host check and the player is not scene host, skip sending
                     if (!varProps.IgnoreSceneHost && !_entityManager.IsSceneHost) {
-                        Logger.Info(
+                        // Debug, not Info: retried every frame until we become scene host (see cache-advance fix).
+                        Logger.Debug(
                             $"Not scene host, not sending persistent int save update ({itemData.Id}, {itemData.SceneName})"
                         );
                         continue;
                     }
 
+                    // Transient drop handled above (scene-host gate leaves LastIntValue stale to retry); a missing
+                    // index is a permanent mapping gap, so advance the cache to stop re-logging every frame.
                     if (!SaveDataMapping.PersistentIntIndices.TryGetValue(itemData, out var index)) {
                         Logger.Info(
                             $"Cannot find persistent int save data index, not sending save update ({itemData.Id}, {itemData.SceneName})"
                         );
+                        persistentFsmData.LastIntValue = value;
                         continue;
                     }
 
@@ -628,8 +649,10 @@ internal class SaveManager {
                         index,
                         [(byte) value]
                     );
+                    persistentFsmData.LastIntValue = value;
                 } else {
                     Logger.Info("Cannot find persistent int/geo rock data bool, not sending save update");
+                    persistentFsmData.LastIntValue = value;
                 }
             } else {
                 var value = persistentFsmData.GetCurrentBool.Invoke();
@@ -637,12 +660,11 @@ internal class SaveManager {
                     continue;
                 }
 
-                persistentFsmData.LastBoolValue = value;
-
                 var itemData = persistentFsmData.PersistentItemKey;
 
                 Logger.Info($"Value for {itemData} changed to: {value}");
 
+                // Transient drop: leave LastBoolValue STALE so the change is re-detected and re-sent once reconnected.
                 if (!_netClient.IsConnected) {
                     continue;
                 }
@@ -652,12 +674,15 @@ internal class SaveManager {
                     Logger.Info(
                         $"Not in persistent bool save data values or false in sync props, not sending save update ({itemData.Id}, {itemData.SceneName})"
                     );
+                    persistentFsmData.LastBoolValue = value;
                     continue;
                 }
 
-                // If we should do the scene host check and the player is not scene host, skip sending
+                // Transient drop: leave LastBoolValue STALE so the change re-sends once we become scene host (do NOT
+                // advance the cache here — that is the cache-advance-on-drop bug that loses non-scene-host world changes).
                 if (!varProps.IgnoreSceneHost && !_entityManager.IsSceneHost) {
-                    Logger.Info(
+                    // Debug, not Info: retried every frame until we become scene host (see cache-advance fix).
+                    Logger.Debug(
                         $"Not scene host, not sending persistent bool save update ({itemData.Id}, {itemData.SceneName})"
                     );
                     continue;
@@ -667,6 +692,7 @@ internal class SaveManager {
                     Logger.Info(
                         $"Cannot find persistent bool save data index, not sending save update ({itemData.Id}, {itemData.SceneName})"
                     );
+                    persistentFsmData.LastBoolValue = value;
                     continue;
                 }
 
@@ -678,6 +704,7 @@ internal class SaveManager {
                     index,
                     BitConverter.GetBytes(value)
                 );
+                persistentFsmData.LastBoolValue = value;
             }
         }
     }
@@ -719,23 +746,29 @@ internal class SaveManager {
 
                 Logger.Debug($"Compound variable ({varName}) changed value");
 
-                // Since the value changed, we update it in the dictionary
-                checkDict[varName] = currentCheckValue;
-
+                bool sent;
                 if (deltaEncodeFunc == null) {
-                    CheckSendSaveUpdate(varName, () => EncodeSaveDataValue(varName, currentValue));
+                    sent = CheckSendSaveUpdate(varName, () => EncodeSaveDataValue(varName, currentValue));
                 } else {
                     var lastValue = _lastPlayerData.GetVariable<TVar>(varName);
 
-                    CheckSendSaveUpdate(
+                    sent = CheckSendSaveUpdate(
                         varName,
                         () => EncodeSaveDataValue(varName, currentValue),
                         () => deltaEncodeFunc.Invoke(currentValue, lastValue)
                     );
+                }
 
-                    // Also update the current value in the PlayerData instance for last values
-                    // We copy the value, because otherwise it will be updated whenever the list is updated
-                    _lastPlayerData.SetVariable(varName, (TVar) GetCompoundCopy(currentValue));
+                // Advance the change-tracking hash (and, for delta fields, the copied last value) ONLY if the update
+                // actually went out. A dropped send (e.g. scene-host gated while not scene host) leaves the hash
+                // stale so the change is re-detected and re-sent next frame instead of being lost. The delta closure
+                // above reads the un-advanced last value, so a deferred send still carries the full cumulative delta.
+                if (sent) {
+                    checkDict[varName] = currentCheckValue;
+                    if (deltaEncodeFunc != null) {
+                        // Copy the value, because otherwise it will be updated whenever the list is updated.
+                        _lastPlayerData.SetVariable(varName, (TVar) GetCompoundCopy(currentValue));
+                    }
                 }
             }
         }
