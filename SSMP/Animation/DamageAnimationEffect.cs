@@ -20,6 +20,17 @@ internal abstract class DamageAnimationEffect : AnimationEffect {
 
     /// <summary>
     /// Whether this effect should deal damage.
+    /// <para>
+    /// INVARIANT: the effect instances held in <c>AnimationManager.AnimationEffects</c>/<c>SubAnimationEffects</c> are
+    /// SINGLETONS shared across every remote player. <c>AnimationManager.OnPlayerAnimationUpdate</c> overwrites this
+    /// field via <see cref="SetShouldDoDamage"/> immediately before calling <c>Play</c> for the current player, so its
+    /// value is only valid for the duration of THAT synchronous <c>Play</c> call. Packet handlers run serially on the
+    /// NetClient receive thread, so reads inside <c>Play</c> are atomic per call today. <c>Play</c> implementations MUST
+    /// read this field (or call <see cref="IsPvpDamageActive"/>) synchronously and capture the result into a local
+    /// BEFORE any coroutine yield or <c>AnimationUtil.ExecuteActionAfterDelay</c> closure — a deferred read of the field
+    /// would observe a stale value belonging to a LATER player's update. <c>NeedleStrike.Play</c> already follows this
+    /// capture-at-schedule pattern.
+    /// </para>
     /// </summary>
     protected bool ShouldDoDamage;
 
@@ -66,10 +77,27 @@ internal abstract class DamageAnimationEffect : AnimationEffect {
 
     /// <summary>
     /// Sets whether this animation effect should deal damage.
+    /// <para>
+    /// Called by <c>AnimationManager.OnPlayerAnimationUpdate</c> on a SHARED singleton effect instance right before the
+    /// matching <c>Play</c> call. The value it sets is overwritten on the next update for a DIFFERENT player, so
+    /// <see cref="ShouldDoDamage"/> must be consumed synchronously within <c>Play</c> (see its remarks) and captured
+    /// into a local before any deferred work.
+    /// </para>
     /// </summary>
     /// <param name="shouldDoDamage">The new boolean value.</param>
     public void SetShouldDoDamage(bool shouldDoDamage) {
         ShouldDoDamage = shouldDoDamage;
+    }
+
+    /// <summary>
+    /// Snapshots the per-invocation PvP damage decision: PvP enabled AND this effect is flagged to deal damage. MUST
+    /// be read synchronously at the TOP of a <c>Play</c> call and captured into a local; never re-read after a yield or
+    /// inside a deferred closure, because <see cref="ShouldDoDamage"/> is shared mutable state owned by the current
+    /// <c>Play</c> only (see its remarks). Mirrors the expression <c>NeedleStrike.Play</c> already captures.
+    /// </summary>
+    /// <returns>True if this effect should apply PvP damage for the current <c>Play</c> invocation.</returns>
+    protected bool IsPvpDamageActive() {
+        return ServerSettings.IsPvpEnabled && ShouldDoDamage;
     }
 
     /// <summary>

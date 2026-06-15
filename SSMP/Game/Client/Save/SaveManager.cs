@@ -71,6 +71,28 @@ internal class SaveManager {
     private readonly Dictionary<string?, int> _listHashes;
 
     /// <summary>
+    /// Per-collectable-item cumulative amount this local player has consumed below the synced (server) totals.
+    ///
+    /// Collectables (CollectableItemsData) is the only Additive field whose per-item Amount can DECREASE in vanilla
+    /// (use / turn-in). The outbound delta is positive-only (a consume is never networked) and the server keeps an
+    /// absolute per-key SUM total that it re-broadcasts as the full absolute map to all peers including the consumer,
+    /// so a naive increase-only max() apply would RESTORE an item the local player just consumed the moment anyone
+    /// picks up any collectable. This APPLY-side offset records what the local player consumed so the apply never
+    /// raises an item above (serverTotal - locallyConsumed). State owned entirely by the apply path; independent of
+    /// _lastPlayerData / _listHashes (send gating / cache-advance), so it never affects the send side.
+    /// </summary>
+    private readonly Dictionary<string, int> _collectablesConsumedOffset;
+
+    /// <summary>
+    /// Per-collectable-item snapshot of the live Amount the apply path last SET each item to. Since the apply path is
+    /// the only thing that RAISES live Collectables and vanilla consume is the only thing that LOWERS them, a drop of
+    /// the live Amount below this baseline between applies is exactly new local consumption to fold into
+    /// <see cref="_collectablesConsumedOffset"/>. Initialised to the current live Amount the first time an item is
+    /// seen so a player who already holds items at connect registers no phantom consume.
+    /// </summary>
+    private readonly Dictionary<string, int> _collectablesAppliedTo;
+
+    /// <summary>
     /// List of FieldInfo for fields in PlayerData that are simple values that should be synced. Used for looping
     /// over to check for changes and network those changes.
     /// </summary>
@@ -138,6 +160,8 @@ internal class SaveManager {
         _bsdCompHashes = new Dictionary<string?, BossSequenceDoor.Completion>();
         _bsCompHashes = new Dictionary<string?, BossStatue.Completion>();
         _listHashes = new Dictionary<string?, int>();
+        _collectablesConsumedOffset = new Dictionary<string, int>();
+        _collectablesAppliedTo = new Dictionary<string, int>();
         _playerDataSimpleSyncFields = [];
         _playerDataCompoundSyncFields = [];
     }
@@ -199,6 +223,12 @@ internal class SaveManager {
         // relying on the stale per-session flag.
         _fullSnapshotSent = false;
         _fullSynchronisation = false;
+
+        // Drop the per-item collectable consume-offset / applied-to baselines so the next session (which begins with a
+        // full SetSaveWithData resync) starts clean. Stale offsets from a prior session would otherwise wrongly
+        // suppress legitimate amounts after the reconnect's full apply.
+        _collectablesConsumedOffset.Clear();
+        _collectablesAppliedTo.Clear();
     }
 
     /// <summary>
@@ -218,6 +248,12 @@ internal class SaveManager {
     /// </summary>
     private void ResetLastPlayerData() {
         var pd = PlayerData.instance;
+
+        // A full-sync (re)connect re-applies the entire server state via SetSaveWithData; any consume-offsets carried
+        // over from a prior session would wrongly suppress that full apply. Reset them so the apply path re-baselines
+        // appliedTo from the freshly-applied live values.
+        _collectablesConsumedOffset.Clear();
+        _collectablesAppliedTo.Clear();
 
         // Allocate a blank PlayerData WITHOUT running any constructor: Silksong's PlayerData() is public and
         // has side effects (SetupNewPlayerData), and the old NonPublic-ctor lookup found nothing on this game
@@ -1078,8 +1114,12 @@ internal class SaveManager {
                     break;
                 }
                 case CollectableItemsData decodedCollectables: {
-                    // INCREASE-ONLY apply: for each incoming key, raise Amount to max(current, incoming). Never
-                    // decrease, never absolute-set. Only Amount is wired; IsSeenMask/AmountWhileHidden stay per-player.
+                    // INCREASE-ONLY apply with a per-item LOCAL-CONSUME offset. The server broadcasts the FULL
+                    // absolute SUM map to every peer including the consumer, so a naive max(current, incoming) would
+                    // RESTORE an item this player just consumed (use/turn-in) the moment anyone picks up any
+                    // collectable. To prevent that, never raise an item above (incoming - locallyConsumed): we track
+                    // how much this player has consumed below the synced totals and subtract it before the raise.
+                    // Only Amount is wired; IsSeenMask/AmountWhileHidden stay per-player.
                     var live = pd.GetVariable<CollectableItemsData>(name);
                     if (live == null) {
                         break;
@@ -1087,12 +1127,44 @@ internal class SaveManager {
 
                     var amountRaised = false;
                     foreach (var entry in decodedCollectables.Enumerate()) {
-                        var currentData = live.GetData(entry.Key);
-                        if (entry.Value.Amount > currentData.Amount) {
-                            currentData.Amount = entry.Value.Amount;
-                            live.SetData(entry.Key, currentData);
+                        var key = entry.Key;
+                        var incoming = entry.Value.Amount;
+                        var currentData = live.GetData(key);
+                        var liveAmount = currentData.Amount;
+
+                        // appliedPrev: the live Amount this apply path last set the item to. First sighting baselines
+                        // to the current live so a pre-owned item is not mistaken for a consume.
+                        if (!_collectablesAppliedTo.TryGetValue(key, out var appliedPrev)) {
+                            appliedPrev = liveAmount;
+                        }
+
+                        // New local consumption since the last apply = how far live dropped below that baseline.
+                        // The apply path is the only raiser and vanilla consume the only lowerer, so a positive drop
+                        // is exactly new local consumption.
+                        var newConsume = appliedPrev - liveAmount;
+                        if (newConsume < 0) {
+                            newConsume = 0;
+                        }
+
+                        _collectablesConsumedOffset.TryGetValue(key, out var offset);
+                        offset += newConsume;
+                        _collectablesConsumedOffset[key] = offset;
+
+                        // Never raise above (serverTotal - locallyConsumed); clamp at 0.
+                        var target = incoming - offset;
+                        if (target < 0) {
+                            target = 0;
+                        }
+
+                        if (target > liveAmount) {
+                            currentData.Amount = target;
+                            live.SetData(key, currentData);
+                            liveAmount = target;
                             amountRaised = true;
                         }
+
+                        // Post-apply baseline for the next round's consume detection.
+                        _collectablesAppliedTo[key] = liveAmount > target ? liveAmount : target;
                     }
 
                     // Bust the quest manager's accepted/active-set caches so a quest that became completable

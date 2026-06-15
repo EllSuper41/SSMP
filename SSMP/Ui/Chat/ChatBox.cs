@@ -175,7 +175,14 @@ internal class ChatBox : IChatBox {
     /// </summary>
     /// <param name="modSettings">The mod settings that hold the current key-binds.</param>
     private void CheckKeyBinds(ModSettings modSettings) {
-        if (!_chatBoxGroup.IsActive()) return;
+        if (!_chatBoxGroup.IsActive()) {
+            // If the chat group is deactivated (e.g. disconnect -> Menu_Title scene change, or game paused) while the
+            // chat input is open, force it closed so the disabled hero actions / pause / mouse state cannot strand the
+            // player. CheckKeyBinds runs every frame, so this fires on the very next frame after deactivation.
+            // HideChatInput is idempotent and null-guards inputActions, so it is safe even off a gameplay scene.
+            if (IsOpen) HideChatInput();
+            return;
+        }
 
         if (IsOpen) {
             HandleOpenChatInput();

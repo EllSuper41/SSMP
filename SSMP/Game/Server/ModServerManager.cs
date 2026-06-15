@@ -200,12 +200,18 @@ internal class ModServerManager : ServerManager {
     }
 
     /// <summary>
-    /// Merge an Additive server PlayerData field's prior-session (.modsav) value onto the seeded base value, mirroring
-    /// EXACTLY the authoritative server-side Additive merge in <see cref="ServerManager"/> (int SUM, List/HashSet of
-    /// string UNION, EnemyJournalKillData/CollectableItemsData per-key SUM). Both inputs are absolute accumulated
-    /// snapshots; SUM-merging double-counts the overlap, matching the existing server-side semantics (the apply path
-    /// is increase-only, so an inflated server total only ever raises a client's value, never lowers it). On any type
-    /// mismatch the modsav value wins (same fallback as the server merge's "type did not match" path).
+    /// Merge an Additive server PlayerData field's prior-session (.modsav) value onto the seeded base value. The
+    /// string List/HashSet branches UNION (idempotent re-merge). The two named-int per-key maps
+    /// (EnemyJournalKillData / CollectableItemsData) MAX-merge per key rather than SUM: both the seeded base (the
+    /// host's own live save, which already includes the host's prior contribution) and the prior-session .modsav
+    /// GlobalSaveData are ABSOLUTE accumulated server totals, so SUM-merging on host restart double-counts the overlap
+    /// (the host's prior contribution is present in both inputs). max(base, modsav) per key is the correct monotonic
+    /// restart value: it preserves base-only keys (absent modsav key leaves base untouched), adopts modsav-only keys,
+    /// and takes the larger of overlapping keys, keeping the increase-only "never lower a client" safety property the
+    /// apply path relies on while removing the double-count. On any type mismatch the modsav value wins (same fallback
+    /// as the server merge's "type did not match" path). NOTE: this is the host-restart reconcile merge only; the LIVE
+    /// per-delta server Additive SUM in <see cref="ServerManager"/> is unchanged (that accumulates per-delta during a
+    /// session and is correct).
     /// </summary>
     /// <param name="name">The PlayerData variable name (needed by EncodeUtil to decode/encode).</param>
     /// <param name="baseBytes">The seeded base value's encoded bytes.</param>
@@ -237,10 +243,12 @@ internal class ModServerManager : ServerManager {
                 res = cs;
                 break;
             case EnemyJournalKillData ck when add is EnemyJournalKillData ak:
+                // MAX-merge per key (both inputs are absolute accumulated totals; SUM would double-count the overlap
+                // the host's own prior contribution present in both base and modsav). Keys only in base survive.
                 if (ak.Dictionary != null) {
                     foreach (var e in ak.Dictionary) {
                         var d = ck.GetKillData(e.Key);
-                        d.Kills += e.Value.Kills;
+                        d.Kills = System.Math.Max(d.Kills, e.Value.Kills);
                         ck.RecordKillData(e.Key, d);
                     }
                 }
@@ -248,9 +256,11 @@ internal class ModServerManager : ServerManager {
                 res = ck;
                 break;
             case CollectableItemsData cc when add is CollectableItemsData ac:
+                // MAX-merge per key (both inputs are absolute accumulated totals; SUM would double-count the overlap).
+                // Keys only in base survive untouched; keys only in modsav are added.
                 foreach (var e in ac.Enumerate()) {
                     var d = cc.GetData(e.Key);
-                    d.Amount += e.Value.Amount;
+                    d.Amount = System.Math.Max(d.Amount, e.Value.Amount);
                     cc.SetData(e.Key, d);
                 }
 

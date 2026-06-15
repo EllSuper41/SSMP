@@ -990,6 +990,13 @@ internal class Entity {
     /// host has been determined.
     /// </summary>
     public void InitializeClient(uint sceneHostEpoch = 0) {
+        // Relinquish authority symmetrically to InitializeHost (which sets _isControlled = false). On a same-scene
+        // host->client demotion (server SetSceneHostTransfer demote, or the local-death InitializeSceneClient on the
+        // still-in-scene dying host) the entity/components were previously set IsControlled = false and would
+        // otherwise stay stuck false (the true default only lives in the constructors, which are not re-run on a
+        // same-scene demote since entities are recreated only on scene change). Leaving them false makes the demoted
+        // machine a dual authority (keeps simulating/broadcasting the boss FSM/contact-damage and drops incoming HP).
+        _isControlled = true;
         _isSceneHostDetermined = true;
 
         // We are a puppet for this entity, so the host object must be inactive (the real enemy is simulated by the
@@ -1009,6 +1016,11 @@ internal class Entity {
         _activateGameObjectHook = null;
 
         foreach (var component in _components.Values) {
+            // Set IsControlled = true BEFORE InitializeClient (exact inverse of the host loop above which sets
+            // it false before InitializeHost). This MUST be at the Entity level because HealthManagerComponent
+            // overrides InitializeClient(uint) and does NOT chain to base, so a reset placed only in
+            // EntityComponent.InitializeClient would be bypassed for that component.
+            component.IsControlled = true;
             component.InitializeClient(sceneHostEpoch);
         }
     }

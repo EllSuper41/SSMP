@@ -1,4 +1,5 @@
 using System;
+using Logger = SSMP.Logging.Logger;
 
 namespace SSMP.Internals;
 
@@ -63,9 +64,7 @@ public static class CrestTypeExt {
     /// Get the crest type from the given internal name.
     /// </summary>
     /// <param name="crestId">The internal crest ID as a string.</param>
-    /// <returns>The corresponding crest type.</returns>
-    /// <exception cref="InvalidOperationException">Thrown when the given crest ID does not have an associated crest
-    /// type.</exception>
+    /// <returns>The corresponding crest type. Falls back to <see cref="CrestType.Hunter"/> for an unknown ID.</returns>
     public static CrestType FromInternal(string crestId) {
         switch (crestId) {
             case "Hunter":
@@ -91,7 +90,8 @@ public static class CrestTypeExt {
             case "Cloakless":
                 return CrestType.Cloakless;
             default:
-                throw new InvalidOperationException($"Supplied crestType (\"{crestId}\") does not exist!");
+                Logger.Warn($"Unknown crest ID \"{crestId}\"; defaulting to Hunter");
+                return CrestType.Hunter;
         }
     }
 

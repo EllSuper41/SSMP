@@ -317,12 +317,18 @@ internal class LobbyBrowserPanel : IComponent {
     /// <summary>
     /// Shows the panel.
     /// </summary>
-    public void Show() => GameObject.SetActive(true);
+    public void Show() {
+        _activeSelf = true;
+        GameObject.SetActive(_componentGroup.IsActive());
+    }
 
     /// <summary>
     /// Hides the panel.
     /// </summary>
-    public void Hide() => GameObject.SetActive(false);
+    public void Hide() {
+        _activeSelf = false;
+        GameObject.SetActive(false);
+    }
 
     /// <summary>
     /// Gets whether the panel is currently visible.

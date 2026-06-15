@@ -744,6 +744,14 @@ internal class AnimationManager {
     private bool _dashHasEnded = true;
 
     /// <summary>
+    /// Whether the lethal Death animation has already been sent this life. HeroController.Die fires its OnDeath
+    /// hook BEFORE its internal cState.dead re-entry guard, so a same-frame second lethal Die (e.g. damage +
+    /// environmental) would otherwise append a second Death AnimationInfo and the remote puppet would run the
+    /// cocoon/leak effect twice. Reset on scene change (a respawn in Silksong always reloads the scene).
+    /// </summary>
+    private bool _deathSentThisLife;
+
+    /// <summary>
     /// List of encoded positions for Rune Rage blasts. Used to gather encoded positions before sending effect info to
     /// server.
     /// </summary>
@@ -1026,6 +1034,9 @@ internal class AnimationManager {
     private void OnSceneChange(Scene oldScene, Scene newScene) {
         // A scene change occurs, so we can send again
         _stopSendingAnimationUntilSceneChange = false;
+
+        // A respawn after death always reloads the scene, so allow the next life to send the Death animation again.
+        _deathSentThisLife = false;
     }
 
     /// <summary>
@@ -1805,12 +1816,22 @@ internal class AnimationManager {
             return;
         }
 
+        // Only send the Death animation once per life. HeroController.Die fires this hook before its internal
+        // re-entry guard, so a same-frame second lethal Die would otherwise append a second Death AnimationInfo
+        // and the remote puppet would play the cocoon/leak effect twice. The flag resets on scene change (a
+        // respawn always reloads the scene). Checked after the IsConnected guard so a disconnected attempt does
+        // not wedge the flag.
+        if (_deathSentThisLife) {
+            return;
+        }
+
         Logger.Debug("Client has died, sending PlayerDeath data");
 
         // Let the server know that we have died
         byte[] effectInfo = [
             (byte)(frostDeath ? 1 : 0)
         ];
+        _deathSentThisLife = true;
         _netClient.UpdateManager.UpdatePlayerAnimation(AnimationClip.Death, 0, effectInfo);
     }
 

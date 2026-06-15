@@ -36,14 +36,21 @@ internal class Death : AnimationEffect {
 
     /// <inheritdoc/>
     public override void Play(GameObject playerObject, CrestType crestType, byte[]? effectInfo) {
-        // Play frost death if applicable (effect info contains a single byte with the value '1')
-        if (effectInfo is [1]) {
-            MonoBehaviourUtil.Instance.StartCoroutine(PlayFrostDeath(playerObject));
-            return;
-        } 
+        // Pick the right death animation coroutine (frost if effect info is a single '1' byte).
+        var routine = effectInfo is [1] ? PlayFrostDeath(playerObject) : PlayDeath(playerObject);
 
-        // Otherwise just play the normal animation
-        MonoBehaviourUtil.Instance.StartCoroutine(PlayDeath(playerObject));
+        // Host the coroutine on the player's OWN container (via its CoroutineCancelComponent) rather than on the
+        // persistent MonoBehaviourUtil. The coroutine defers SpawnCocoonParticles/HidePlayer across several seconds;
+        // if the container is recycled and re-used for a different player in that window, a coroutine on the
+        // persistent runner would spawn the cocoon particles on the WRONG player. A coroutine hosted on the
+        // container is stopped automatically when the container is deactivated on recycle. Fall back to the
+        // persistent runner (the activeInHierarchy guards inside the coroutines still protect that path).
+        var canceller = playerObject.GetComponent<CoroutineCancelComponent>();
+        if (canceller != null) {
+            canceller.AddCoroutine("death", canceller.StartCoroutine(routine));
+        } else {
+            MonoBehaviourUtil.Instance.StartCoroutine(routine);
+        }
     }
 
     /// <summary>
@@ -90,6 +97,12 @@ internal class Death : AnimationEffect {
 
         yield return new WaitForSeconds(growthTime);
 
+        // Bail if the player container was recycled/deactivated during the wait, so we never apply the rest of the
+        // death sequence (HidePlayer, cocoon particles) to a container that has since been reused for another player.
+        if (playerObject == null || !playerObject.activeInHierarchy) {
+            yield break;
+        }
+
         // Transition from growing the crystals to exploding them
         var localDestroyEffects = prefab.FindGameObjectInChildren("Destroy Effects");
         var destroyEffects = EffectUtils.SpawnGlobalPoolObject(
@@ -119,6 +132,9 @@ internal class Death : AnimationEffect {
 
         // Fade out and play particles
         yield return new WaitForSeconds(frostedDuration);
+        if (playerObject == null || !playerObject.activeInHierarchy) {
+            yield break;
+        }
         frostDeath.AddComponent<SimpleFadeOut>();
         SpawnCocoonParticles(frostDeath);
     }
@@ -144,6 +160,10 @@ internal class Death : AnimationEffect {
 
         // Disable leak particle emission after time, then spawn black particles
         yield return new WaitForSeconds(4);
+        // Bail if the container was recycled/reused during the wait (don't spawn cocoon particles on a now-different player).
+        if (playerObject == null || !playerObject.activeInHierarchy) {
+            yield break;
+        }
         emission.enabled = false;
         SpawnCocoonParticles(playerObject);
     }

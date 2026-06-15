@@ -606,6 +606,15 @@ internal class ConnectInterface {
         _glowingNotch = CreateNotch(ref currentY);
         _backgroundPanel = CreateBackgroundPanel(ref currentY);
 
+        // Place the panel and notch under the same ComponentGroup tree that governs every other connect UI element,
+        // so a single _connectGroup.SetActive(...) drives panel + notch + all content together. This removes the
+        // second, manually-toggled visibility authority (the old SetMenuActive) that previously had to be paired with
+        // _connectGroup.SetActive at every call site and caused the .16 black-square regression when one was missed.
+        // The wrappers are NOT Component subclasses, so ComponentGroup.ReparentComponents (which only reparents
+        // `is Component`) skips them and never tries to reparent the panel into itself during FinalizeLayout.
+        new GameObjectComponent(_backgroundGroup, _backgroundPanel);
+        new GameObjectComponent(_backgroundGroup, _glowingNotch);
+
         _usernameInput = CreateUsernameSection(ref currentY);
         var tabElements = CreateTabButtons(ref currentY);
         _matchmakingTab = tabElements.matchmaking;
@@ -1182,16 +1191,38 @@ internal class ConnectInterface {
     }
 
     /// <summary>
-    /// Shows or hides the entire multiplayer menu interface.
+    /// Resets the interface to a clean default state. Called whenever the multiplayer menu is (re)opened so stale
+    /// sub-panels, leftover feedback, or an inconsistent tab view from a previous session cannot persist.
+    /// Hides all lobby browser/config sub-panels, clears any transient feedback, and re-runs SwitchTab on the active
+    /// tab unconditionally (which re-shows the active tab content and refreshes matchmaking status messaging). Also
+    /// kicks an idempotent matchmaking version probe so a reopened menu re-checks compatibility when appropriate.
+    ///
+    /// Note: panel/notch visibility is governed by the ComponentGroup tree via _connectGroup.SetActive, so this method
+    /// no longer needs to toggle them (the old SetMenuActive responsibility is now a single group switch).
     /// </summary>
-    /// <param name="active">True to show the menu, false to hide it.</param>
-    public void SetMenuActive(bool active) {
-        _backgroundPanel.SetActive(active);
-        _glowingNotch.SetActive(active);
+    public void ResetToDefault() {
+        // Hide all sub-panels. After the LobbyBrowserPanel _activeSelf fix these Hide() calls correctly clear
+        // _activeSelf so the panels cannot resurrect on the next group toggle.
+        _lobbyBrowserPanel.Hide();
+        _steamLobbyBrowserPanel?.Hide();
+        _lobbyConfigPanel.Hide();
+        _steamLobbyConfigPanel?.Hide();
 
-        if (active && !_isMatchmakingVersionBlocked && !_isCheckingMatchmakingVersion) {
-            BeginMatchmakingVersionCheck();
+        // Clear any transient feedback so a stale message does not linger when the menu reopens.
+        if (_feedbackHideCoroutine != null) {
+            MonoBehaviourUtil.Instance.StopCoroutine(_feedbackHideCoroutine);
+            _feedbackHideCoroutine = null;
         }
+
+        _isMatchmakingFeedbackActive = false;
+        _feedbackText.SetActive(false);
+
+        // Re-run SwitchTab unconditionally: it re-hides sub-panels, re-shows the active tab's content, and calls
+        // RefreshMatchmakingStatusFeedback so version-block/checking/unavailable messaging is preserved.
+        SwitchTab(_activeTab);
+
+        // Re-probe matchmaking compatibility if not already blocked/checking (self-guards).
+        BeginMatchmakingVersionCheck();
     }
 
     #endregion
@@ -2020,6 +2051,15 @@ internal class ConnectInterface {
     /// </summary>
     /// <param name="result">The connection failure details.</param>
     /// <returns>A formatted error message string.</returns>
+    /// <summary>
+    /// Public accessor for the user-facing failure message. Used by the host self-connect recovery path
+    /// (UiManager.OnHostSelfConnectFailed) so the in-game chat message matches the connect-menu feedback text,
+    /// since the connect menu's feedback panel is already hidden once the host has entered the world.
+    /// </summary>
+    /// <param name="result">The connection failure details.</param>
+    /// <returns>A formatted error message string.</returns>
+    internal static string GetFailureMessageText(ConnectionFailedResult result) => GetFailureMessage(result);
+
     private static string GetFailureMessage(ConnectionFailedResult result) {
         return result.Reason switch {
             ConnectionFailedReason.InvalidAddons => ErrorInvalidAddons,

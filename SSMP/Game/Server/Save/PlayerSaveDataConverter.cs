@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using SSMP.Game.Client.Save;
@@ -61,7 +62,7 @@ public class PlayerSaveDataConverter : JsonConverter {
 
             // From the variable properties, we obtain the type for the value of this JSON property
             var typeString = varProps.VarType;
-            var type = Type.GetType(typeString);
+            var type = ResolveVarType(typeString);
 
             if (type == null) {
                 Logger.Warn($"Could not deserialize ModSaveFile.Entry, because var type '{typeString}' could not be found, skipping");
@@ -77,6 +78,34 @@ public class PlayerSaveDataConverter : JsonConverter {
         }
 
         return entries;
+    }
+
+    /// <summary>
+    /// Resolve a save-data VarType string to a CLR <see cref="Type"/>.
+    ///
+    /// Some Sync:true VarType strings are synthetic / bare game-type names that <see cref="Type.GetType(string)"/>
+    /// cannot resolve: 'CollectableItemsData' and 'EnemyJournalKillData' are top-level types living in Assembly-CSharp
+    /// (neither the executing SSMP assembly nor mscorlib), and 'HashSet&lt;string&gt;' is not valid CLR type-name
+    /// syntax at all. Without an explicit mapping these resolve to null and the entry is silently dropped on read-back,
+    /// losing shared quest progress / scene discovery sets across a host restart.
+    ///
+    /// These exact synthetic strings mirror the set that <see cref="SSMP.Util.EncodeUtil"/> already special-cases in
+    /// its encode/decode switches; they must stay in lockstep with the VarType strings in save-data.json and must NOT
+    /// be renamed. Everything else falls back to <see cref="Type.GetType(string)"/> (System.* and the fully-qualified
+    /// SSMP.* strings already resolve), and an unknown future type still degrades gracefully via the null guard in
+    /// the caller.
+    /// </summary>
+    private static Type? ResolveVarType(string typeString) {
+        switch (typeString) {
+            case "HashSet<string>":
+                return typeof(HashSet<string>);
+            case "CollectableItemsData":
+                return typeof(CollectableItemsData);
+            case "EnemyJournalKillData":
+                return typeof(EnemyJournalKillData);
+            default:
+                return Type.GetType(typeString);
+        }
     }
 
     /// <inheritdoc />

@@ -436,6 +436,13 @@ internal class ClientManager : IClientManager {
             ClientUpdatePacketId.PlayerLeaveScene,
             OnPlayerLeaveScene
         );
+        // The server broadcasts PlayerDeath to every other in-scene client unconditionally (not full-sync-gated),
+        // so this handler is always registered. Without it the packet hits the no-handler branch in
+        // PacketHandlerRegistry.Execute, logging Logger.Error once per instance per observer per death.
+        _packetManager.RegisterClientUpdatePacketHandler<GenericClientData>(
+            ClientUpdatePacketId.PlayerDeath,
+            OnRemotePlayerDeath
+        );
         _packetManager.RegisterClientUpdatePacketHandler<PlayerUpdate>(
             ClientUpdatePacketId.PlayerUpdate,
             OnPlayerUpdate
@@ -492,6 +499,7 @@ internal class ClientManager : IClientManager {
         _packetManager.DeregisterClientUpdatePacketHandler(ClientUpdatePacketId.PlayerEnterScene);
         _packetManager.DeregisterClientUpdatePacketHandler(ClientUpdatePacketId.PlayerAlreadyInScene);
         _packetManager.DeregisterClientUpdatePacketHandler(ClientUpdatePacketId.PlayerLeaveScene);
+        _packetManager.DeregisterClientUpdatePacketHandler(ClientUpdatePacketId.PlayerDeath);
         _packetManager.DeregisterClientUpdatePacketHandler(ClientUpdatePacketId.PlayerUpdate);
         _packetManager.DeregisterClientUpdatePacketHandler(ClientUpdatePacketId.PlayerMapUpdate);
         _packetManager.DeregisterClientUpdatePacketHandler(ClientUpdatePacketId.ServerSettingsUpdated);
@@ -946,7 +954,21 @@ internal class ClientManager : IClientManager {
             enterSceneData.Position,
             enterSceneData.Scale
         );
-        _animationManager.UpdatePlayerAnimation(id, enterSceneData.AnimationClipId, 0, playerData.CrestType);
+
+        // The server persists the Death clip as the player's AnimationId (Death's enum ordinal sits below DashEnd,
+        // so it passes the persist filter) and re-sends it in this enter snapshot. A late-joiner who missed the
+        // live Death animation update would otherwise see only the frozen Death sprite pose with no cocoon effect,
+        // because the plain UpdatePlayerAnimation path only plays the sprite and never runs the registered Death
+        // effect. For the Death clip specifically, route through OnPlayerAnimationUpdate so the corpse/cocoon effect
+        // also runs and the late-joiner sees an intentional corpse rather than a standing Death-pose puppet. The
+        // enter snapshot does not carry effectInfo (frost vs normal), so the effect defaults to the normal cocoon —
+        // an acceptable cosmetic approximation. (The cleaner root fix is server-side, clearing/skipping the Death
+        // AnimationId on death; that lives in ServerManager.cs which is outside this cluster — see deviations.)
+        if ((SSMP.Animation.AnimationClip) enterSceneData.AnimationClipId == SSMP.Animation.AnimationClip.Death) {
+            _animationManager.OnPlayerAnimationUpdate(id, enterSceneData.AnimationClipId, 0, null);
+        } else {
+            _animationManager.UpdatePlayerAnimation(id, enterSceneData.AnimationClipId, 0, playerData.CrestType);
+        }
 
         try {
             PlayerEnterSceneEvent?.Invoke(playerData);
@@ -995,6 +1017,18 @@ internal class ClientManager : IClientManager {
                 $"Exception thrown while invoking PlayerLeaveScene event:\n{e}"
             );
         }
+    }
+
+    /// <summary>
+    /// Callback method for when a remote player death broadcast is received. The corpse/cocoon visual is delivered
+    /// cosmetically via the <see cref="AnimationClip.Death"/> animation channel, so this handler intentionally does
+    /// NOT replay the death effect (doing so would double the cocoon/leak particles). Its job is to consume the
+    /// broadcast so it no longer hits the no-handler branch in the packet registry (which logged an error per
+    /// instance per observer per death) and to provide an explicit, deterministic remote-death log hook.
+    /// </summary>
+    /// <param name="data">The generic client data identifying the player that died.</param>
+    private void OnRemotePlayerDeath(GenericClientData data) {
+        Logger.Info($"Remote player {data.Id} died");
     }
 
     /// <summary>

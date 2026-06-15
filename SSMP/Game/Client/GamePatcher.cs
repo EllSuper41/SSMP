@@ -74,6 +74,11 @@ internal partial class GamePatcher {
     private Hook? _crawlerStopCrawlingHook;
 
     /// <summary>
+    /// Hook for guarding <see cref="Crawler.EndAmbientIdle"/> against destruction-time errors on puppet teardown.
+    /// </summary>
+    private Hook? _crawlerEndAmbientIdleHook;
+
+    /// <summary>
     /// The NetClient instance to check if we are connected to a server.
     /// </summary>
     private readonly NetClient _netClient;
@@ -158,6 +163,11 @@ internal partial class GamePatcher {
             OnCrawlerStopCrawling
         );
 
+        _crawlerEndAmbientIdleHook = new Hook(
+            typeof(Crawler).GetMethod("EndAmbientIdle", InstancePublicFlags | InstanceNonPublicFlags)!,
+            OnCrawlerEndAmbientIdle
+        );
+
         RegisterAggressionHooks();
     }
 
@@ -199,6 +209,9 @@ internal partial class GamePatcher {
 
         _crawlerStopCrawlingHook?.Dispose();
         _crawlerStopCrawlingHook = null;
+
+        _crawlerEndAmbientIdleHook?.Dispose();
+        _crawlerEndAmbientIdleHook = null;
     }
 
     /// <summary>
@@ -239,6 +252,22 @@ internal partial class GamePatcher {
             orig(self);
         } catch (NullReferenceException) {
             Logger.Debug("Safely caught NullReferenceException in Crawler.StopCrawling");
+        }
+    }
+
+    /// <summary>
+    /// Guards <see cref="Crawler.EndAmbientIdle"/> against errors during puppet teardown. The ambient-to-crawl
+    /// transition calls StartCoroutine on a Crawler that may already be Object.Destroy'd on a puppet (dangling
+    /// TookDamage delegate), which surfaces as ArgumentNullException / MissingReferenceException / NullReferenceException
+    /// depending on teardown timing. A real (non-puppet) enemy never throws here, so the catch is dead code there.
+    /// We intentionally catch broad <see cref="Exception"/> rather than just NullReferenceException because the
+    /// observed throw is ArgumentNullException and the subtype varies; this is a teardown-path guard.
+    /// </summary>
+    private static void OnCrawlerEndAmbientIdle(Action<Crawler> orig, Crawler self) {
+        try {
+            orig(self);
+        } catch (Exception e) {
+            Logger.Debug($"Safely caught {e.GetType().Name} in Crawler.EndAmbientIdle (puppet teardown): {e.Message}");
         }
     }
 

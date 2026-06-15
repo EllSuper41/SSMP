@@ -74,6 +74,11 @@ internal abstract class EntityComponent {
     /// Initializes the entity component when the client user is a scene client with an epoch.
     /// </summary>
     public virtual void InitializeClient(uint sceneHostEpoch) {
+        // Defensive symmetry with InitializeHost (which leaves IsControlled = false). The authoritative reset
+        // is performed by Entity.InitializeClient's component loop BEFORE this is called, because overrides such
+        // as HealthManagerComponent.InitializeClient(uint) do NOT chain to base and would bypass a reset placed
+        // only here. Kept for consistency with the non-overriding components and future-safety.
+        IsControlled = true;
         InitializeClient();
     }
 

@@ -172,7 +172,14 @@ internal class UiManager : IUiManager {
     /// Required for button clicks and keyboard navigation.
     /// </summary>
     private EventSystem _eventSystem = null!;
-    
+
+    /// <summary>
+    /// Whether the mod created (and therefore owns) <see cref="_eventSystem"/>. When we reuse the game's existing
+    /// EventSystem instead of creating our own, this is false and we must NOT toggle its enabled state per-scene,
+    /// since disabling the game's own EventSystem would break the game's menu navigation.
+    /// </summary>
+    private bool _ownsEventSystem;
+
     /// <summary>
     /// Component group controlling visibility of connection UI elements.
     /// Shown in main menu, hidden during gameplay.
@@ -377,7 +384,9 @@ internal class UiManager : IUiManager {
     private void OnSceneChanged(UnityEngine.SceneManagement.Scene oldScene, UnityEngine.SceneManagement.Scene newScene) {
         var isNonGameplayScene = SceneUtil.IsNonGameplayScene(newScene.name);
 
-        if (_eventSystem != null) {
+        // Only toggle the EventSystem we created. If we reused the game's EventSystem (_ownsEventSystem == false),
+        // disabling it would break the game's own menu navigation, so we leave it alone.
+        if (_ownsEventSystem && _eventSystem != null) {
             _eventSystem.enabled = !isNonGameplayScene;
         }
 
@@ -452,6 +461,20 @@ internal class UiManager : IUiManager {
     /// Creates the Unity EventSystem for handling UI input.
     /// </summary>
     private void CreateEventSystem() {
+        // Unity supports only one active EventSystem. Prefer reusing the game's existing one (if it is alive yet)
+        // rather than creating a second persistent EventSystem that fights it for input focus. We only create our own
+        // SSMP_EventSystem when none exists (the early-startup case before the game's menu EventSystem is alive).
+        var existing = EventSystem.current;
+        if (existing == null) {
+            existing = Object.FindObjectOfType<EventSystem>();
+        }
+
+        if (existing != null) {
+            _eventSystem = existing;
+            _ownsEventSystem = false;
+            return;
+        }
+
         var eventSystemObj = new GameObject("SSMP_EventSystem");
 
         _eventSystem = eventSystemObj.AddComponent<EventSystem>();
@@ -460,6 +483,7 @@ internal class UiManager : IUiManager {
 
         eventSystemObj.AddComponent<StandaloneInputModule>();
         Object.DontDestroyOnLoad(eventSystemObj);
+        _ownsEventSystem = true;
     }
 
     /// <summary>
@@ -543,12 +567,11 @@ internal class UiManager : IUiManager {
     /// <param name="newGame">True to start a new game, false to continue existing save</param>
     public void EnterGameFromMultiplayerMenu(bool newGame) {
         IH.StopUIInput();
+        // The background panel + glowing notch are now governed by the ComponentGroup tree (wrapped in
+        // _backgroundGroup, a child of _connectGroup), so this single switch hides panel + notch + all content.
+        // This removes the .16-era second authority (the old SetMenuActive) that had to be paired here to avoid
+        // the dark menu panel lingering in-game as a large black square.
         _connectGroup.SetActive(false);
-        // Also hide the menu background panel + glowing notch. These are parented to the root UI object
-        // (not to _connectGroup), so SetActive(false) above does NOT hide them. The host enters via
-        // GoToSaveMenu -> HideMultiplayerMenu (which hides them), but the client enters here, so without
-        // this the dark menu panel stays on screen in-game as a large black square.
-        _connectInterface.SetMenuActive(false);
         PlayMenuTransitionAudio();
 
         Logger.Debug($"Entering game from MP menu for {(newGame ? "new" : "continued")} game");
@@ -593,6 +616,31 @@ internal class UiManager : IUiManager {
     /// <param name="fallbackAddress">Optional fallback address (IP:Port) to attempt on failure.</param>
     public void OnFailedConnect(ConnectionFailedResult result, string? fallbackAddress = null) =>
         _connectInterface.OnFailedConnect(result, fallbackAddress);
+
+    /// <summary>
+    /// Recovery hook for a host self-connect failure (the autoConnect/localhost path). Unlike a remote client whose
+    /// connect menu is still on screen when a connection fails, the host has already torn down the multiplayer menu
+    /// (GoToSaveMenu -> HideMultiplayerMenu) and entered the world before self-connecting, so the connect-menu
+    /// feedback text is hidden and renders nothing. This surfaces the error in-game via the chat box (which is
+    /// visible during gameplay) and un-strands the host by stopping the half-started server and returning to the main
+    /// menu without saving the partially-loaded world.
+    ///
+    /// This is a menu-independent recovery entry point. Wiring it from ClientManager.OnConnectFailed (branching on the
+    /// _autoConnect flag) belongs to the netcode/wire-protocol owner, since OnConnectFailed and _autoConnect live in
+    /// ClientManager (outside the UI layer).
+    /// </summary>
+    /// <param name="result">The reason the host self-connect failed.</param>
+    public void OnHostSelfConnectFailed(ConnectionFailedResult result) {
+        // Surface the failure where the player actually is (in-game), since the connect-menu feedback panel is hidden.
+        var message = ConnectInterface.GetFailureMessageText(result);
+        InternalChatBox?.AddMessage(message);
+
+        // Un-strand the host: stop the half-started embedded server and leave the partially-loaded world without
+        // saving it. Both are idempotent (RequestServerStopHostEvent is a no-op if no host is running; returning to
+        // the main menu is safe even if the world is only partially loaded).
+        RequestServerStopHostEvent?.Invoke();
+        ReturnToMainMenuFromGame(false);
+    }
 
     /// <summary>
     /// Callback invoked when client disconnects from the server.
@@ -842,15 +890,19 @@ internal class UiManager : IUiManager {
     /// </summary>
     private void ShowMultiplayerMenu() {
         _connectGroup.SetActive(true);
-        _connectInterface.SetMenuActive(true);
+        // Reset interface sub-state on every (re)open so stale lobby/config panels, leftover feedback, or an
+        // inconsistent tab view from a previous session cannot persist. ResetToDefault subsumes the old
+        // SetMenuActive(true) behaviour (it kicks an idempotent matchmaking version probe) and runs SwitchTab
+        // unconditionally so the hide of stale sub-panels is guaranteed.
+        _connectInterface.ResetToDefault();
     }
 
     /// <summary>
     /// Hides the multiplayer connection interface.
     /// </summary>
     private void HideMultiplayerMenu() {
+        // Single switch: _connectGroup governs panel + notch + all content via the ComponentGroup tree.
         _connectGroup.SetActive(false);
-        _connectInterface.SetMenuActive(false);
     }
 
     /// <summary>
