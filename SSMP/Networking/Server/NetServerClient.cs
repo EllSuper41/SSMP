@@ -56,6 +56,13 @@ internal class NetServerClient {
     public IEncryptedTransportClient TransportClient { get; }
 
     /// <summary>
+    /// Leftover (incomplete-packet) stream-reassembly bytes for THIS client only. Each client owns its own buffer so
+    /// one client's partial packet can never be prepended onto another client's stream (cross-client framing
+    /// corruption). Passed by ref into PacketManager.HandleReceivedData, so it must be a field, not a property.
+    /// </summary>
+    public byte[]? LeftoverData;
+
+    /// <summary>
     /// Construct the client with the given transport client.
     /// </summary>
     /// <param name="transportClient">The encrypted transport client.</param>

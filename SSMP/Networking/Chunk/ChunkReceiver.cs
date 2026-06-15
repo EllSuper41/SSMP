@@ -80,6 +80,19 @@ internal sealed class ChunkReceiver {
     public void ProcessReceivedData(SliceData sliceData) {
         //Logger.Debug($"Received slice packet: {sliceData.ChunkId}, {sliceData.SliceId}, {sliceData.NumSlices}");
 
+        // Bounds-validate the slice against the protocol maxima BEFORE it is used to index _received / _chunkData.
+        // A malformed (or hostile, post-auth-bug) slice with SliceId >= NumSlices, an out-of-range NumSlices, or an
+        // oversized Data payload would otherwise write out of bounds (_received[SliceId] at the dedup check and the
+        // Array.Copy into _chunkData at SliceId * MaxSliceSize). SliceId < NumSlices <= MaxSlicesPerChunk and
+        // Data.Length <= MaxSliceSize together guarantee SliceId*MaxSliceSize + Data.Length <= MaxChunkSize.
+        if (sliceData.NumSlices == 0
+            || sliceData.NumSlices > ConnectionManager.MaxSlicesPerChunk
+            || sliceData.SliceId >= sliceData.NumSlices
+            || sliceData.Data == null
+            || sliceData.Data.Length > ConnectionManager.MaxSliceSize) {
+            return;
+        }
+
         // We check if the received chunk ID is smaller than the current chunk ID accounting for wrapping IDs
         if (ConnectionManager.IsWrappingIdSmaller(sliceData.ChunkId, _chunkId)) {
             //Logger.Debug("Chunk ID of received slice packet is smaller than currently receiving chunk");

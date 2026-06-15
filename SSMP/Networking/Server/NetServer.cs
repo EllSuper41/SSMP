@@ -58,11 +58,6 @@ internal class NetServer : INetServer {
     private readonly AutoResetEvent _processingWaitHandle;
 
     /// <summary>
-    /// Byte array containing leftover data that was not processed as a packet yet.
-    /// </summary>
-    private byte[]? _leftoverData;
-
-    /// <summary>
     /// Cancellation token source for all threads of the server.
     /// </summary>
     private CancellationTokenSource? _taskTokenSource;
@@ -170,15 +165,11 @@ internal class NetServer : INetServer {
             while (_receivedQueue.TryDequeue(out var receivedData)) {
                 if (token.IsCancellationRequested) break;
 
-                var packets = PacketManager.HandleReceivedData(
-                    receivedData.Buffer,
-                    receivedData.NumReceived,
-                    ref _leftoverData
-                );
-
                 var transportClient = receivedData.TransportClient;
 
-                // Try to find existing client by transport client reference
+                // Resolve the client BEFORE parsing so stream reassembly uses THIS client's own leftover buffer.
+                // A single shared buffer would splice one client's partial packet onto another client's stream
+                // (cross-client framing corruption) whenever two clients' datagrams interleave on this thread.
                 var client = _clientsById.Values.FirstOrDefault(c => c.TransportClient == transportClient);
 
                 if (client == null) {
@@ -204,6 +195,12 @@ internal class NetServer : INetServer {
                     // that wants to connect
                     client = CreateNewClient(transportClient);
                 }
+
+                var packets = PacketManager.HandleReceivedData(
+                    receivedData.Buffer,
+                    receivedData.NumReceived,
+                    ref client.LeftoverData
+                );
 
                 HandleClientPackets(client, packets);
             }
@@ -397,8 +394,7 @@ internal class NetServer : INetServer {
         _taskTokenSource?.Dispose();
         _taskTokenSource = null;
 
-        // Clear leftover data
-        _leftoverData = null;
+        // (Per-client leftover buffers live on each NetServerClient and are released with the client.)
 
         // Deregister the client info handler to prevent leaks when restarting the server
         _packetManager.DeregisterServerConnectionPacketHandler(ServerConnectionPacketId.ClientInfo);
