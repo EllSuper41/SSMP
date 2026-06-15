@@ -127,6 +127,19 @@ internal class SaveManager {
     private bool _fullSnapshotSent;
 
     /// <summary>
+    /// Number of player fields flushed per frame during the progressive full snapshot (<see cref="FlushSnapshotBatch"/>).
+    /// Small enough that one frame's batch of SaveUpdates stays well under the ~1200-byte MTU, so the snapshot is never
+    /// raw-fragmented across unreliable UDP datagrams (where a lost/reordered fragment desyncs stream reassembly).
+    /// </summary>
+    private const int SnapshotFieldsPerFrame = 48;
+
+    /// <summary>
+    /// Cursor into <see cref="_playerDataSimpleSyncFields"/> for the progressive full snapshot; advanced each frame
+    /// until it reaches the field count. Reset alongside _fullSnapshotSent on (re)connect.
+    /// </summary>
+    private int _snapshotFieldCursor;
+
+    /// <summary>
     /// List of HashSet variables in PlayerData.
     /// </summary>
     private static readonly List<string> HashSetVariables = [
@@ -222,6 +235,7 @@ internal class SaveManager {
         // (ClientManager.OnDisconnect -> DeregisterHooks), so a reconnect re-flushes a full snapshot rather than
         // relying on the stale per-session flag.
         _fullSnapshotSent = false;
+        _snapshotFieldCursor = 0;
         _fullSynchronisation = false;
 
         // Drop the per-item collectable consume-offset / applied-to baselines so the next session (which begins with a
@@ -308,8 +322,11 @@ internal class SaveManager {
             && _fullSynchronisation
             && _netClient.IsConnected
             && gm.GameState == GameState.PLAYING) {
-            FlushFullPlayerSnapshot();
-            _fullSnapshotSent = true;
+            // Progressive: flush a small batch of fields per frame so the snapshot never produces an over-MTU packet.
+            // Returns true once all fields have been flushed.
+            if (FlushSnapshotBatch()) {
+                _fullSnapshotSent = true;
+            }
         }
 
         foreach (var field in _playerDataSimpleSyncFields) {
@@ -348,21 +365,28 @@ internal class SaveManager {
 
     /// <summary>
     /// Force-send a COMPLETE snapshot of every Sync:true SyncType=Player simple field's CURRENT value, regardless of
-    /// whether it changed this session. Reuses the SAME synced-field set and the SAME low-level send path as the
-    /// per-frame delta loop (<see cref="CheckSendSaveUpdate"/> -> UpdateManager.SetSaveUpdate); it does NOT introduce a
-    /// new packet type. The per-frame loop's "value unchanged" early-return lives in its OWN body (the Equals check in
-    /// <see cref="OnUpdatePlayerData"/>), so calling CheckSendSaveUpdate directly here bypasses ONLY that guard while
-    /// still honoring everything CheckSendSaveUpdate enforces (not connected, permadeath, !Sync, scene-host gate, index
-    /// lookup). Deliberately passes NO deltaEncodeFunc so additive fields send their ABSOLUTE current value (a delta
-    /// here would be wrong/zero). Only simple Player fields are flushed; the compound fields keep their existing
-    /// per-frame additive delta handling in <see cref="OnUpdateCompounds"/>.
+    /// whether it changed this session, so the host's per-player record is complete (fixes rejoin-to-Tut_01). Sent
+    /// PROGRESSIVELY in small per-frame batches (<see cref="SnapshotFieldsPerFrame"/>) rather than all ~1300 fields in
+    /// one frame: a single-frame flush builds one ~6 KB update packet that the MTU splitter raw-fragments across
+    /// several unreliable UDP datagrams, and a lost/reordered fragment desyncs the receiver's stream reassembly. Small
+    /// batches keep each frame's update packet under one MTU/datagram. Reuses the SAME synced-field set and the SAME
+    /// low-level send path (<see cref="CheckSendSaveUpdate"/> -> UpdateManager.SetSaveUpdate); no new packet type.
+    /// Deliberately passes NO deltaEncodeFunc so additive fields send their ABSOLUTE current value (a delta would be
+    /// wrong here). Advances the last-values snapshot only on a real send, so a dropped field is retried by the
+    /// per-frame delta loop. Returns true once every field has been flushed (the caller then sets _fullSnapshotSent).
     /// </summary>
-    private void FlushFullPlayerSnapshot() {
+    private bool FlushSnapshotBatch() {
         var pd = PlayerData.instance;
+        var fields = _playerDataSimpleSyncFields;
 
-        Logger.Info($"Flushing full player save snapshot ({_playerDataSimpleSyncFields.Count} fields)");
+        if (_snapshotFieldCursor == 0) {
+            Logger.Info(
+                $"Flushing full player save snapshot progressively ({fields.Count} fields, {SnapshotFieldsPerFrame}/frame)");
+        }
 
-        foreach (var field in _playerDataSimpleSyncFields) {
+        var end = System.Math.Min(_snapshotFieldCursor + SnapshotFieldsPerFrame, fields.Count);
+        for (var i = _snapshotFieldCursor; i < end; i++) {
+            var field = fields[i];
             var currentValue = field.GetValue(pd);
 
             // No delta func: send the absolute current value even for additive fields. Advance the last-values
@@ -372,6 +396,9 @@ internal class SaveManager {
                 field.SetValue(_lastPlayerData, currentValue);
             }
         }
+
+        _snapshotFieldCursor = end;
+        return _snapshotFieldCursor >= fields.Count;
     }
 
     /// <summary>
